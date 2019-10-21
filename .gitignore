@@ -1,0 +1,7 @@
+node_modules/
+dist/
+database/full-db.sql
+package-lock.json
+
+/.idea
+/.idea/*
