@@ -62,7 +62,7 @@ export class SqlService {
         });
     }
 
-    static getTable(tableName, recordCount = 1) {
+    static getTable(tableName, recordCount = 1) { // 0 to get all
         const query = `select * from ${tableName};`;
         if (recordCount === 1) {
             return this.getSingle(query);

@@ -22,9 +22,10 @@ export class UserService {
 	}
 
     async getAllUsers() {
-        const query = `select u.*,ur.name 
+        const query = `select u.*, ur.name role
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
+	    				where u.roleId <> 1
 	    				order by id desc;`;
         return SqlService.executeQuery(query);
     }
@@ -129,7 +130,7 @@ export class UserService {
         if (_.isEmpty(u)) {
             throw {
                 code: ErrorCode.invalid_creds,
-                message: "Email or password are incorrect"
+                message: "Email or password is incorrect"
             };
         }
         return u;

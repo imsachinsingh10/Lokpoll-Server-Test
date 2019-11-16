@@ -5,11 +5,15 @@ import {ErrorCode} from "../enum/error-codes";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
+import {SqlService} from "../service/sql.service";
+import {table} from "../enum/table";
+import AppOverrides from "../service/app.overrides";
 
 const router = express();
 
 export class UserRoutes {
     constructor(app) {
+        new AppOverrides(router);
         app.use('/user', router);
 
         this.userService = new UserService();
@@ -20,21 +24,26 @@ export class UserRoutes {
     initRoutes() {
         router.use((req, res, next) => {
             const token = req.body.token || req.query.token || req.headers.token;
+            console.log('token', token);
             if (!token) {
                 return res.json('token missing');
             }
             jwt.verify(token, Config.auth.secretKey, function (err, decoded) {
                 if (err) {
+                    console.log('invalid_token', err);
                     return res.json('token not verified');
                 } else {
-                    console.log('user verified', decoded);
+                    // console.log('user verified', decoded);
+                    delete req.body.token;
+                    delete decoded.iat;
+                    delete decoded.exp;
                     req.user = decoded;
                     next();
                 }
             });
         });
 
-        router.get('/', async (req, res) => {
+        router.post('/', async (req, res) => {
             try {
                 return res.status(HttpCodes.ok).json({
                     user: req.user
@@ -45,6 +54,60 @@ export class UserRoutes {
                     return res.status(HttpCodes.unauthorized).send(e.message);
                 }
                 res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.post('/getRoles', async (req, res) => {
+            try {
+                let roles = await SqlService.getTable(table.userRole, 0);
+                roles = roles.filter((r) => r.id !== 1);
+                return await res.json(roles);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.post('/add', async (req, res) => {
+            try {
+                const user = req.body;
+                await this.userController.checkIfUserRegistered(user);
+                await this.userService.createUser(user);
+                return res.sendStatus(HttpCodes.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.duplicate_entity) {
+                    return res.status(HttpCodes.bad_request).send(e.message);
+                }
+                return res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.post('/getUsers', async (req, res) => {
+            try {
+                let users = await this.userService.getAllUsers();
+                return await res.json(users);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.post('/udpate', async (req, res) => {
+            try {
+                const user = req.body;
+                console.log('new user to update', user);
+                await this.userService.updateUser(user);
+                return res.sendStatus(HttpCodes.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCodes.internal_server_error);
             }
         });
     }
