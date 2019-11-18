@@ -8,10 +8,12 @@ import {Config} from "../config";
 import {SqlService} from "../service/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
+import {ErrorModel} from "../model/error.model";
 
 const router = express();
 
 export class UserRoutes {
+
     constructor(app) {
         new AppOverrides(router);
         app.use('/user', router);
@@ -23,15 +25,22 @@ export class UserRoutes {
 
     initRoutes() {
         router.use((req, res, next) => {
+            if (req.method === 'OPTIONS') {
+                return res.send();
+            }
             const token = req.body.token || req.query.token || req.headers.token;
             console.log('token', token);
             if (!token) {
-                return res.json('token missing');
+                return res.status(HttpCodes.unauthorized).json(
+                    new ErrorModel('no_token', 'Please add token')
+                );
             }
             jwt.verify(token, Config.auth.secretKey, function (err, decoded) {
                 if (err) {
                     console.log('invalid_token', err);
-                    return res.json('token not verified');
+                    return res.status(HttpCodes.unauthorized).json(
+                        new ErrorModel('invalid_token', 'Token not verified')
+                    );
                 } else {
                     // console.log('user verified', decoded);
                     delete req.body.token;
@@ -99,11 +108,21 @@ export class UserRoutes {
             }
         });
 
-        router.post('/udpate', async (req, res) => {
+        router.post('/update', async (req, res) => {
             try {
                 const user = req.body;
-                console.log('new user to update', user);
                 await this.userService.updateUser(user);
+                return res.sendStatus(HttpCodes.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.get('/delete/:userId', async (req, res) => {
+            try {
+                console.log('user to delete', req.params.userId);
+                await this.userService.deleteUser(req.params.userId);
                 return res.sendStatus(HttpCodes.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

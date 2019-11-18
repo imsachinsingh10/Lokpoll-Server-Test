@@ -1,9 +1,8 @@
 export class ErrorModel {
-    constructor() {
+    constructor(code, description) {
         this.error = {
-            name: '',
-            code: '',
-            description: ''
+            code,
+            description
         }
     }
 }
