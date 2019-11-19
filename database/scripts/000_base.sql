@@ -6,20 +6,20 @@ CREATE SCHEMA IF NOT EXISTS `lokpoll` DEFAULT CHARACTER SET utf8 ;
 USE `lokpoll` ;
 
 -- -----------------------------------------------------
--- Table `userrole`
+-- Table `user_role`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `userrole`;
-CREATE TABLE `userrole` (
+DROP TABLE IF EXISTS `user_role`;
+CREATE TABLE `user_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 
 -- -----------------------------------------------------
--- Table `dblogs`
+-- Table `db_logs`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `dblogs` ;
-CREATE TABLE `dblogs` (
+DROP TABLE IF EXISTS `db_logs` ;
+CREATE TABLE `db_logs` (
   `id` bigint(200) NOT NULL AUTO_INCREMENT,
   `dev` varchar(200) DEFAULT NULL,
   `date` datetime DEFAULT current_timestamp(),
@@ -39,6 +39,7 @@ CREATE TABLE `user` (
   `password` varchar(50) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `address` varchar(200) DEFAULT NULL,
+  `gender` varchar(50),
   `imageUrl` varchar(200) DEFAULT NULL,
   `bgImageUrl` varchar(200) DEFAULT NULL,
   `city` varchar(50) DEFAULT NULL,
@@ -57,10 +58,10 @@ CREATE TABLE `user` (
 );
 
 -- -----------------------------------------------------
--- Table `loginhistory`
+-- Table `login_history`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `loginhistory`;
-CREATE TABLE `loginhistory` (
+DROP TABLE IF EXISTS `login_history`;
+CREATE TABLE `login_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `userId` bigint(20) DEFAULT NULL,
   `browserId` bigint(20) DEFAULT NULL,
@@ -85,5 +86,26 @@ CREATE TABLE `verification` (
   `otp` int(11) DEFAULT NULL,
   `sentAt` datetime DEFAULT NULL,
   `verifiedAt` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+-- -----------------------------------------------------
+-- Table `age_range`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `age_range`;
+CREATE TABLE `age_range` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `min` bigint(20) DEFAULT NULL,
+  `max` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+-- -----------------------------------------------------
+-- Table `gender`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `gender`;
+CREATE TABLE `gender` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );

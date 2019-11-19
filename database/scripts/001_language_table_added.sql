@@ -1,4 +1,4 @@
-insert into dblogs (`dev`, scriptName) values ('himanshu', '001_language_table_added.sql');
+insert into db_logs (`dev`, scriptName) values ('himanshu', '001_language_table_added.sql');
 
 -- -----------------------------------------------------
 -- Table `language`
