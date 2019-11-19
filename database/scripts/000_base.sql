@@ -8,7 +8,7 @@ USE `lokpoll` ;
 -- -----------------------------------------------------
 -- Table `userRole`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `userRole`;
+DROP TABLE IF EXISTS `userrole`;
 CREATE TABLE `userrole` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE `user` (
 -- -----------------------------------------------------
 -- Table `loginHistory`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `loginHistory`;
+DROP TABLE IF EXISTS `loginhistory`;
 CREATE TABLE `loginhistory` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `userId` bigint(20) DEFAULT NULL,
