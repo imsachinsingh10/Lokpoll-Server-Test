@@ -40,6 +40,37 @@ export class AuthRoutes {
                 res.sendStatus(HttpCodes.internal_server_error);
             }
         });
+
+        router.post('/register', async (req, res) => {
+            try {
+                try {
+                    const user = req.body;
+                    await this.userController.validateAndCheckIfUserRegisteredByPhone(user);
+                    user.roleId = 3;
+                    const result = await this.userService.createUser(user);
+                    const token = jwt.sign(
+                        {id: result.insertId, roleId: 3},
+                        Config.auth.secretKey,
+                        {expiresIn: Config.auth.expiryInSeconds}
+                    );
+                    return res.json({
+                        token
+                    });
+                } catch (e) {
+                    console.error(`${req.method}: ${req.url}`, e);
+                    if (e.code === ErrorCode.duplicate_entity || e.code === ErrorCode.invalid_phone) {
+                        return res.status(HttpCodes.bad_request).json(e);
+                    }
+                    return res.sendStatus(HttpCodes.internal_server_error);
+                }
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
     }
 }
 

@@ -15,6 +15,11 @@ export class UserService {
         return await SqlService.getSingle(query);
     }
 
+    async getUserByPhone(phone) {
+        const query = `select * from ${table.user} where phone = '${phone}';`;
+        return await SqlService.getSingle(query);
+    }
+
 	async createUser(user) {
 		user.avatarBG = Utils.getRandomColor();
 		const query = QueryBuilderService.getInsertQuery(table.user, user);
