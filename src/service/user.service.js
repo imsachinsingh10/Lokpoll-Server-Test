@@ -21,12 +21,17 @@ export class UserService {
 		return SqlService.executeQuery(query);
 	}
 
-    async getAllUsers() {
+    async getAllUsers(data) {
+        const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
+                            or u.lastName LIKE '%${data.searchText}%'
+                            or u.email LIKE '%${data.searchText}%'`;
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
 	    				where u.roleId <> 1
-	    				order by id desc;`;
+	    				   ${!_.isEmpty(data.searchText) ? condition2 : ''}
+	    				order by id desc
+	    				LIMIT ${data.limit} OFFSET ${data.offset}`;
         return SqlService.executeQuery(query);
     }
 
@@ -232,5 +237,17 @@ export class UserService {
                             or u.email LIKE '%${searchData}%'
                         order by id desc;`;
         return SqlService.executeQuery(query);
+    }
+
+    async getTotalUsers(data) {
+        const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
+                            or u.lastName LIKE '%${data.searchText}%'
+                            or u.email LIKE '%${data.searchText}%'`;
+        const query = `select count("id") totalUsers
+	    				from ${table.user} u 
+	    					left join ${table.userRole} ur on u.roleId = ur.id 
+	    				where u.roleId <> 1
+	    				${!_.isEmpty(data.searchText) ? condition2 : ''}`;
+        return SqlService.getSingle(query);
     }
 }
