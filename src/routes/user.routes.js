@@ -43,7 +43,7 @@ export class UserRoutes {
 
         router.post('/getRoles', async (req, res) => {
             try {
-                let roles = await SqlService.getTable(table.userrole, 0);
+                let roles = await SqlService.getTable(table.userRole, 0);
                 roles = roles.filter((r) => r.id !== 1);
                 return await res.json(roles);
             } catch (e) {

@@ -24,7 +24,7 @@ export class UserService {
     async getAllUsers() {
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
-	    					left join ${table.userrole} ur on u.roleId = ur.id 
+	    					left join ${table.userRole} ur on u.roleId = ur.id 
 	    				where u.roleId <> 1
 	    				order by id desc;`;
         return SqlService.executeQuery(query);
@@ -51,7 +51,7 @@ export class UserService {
         const condition3 = `and u.firmId = '${searchCriteria.firmId}'`;
         const query = `select u.*, ur.name role, ll.loginTime
 	    				from ${table.user} u 
-	    					left join ${table.userrole} ur on u.roleId = ur.id
+	    					left join ${table.userRole} ur on u.roleId = ur.id
 	    					left join ${dbview.lastLoginAudit} ll on ll.userId = u.id
                         where 
                         	u.id > 0 ${condition1}
@@ -67,9 +67,9 @@ export class UserService {
         const query = `select 
 							concat(u.firstName, ' ', u.lastName) userName, ur.name 'role',
 							lh.operatingSystem os, lh.ip, lh.logTime, lh.loginStatus, '1 hr(s)' sessionDuration 
-						from ${table.loginhistory} lh
+						from ${table.loginHistory} lh
 							join ${table.user} u on u.id = lh.userId
-							join ${table.userrole} ur on ur.id = u.roleId
+							join ${table.userRole} ur on ur.id = u.roleId
 						order by lh.logTime desc
 						limit ${searchCriteria.limit} 
                         offset ${searchCriteria.offset}`;
@@ -114,7 +114,7 @@ export class UserService {
     async getUserById(id) {
         const query = `select u.*, ur.name role 
 						from ${table.user} u
-		 					left join ${table.userrole} ur on u.roleId = ur.id
+		 					left join ${table.userRole} ur on u.roleId = ur.id
 						where
 		  					u.id = ${id} limit 1;`;
         return await SqlService.getSingle(query);
@@ -123,7 +123,7 @@ export class UserService {
     async validateUser(user) {
         const query = `select u.id, ur.id roleId 
 						from ${table.user} u
-							left join ${table.userrole} ur on ur.id = u.roleId 
+							left join ${table.userRole} ur on ur.id = u.roleId 
                         where u.email = '${user.email}' 
                         and u.password = '${user.password}';`;
         const u = await SqlService.getSingle(query);
@@ -145,13 +145,13 @@ export class UserService {
             logTime: 'utc_timestamp()',
 			loginStatus: 'login'
         };
-        const query = QueryBuilderService.getInsertQuery(table.loginhistory, loginDetails);
+        const query = QueryBuilderService.getInsertQuery(table.loginHistory, loginDetails);
         return SqlService.executeQuery(query);
     }
 
     async getLastLogin(userId, loginStatus = 'login') {
 
-		const query = `select * from ${table.loginhistory} lh 
+		const query = `select * from ${table.loginHistory} lh 
 						where userId = ${userId} 
 							and loginStatus = '${loginStatus}'
 						order by id desc`;
@@ -159,7 +159,7 @@ export class UserService {
 	}
 
     async getAllUserRoles() {
-        const query = `select * from ${table.userrole};`;
+        const query = `select * from ${table.userRole};`;
         return SqlService.executeQuery(query);
     }
 
@@ -225,7 +225,7 @@ export class UserService {
     async getSearchUsers(searchData) {
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
-	    					left join ${table.userrole} ur on u.roleId = ur.id 
+	    					left join ${table.userRole} ur on u.roleId = ur.id 
 	    				where u.roleId <> 1
                             and u.firstName LIKE '%${searchData}%'
                             or u.lastName LIKE '%${searchData}%'
