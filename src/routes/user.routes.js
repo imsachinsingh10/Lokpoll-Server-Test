@@ -72,7 +72,7 @@ export class UserRoutes {
 
         router.post('/getUsers', async (req, res) => {
             try {
-                let users = await this.userService.getAllUsers();
+                let users = await this.userService.getAllUsers(req.body);
                 return await res.json(users);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -110,6 +110,20 @@ export class UserRoutes {
                 const searchData = req.body.searchText;
                 let users = await this.userService.getSearchUsers(searchData);
                 return await res.json(users);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+
+        router.post('/totalUser', async (req, res) => {
+            try {
+                let result = await this.userService.getTotalUsers(req.body);
+                return await res.json(result.totalUsers);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.invalid_creds) {
