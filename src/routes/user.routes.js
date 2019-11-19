@@ -43,7 +43,7 @@ export class UserRoutes {
 
         router.post('/getRoles', async (req, res) => {
             try {
-                let roles = await SqlService.getTable(table.userRole, 0);
+                let roles = await SqlService.getTable(table.userrole, 0);
                 roles = roles.filter((r) => r.id !== 1);
                 return await res.json(roles);
             } catch (e) {
@@ -102,6 +102,20 @@ export class UserRoutes {
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.post('/searchUser', async (req, res) => {
+            try {
+                const searchData = req.body.searchText;
+                let users = await this.userService.getSearchUsers(searchData);
+                return await res.json(users);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCodes.internal_server_error);
             }
         });
     }

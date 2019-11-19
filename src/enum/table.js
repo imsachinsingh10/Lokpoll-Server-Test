@@ -1,7 +1,7 @@
 export const table = {
     user: 'user',
-    userRole: 'userRole',
-    loginHistory: 'loginHistory',
+    userrole: 'userrole',
+    loginhistory: 'loginhistory',
     fund: 'fund',
     verification: "verification",
     docs: "docs",

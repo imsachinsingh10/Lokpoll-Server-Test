@@ -6,7 +6,7 @@ CREATE SCHEMA IF NOT EXISTS `lokpoll` DEFAULT CHARACTER SET utf8 ;
 USE `lokpoll` ;
 
 -- -----------------------------------------------------
--- Table `userRole`
+-- Table `userrole`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `userrole`;
 CREATE TABLE `userrole` (
@@ -65,7 +65,7 @@ CREATE TABLE `user` (
 );
 
 -- -----------------------------------------------------
--- Table `loginHistory`
+-- Table `loginhistory`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `loginhistory`;
 CREATE TABLE `loginhistory` (
