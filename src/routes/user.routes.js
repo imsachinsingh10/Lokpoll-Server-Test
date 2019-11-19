@@ -9,6 +9,7 @@ import {SqlService} from "../service/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
+import {validateAuthToken} from "../middleware/auth.middleware";
 
 const router = express();
 
@@ -24,33 +25,7 @@ export class UserRoutes {
     }
 
     initRoutes() {
-        router.use((req, res, next) => {
-            if (req.method === 'OPTIONS') {
-                return res.send();
-            }
-            const token = req.body.token || req.query.token || req.headers.token;
-            console.log('token', token);
-            if (!token) {
-                return res.status(HttpCodes.unauthorized).json(
-                    new ErrorModel('no_token', 'Please add token')
-                );
-            }
-            jwt.verify(token, Config.auth.secretKey, function (err, decoded) {
-                if (err) {
-                    console.log('invalid_token', err);
-                    return res.status(HttpCodes.unauthorized).json(
-                        new ErrorModel('invalid_token', 'Token not verified')
-                    );
-                } else {
-                    // console.log('user verified', decoded);
-                    delete req.body.token;
-                    delete decoded.iat;
-                    delete decoded.exp;
-                    req.user = decoded;
-                    next();
-                }
-            });
-        });
+        router.use(validateAuthToken);
 
         router.post('/', async (req, res) => {
             try {

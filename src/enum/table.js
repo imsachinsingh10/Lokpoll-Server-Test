@@ -7,6 +7,7 @@ export const table = {
     docs: "docs",
     permission: "permission",
     feature: "feature",
+    language: "language",
 };
 
 export const dbview = {

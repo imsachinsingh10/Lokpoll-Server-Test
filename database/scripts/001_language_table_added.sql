@@ -10,5 +10,6 @@ CREATE TABLE `language` (
   `code` varchar(100) DEFAULT NULL,
   `isActive` tinyint(2) DEFAULT 0,
   `addedOn` datetime DEFAULT NULL,
+  `position` tinyint(4),
   PRIMARY KEY (`id`)
 );
