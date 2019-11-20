@@ -20,12 +20,12 @@ export class UserService {
         return await SqlService.getSingle(query);
     }
 
-	async createUser(user) {
-		user.avatarBG = Utils.getRandomColor();
-		user.password = '1234';
-		const query = QueryBuilderService.getInsertQuery(table.user, user);
-		return SqlService.executeQuery(query);
-	}
+    async createUser(user) {
+        user.avatarBG = Utils.getRandomColor();
+        user.password = '1234';
+        const query = QueryBuilderService.getInsertQuery(table.user, user);
+        return SqlService.executeQuery(query);
+    }
 
     async getAllUsers(data) {
         const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
@@ -131,7 +131,35 @@ export class UserService {
         return await SqlService.getSingle(query);
     }
 
-    async validateUser(user) {
+    async validateUserByEmail(user) {
+        if (_.isEmpty(user) || _.isEmpty(user.email) || _.isEmpty(user.password)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "Email or password is missing"
+            };
+        }
+        const query = `select u.id, ur.id roleId 
+						from ${table.user} u
+							left join ${table.userRole} ur on ur.id = u.roleId 
+                        where u.email = '${user.email}' 
+                        and u.password = '${user.password}';`;
+        const u = await SqlService.getSingle(query);
+        if (_.isEmpty(u)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "Email or password is incorrect"
+            };
+        }
+        return u;
+    }
+
+    async validateUserByPhone(user) {
+        if (_.isEmpty(user) || _.isEmpty(user.phone) || _.isEmpty(user.otp)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "Phone or OTP is missing"
+            };
+        }
         const query = `select u.id, ur.id roleId 
 						from ${table.user} u
 							left join ${table.userRole} ur on ur.id = u.roleId 
@@ -154,7 +182,7 @@ export class UserService {
             operatingSystem: req.body.operatingSystem,
             browser: req.body.browser,
             logTime: 'utc_timestamp()',
-			loginStatus: 'login'
+            loginStatus: 'login'
         };
         const query = QueryBuilderService.getInsertQuery(table.loginHistory, loginDetails);
         return SqlService.executeQuery(query);
@@ -162,12 +190,12 @@ export class UserService {
 
     async getLastLogin(userId, loginStatus = 'login') {
 
-		const query = `select * from ${table.loginHistory} lh 
+        const query = `select * from ${table.loginHistory} lh 
 						where userId = ${userId} 
 							and loginStatus = '${loginStatus}'
 						order by id desc`;
-		return await SqlService.getSingle(query);
-	}
+        return await SqlService.getSingle(query);
+    }
 
     async getAllUserRoles() {
         const query = `select * from ${table.userRole};`;
@@ -183,20 +211,44 @@ export class UserService {
         if (_.isEmpty(result)) {
             query = QueryBuilderService.getInsertQuery(table.verification, model);
         } else {
-            const condition = `where phone = ${phone}`;
-            query = QueryBuilderService.getUpdateQuery(table.verification, model, condition);
+            query = `update ${table.verification} 
+                                set otp = '${otp}' 
+                                    and phone = ${phone}
+                                    and sentAt = utc_timestamp()
+                                    and verifiedAt = null
+                                where phone = ${phone}`;
         }
         return await SqlService.executeQuery(query);
     }
 
-    async verifyOTP(otp, phone) {
-        let query = `select id from ${table.verification} 
-						where phone = ${phone} 
-							and otp = ${otp} 
-							and TIMESTAMPDIFF(MINUTE, sentAt, utc_timestamp()) <= 15;`;
-        let result = await SqlService.getSingle(query);
-        if (_.isEmpty(result)) {
-            throw 'otp not verified';
+    async verifyOTP(otp, phone, saveVerificationDate = false) {
+        if (_.isEmpty(phone) || _.isEmpty(otp)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "Phone or OTP is missing"
+            };
+        }
+        let query = `select id, verifiedAt from ${table.verification} 
+						where phone = '${phone} '
+							and otp = '${otp}'
+							-- and TIMESTAMPDIFF(MINUTE, sentAt, utc_timestamp()) <= 15
+							;`;
+        let verification = await SqlService.getSingle(query);
+        if (_.isEmpty(verification)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "OTP not verified"
+            };
+        }
+        if (!_.isEmpty(verification.verifiedAt)) {
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "OTP is used once, it cannot be used again."
+            };
+        }
+        if (saveVerificationDate) {
+            query = `update ${table.verification} set verifiedAt = utc_timestamp() where id = ${verification.id}`;
+            await SqlService.executeQuery(query);
         }
         return true;
     }
@@ -209,7 +261,10 @@ export class UserService {
 						order by id desc;`;
         let result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
-            throw 'email not verified';
+            throw {
+                code: ErrorCode.invalid_creds,
+                message: "Email not verified"
+            };
         }
         return true;
     }
@@ -221,17 +276,17 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-	async getDocsByUserId(userId) {
-		const query = `select * from ${table.docs} where userId = ${userId};`;
-		return  SqlService.executeQuery(query);
-	}
+    async getDocsByUserId(userId) {
+        const query = `select * from ${table.docs} where userId = ${userId};`;
+        return SqlService.executeQuery(query);
+    }
 
-	async resetPassword(model) {
-    	const password = _.isEmpty(model.newPassword) ? Utils.getRandomString(10) : model.newPassword;
-		const query = `update ${table.user} set password = '${password}' where id = ${model.userId}`;
-		await SqlService.executeQuery(query);
-		return password;
-	}
+    async resetPassword(model) {
+        const password = _.isEmpty(model.newPassword) ? Utils.getRandomString(10) : model.newPassword;
+        const query = `update ${table.user} set password = '${password}' where id = ${model.userId}`;
+        await SqlService.executeQuery(query);
+        return password;
+    }
 
     async getSearchUsers(searchData) {
         const query = `select u.*, ur.name role

@@ -17,3 +17,8 @@ INSERT INTO `lokpoll`.`language` (`name`, `code`, `isActive`, `translation`) VAL
 INSERT INTO `lokpoll`.`language` (`name`, `code`, `isActive`, `translation`) VALUES ('marathi', 'mr', '1', 'मराठी');
 INSERT INTO `lokpoll`.`language` (`name`, `code`, `isActive`, `translation`) VALUES ('gujarati', 'gu', '1', 'गुजराती');
 INSERT INTO `lokpoll`.`language` (`name`, `code`, `isActive`, `translation`) VALUES ('bengali', 'bn', '1', 'बंगाली');
+
+INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (1,18,24);
+INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (2,25,34);
+INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (3,35,40);
+INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (4,41,NULL);

@@ -77,18 +77,6 @@ export class UserController {
         }
     }
 
-    async updatePassword(user) {
-        const _user = await this.userService.getUserById(user.id);
-        if (user.oldPassword !== _user.password) {
-            throw {
-                message: 'Please enter correct password!',
-                code: ErrorCode.invalid_creds
-            }
-        }
-        user.oldPassword = undefined;
-        return this.userService.updateUser(user)
-    }
-
     async updateUser(user) {
         const _user = {
             id: user.id,

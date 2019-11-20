@@ -10,6 +10,7 @@ import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
+import _ from 'lodash';
 
 const router = express();
 
@@ -86,6 +87,10 @@ export class UserRoutes {
         router.post('/update', async (req, res) => {
             try {
                 const user = req.body;
+                if (_.isEmpty(user.id)) {
+                    user.id = req.user.id;
+                    user.workingStatus = 'active'
+                }
                 await this.userService.updateUser(user);
                 return res.sendStatus(HttpCodes.ok);
             } catch (e) {
@@ -118,7 +123,6 @@ export class UserRoutes {
                 res.sendStatus(HttpCodes.internal_server_error);
             }
         });
-
 
         router.post('/totalUser', async (req, res) => {
             try {

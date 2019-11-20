@@ -96,16 +96,6 @@ DROP TABLE IF EXISTS `age_range`;
 CREATE TABLE `age_range` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `min` bigint(20) DEFAULT NULL,
-  `max` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-);
-
--- -----------------------------------------------------
--- Table `gender`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `gender`;
-CREATE TABLE `gender` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` bigint(20) DEFAULT NULL,
+  `max` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );

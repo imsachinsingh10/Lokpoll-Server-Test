@@ -33,7 +33,7 @@ export class SqlService {
     }
 
     static getSingle(query) {
-        // console.log('query', query);
+        console.log('query', query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
