@@ -22,6 +22,7 @@ export class UserService {
 
 	async createUser(user) {
 		user.avatarBG = Utils.getRandomColor();
+		user.password = '1234';
 		const query = QueryBuilderService.getInsertQuery(table.user, user);
 		return SqlService.executeQuery(query);
 	}
