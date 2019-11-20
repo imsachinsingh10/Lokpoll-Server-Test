@@ -11,7 +11,7 @@ export class LanguageService {
     }
 
     async getLanguages() {
-        const query = `select id, name, code from ${table.language} where isActive = 1;`;
+        const query = `select id, name, code, translation from ${table.language} where isActive = 1;`;
         return SqlService.executeQuery(query);
     }
 
