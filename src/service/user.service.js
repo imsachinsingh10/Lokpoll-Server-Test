@@ -28,6 +28,8 @@ export class UserService {
     }
 
     async getAllUsers(data) {
+        const condition1 = ` and u.roleId = 3 `;
+
         const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
                             or u.lastName LIKE '%${data.searchText}%'
                             or u.email LIKE '%${data.searchText}%'`;

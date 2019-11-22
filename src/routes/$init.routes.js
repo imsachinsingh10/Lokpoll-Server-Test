@@ -1,5 +1,6 @@
 import {UserRoutes} from './user.routes';
 import {LanguageRoutes} from "./language.routes";
+import {MoodRoutes} from "./mood.routes";
 import {HttpCodes} from "../enum/http-codes";
 import jwt from 'jsonwebtoken';
 import {Config} from "../config";
@@ -21,6 +22,7 @@ export class InitRoutes {
         new AuthRoutes(app);
         new UserRoutes(app);
         new LanguageRoutes(app);
+        new MoodRoutes(app);
     }
 
     initTestApi(app) {

@@ -35,7 +35,8 @@ export class AuthRoutes {
                     {expiresIn: Config.auth.expiryInSeconds}
                 );
                 return res.status(HttpCodes.ok).json({
-                    token
+                    token,
+                    user
                 });
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
