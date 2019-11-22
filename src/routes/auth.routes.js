@@ -105,7 +105,8 @@ export class AuthRoutes {
         router.post('/sendOTP', async (req, res) => {
             try {
                 const {phone} = req.body;
-                const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
+                // const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
+                const otp = 8888;
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
                 if (isOTPSent) {
                     await this.userService.saveOTP(otp, phone);

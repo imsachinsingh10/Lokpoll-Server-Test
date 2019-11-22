@@ -28,11 +28,10 @@ export class UserRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/', async (req, res) => {
+        router.post('/getProfile', async (req, res) => {
             try {
-                return res.status(HttpCodes.ok).json({
-                    user: req.user
-                });
+                const user = await this.userService.getUserById(req.user.id);
+                return res.status(HttpCodes.ok).json({user});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.invalid_creds) {

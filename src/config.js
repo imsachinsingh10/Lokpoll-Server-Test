@@ -2,13 +2,14 @@ import {Environment} from "./enum/common";
 
 export class Config {
 
-    static env = Environment.dev;
+    static env = Environment.prod;
 
     static dbProd = {
         host: `node23483-asa-server.cloudjiffy.net`,
         user: `root`,
         password: `16hstpssZz`,
-        database: `asa`
+        database: `lokpoll`,
+        port: 3306
     };
 
     static dbDev = {
@@ -71,8 +72,8 @@ export class Config {
     };
 
     static version = {
-        majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 7,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 14,  // (Only bug fixes not new feature)
+        majorRevision: 1,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 1,  // (Only bug fixes not new feature)
     };
 }

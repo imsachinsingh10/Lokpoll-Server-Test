@@ -5,7 +5,7 @@ import {Environment} from "../enum/common";
 export class SMSService {
 
 	static sendSMS = async (phone, otp) => {
-		if (Config.env === Environment.dev) {
+		if (Config.env === Environment.dev || Config.env === Environment.prod) {
 			return true;
 		}
 		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 mins.`;

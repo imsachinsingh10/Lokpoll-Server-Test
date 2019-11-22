@@ -160,16 +160,17 @@ export class UserService {
                 message: "Phone or OTP is missing"
             };
         }
-        const query = `select u.id, ur.id roleId 
+        const query = `select u.id
 						from ${table.user} u
-							left join ${table.userRole} ur on ur.id = u.roleId 
-                        where u.email = '${user.email}' 
-                        and u.password = '${user.password}';`;
+						join ${table.verification} v on v.phone = u.phone
+                        where u.phone = '${user.phone}' 
+                        and v.otp = '${user.otp}';`;
         const u = await SqlService.getSingle(query);
+        console.log('+++++++++++ u +++++++++++ ', u);
         if (_.isEmpty(u)) {
             throw {
                 code: ErrorCode.invalid_creds,
-                message: "Email or password is incorrect"
+                message: "Phone or OTP is incorrect"
             };
         }
         return u;
