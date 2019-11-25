@@ -207,17 +207,17 @@ export class UserService {
         const model = {
             otp, phone, sentAt: 'utc_timestamp()'
         };
-        let query = `select id from ${table.verification} where phone = ${phone};`;
+        let query = `select id from ${table.verification} where phone = '${phone}';`;
         let result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
             query = QueryBuilderService.getInsertQuery(table.verification, model);
         } else {
             query = `update ${table.verification} 
                                 set otp = '${otp}' 
-                                    and phone = ${phone}
+                                    and phone = '${phone}'
                                     and sentAt = utc_timestamp()
                                     and verifiedAt = null
-                                where phone = ${phone}`;
+                                where phone = '${phone}'`;
         }
         return await SqlService.executeQuery(query);
     }
