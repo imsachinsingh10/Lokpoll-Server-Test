@@ -30,7 +30,7 @@ export class MoodRoutes {
         router.post('/add', async (req, res) => {
             try {
                 const mood = req.body;
-
+                mood.createdBy = req.user.id;
                 await this.moodController.checkIfMoodRegistered(mood);
                 await this.moodService.createMood(mood);
                 return res.sendStatus(HttpCodes.ok);
@@ -63,6 +63,16 @@ export class MoodRoutes {
                     mood.id = mood.id;
                 }
                 await this.moodService.updateMood(mood);
+                return res.sendStatus(HttpCodes.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCodes.internal_server_error);
+            }
+        });
+
+        router.get('/delete/:moodId', async (req, res) => {
+            try {
+                await this.moodService.deleteMood(req.params.moodId);
                 return res.sendStatus(HttpCodes.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

@@ -22,11 +22,11 @@ export class MoodService {
 
     async getAllMoods(data) {
 
-        const condition2 = ` and u.name LIKE '%${data.searchText}%'`;
+        const condition2 = ` where u.name LIKE '%${data.searchText}%'`;
         const query = `select u.*
 	    				from ${table.mood} u
-	    				order by id desc
-	    				LIMIT ${data.limit} OFFSET ${data.offset}`;
+	    				${!_.isEmpty(data.searchText) ? condition2 : ''}
+	    				order by id desc`;
         return SqlService.executeQuery(query);
     }
 
@@ -34,6 +34,11 @@ export class MoodService {
         const condition = `where id = ${mood.id}`;
 
         const query = QueryBuilderService.getUpdateQuery(table.mood, mood, condition);
+        return SqlService.executeQuery(query);
+    }
+
+    async deleteMood(moodId) {
+        const query = `delete from ${table.mood} where id = ${moodId};`;
         return SqlService.executeQuery(query);
     }
 }

@@ -28,18 +28,18 @@ export class UserService {
     }
 
     async getAllUsers(data) {
-        const condition1 = ` and u.roleId = 3 `;
-
-        const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
-                            or u.lastName LIKE '%${data.searchText}%'
-                            or u.email LIKE '%${data.searchText}%'`;
+        const condition1  =  ` and u.roleId = 3`;
+        const condition2 = ` and u.firstName LIKE '%${data.body.searchText}%'
+                            or u.lastName LIKE '%${data.body.searchText}%'
+                            or u.email LIKE '%${data.body.searchText}%'`;
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
 	    				where u.roleId <> 1
-	    				   ${!_.isEmpty(data.searchText) ? condition2 : ''}
+	    				   ${(data.user.roleId == 2) ? condition1 : ''}
+	    				    ${!_.isEmpty(data.body.searchText) ? condition2 : ''}
 	    				order by id desc
-	    				LIMIT ${data.limit} OFFSET ${data.offset}`;
+	    				LIMIT ${data.body.limit} OFFSET ${data.body.offset}`;
         return SqlService.executeQuery(query);
     }
 

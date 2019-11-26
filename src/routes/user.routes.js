@@ -73,7 +73,7 @@ export class UserRoutes {
 
         router.post('/getUsers', async (req, res) => {
             try {
-                let users = await this.userService.getAllUsers(req.body);
+                let users = await this.userService.getAllUsers(req);
                 return await res.json(users);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

@@ -10,7 +10,8 @@ export const table = {
     language: "language",
     gender: "gender",
     ageRange: "age_range",
-    mood: "mood"
+    mood: "mood",
+    post: "post"
 };
 
 export const dbview = {
