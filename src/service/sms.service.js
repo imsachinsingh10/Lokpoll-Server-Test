@@ -1,11 +1,19 @@
 import axios from 'axios';
 import {Config} from "../config";
 import {Environment} from "../enum/common";
+import * as _ from "lodash";
+import {ErrorCode} from "../enum/error-codes";
 
 export class SMSService {
 
 	static sendSMS = async (phone, otp) => {
-		if (Config.env === Environment.dev) {
+		if (_.isEmpty(phone) || phone.length !== 10) {
+			throw {
+				message: `Please enter valid phone number of 10 digits.`,
+				code: ErrorCode.invalid_phone
+			}
+		}
+		if (Config.env === Environment.dev || Config.env === Environment.prod) {
 			return true;
 		}
 		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 mins.`;

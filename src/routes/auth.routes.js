@@ -115,7 +115,7 @@ export class AuthRoutes {
                 return res.status(HttpCodes.bad_request).json("OTP not sent")
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.duplicate_entity) {
+                if (e.code === ErrorCode.duplicate_entity || e.code === ErrorCode.invalid_phone) {
                     return res.status(HttpCodes.bad_request).send(e.message);
                 }
                 return res.sendStatus(HttpCodes.internal_server_error);
