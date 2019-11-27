@@ -162,16 +162,17 @@ export class UserService {
                 message: "Phone or OTP is missing"
             };
         }
-        const query = `select u.id, ur.id roleId 
+        const query = `select u.id
 						from ${table.user} u
-							left join ${table.userRole} ur on ur.id = u.roleId 
-                        where u.email = '${user.email}' 
-                        and u.password = '${user.password}';`;
+						join ${table.verification} v on v.phone = u.phone
+                        where u.phone = '${user.phone}' 
+                        and v.otp = '${user.otp}';`;
         const u = await SqlService.getSingle(query);
+        console.log('+++++++++++ u +++++++++++ ', u);
         if (_.isEmpty(u)) {
             throw {
                 code: ErrorCode.invalid_creds,
-                message: "Email or password is incorrect"
+                message: "Phone or OTP is incorrect"
             };
         }
         return u;
@@ -208,17 +209,17 @@ export class UserService {
         const model = {
             otp, phone, sentAt: 'utc_timestamp()'
         };
-        let query = `select id from ${table.verification} where phone = ${phone};`;
+        let query = `select id from ${table.verification} where phone = '${phone}';`;
         let result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
             query = QueryBuilderService.getInsertQuery(table.verification, model);
         } else {
             query = `update ${table.verification} 
                                 set otp = '${otp}' 
-                                    and phone = ${phone}
+                                    and phone = '${phone}'
                                     and sentAt = utc_timestamp()
                                     and verifiedAt = null
-                                where phone = ${phone}`;
+                                where phone = '${phone}'`;
         }
         return await SqlService.executeQuery(query);
     }

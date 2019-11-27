@@ -8,13 +8,14 @@ export class Config {
         host: `node23483-asa-server.cloudjiffy.net`,
         user: `root`,
         password: `16hstpssZz`,
-        database: `asa`
+        database: `lokpoll`,
+        port: 3306
     };
 
     static dbDev = {
         host: `127.0.0.1`,
         user: `root`,
-        password: `root`,
+        // password: `root`,
         database: `lokpoll`,
         multipleStatements: true
     };

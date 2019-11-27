@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import {Config} from "../config";
 
 export default class Utils {
     static formData = {remember: ''};
@@ -26,5 +27,10 @@ export default class Utils {
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
+    }
+
+    static getVersion() {
+        const v = Config.version;
+        return `V${v.majorRevision}.${v.minorRevision}.${v.bugFixes}`
     }
 }

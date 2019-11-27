@@ -18,14 +18,14 @@ export class LanguageRoutes {
 
     constructor(app) {
         new AppOverrides(router);
-        app.use('/app', router);
+        app.use('/', router);
 
         this.languageService = new LanguageService();
         this.initRoutes();
     }
 
     initRoutes() {
-        router.use(validateAuthToken);
+        // router.use(validateAuthToken);
 
         router.get('/getLanguages', async (req, res) => {
             try {
