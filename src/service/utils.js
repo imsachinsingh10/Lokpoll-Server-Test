@@ -31,6 +31,6 @@ export default class Utils {
 
     static getVersion() {
         const v = Config.version;
-        return `V${v.majorRevision}.${v.minorRevision}.${v.bugFixes}`
+        return `${v.majorRevision}.${v.minorRevision}.${v.bugFixes}`
     }
 }
