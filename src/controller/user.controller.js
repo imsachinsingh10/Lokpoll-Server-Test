@@ -20,18 +20,17 @@ export class UserController {
         }
     }
 
-    async validateAndCheckIfUserRegisteredByPhone(user) {
-        const phone = user.phone;
+    async validateAndCheckIfUserRegisteredByPhone(phone) {
         if (_.isEmpty(phone) || phone.length !== 10) {
             throw {
                 message: `Please enter valid phone number of 10 digits.`,
                 code: ErrorCode.invalid_phone
             }
         }
-        const _users = await this.userService.getUserByPhone(user.phone);
+        const _users = await this.userService.getUserByPhone(phone);
         if (!_.isEmpty(_users)) {
             throw {
-                message: `User already registered with phone ${user.phone}.`,
+                message: `User already registered with phone ${phone}.`,
                 code: ErrorCode.duplicate_entity
             }
         }
