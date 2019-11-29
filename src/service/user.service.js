@@ -4,6 +4,9 @@ import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";
 import {ErrorCode} from "../enum/error-codes";
+import {ErrorModel} from "../model/error.model";
+import {Message} from "../enum/common";
+import Validator from "./validator.service";
 
 export class UserService {
     constructor() {
@@ -28,7 +31,7 @@ export class UserService {
     }
 
     async getAllUsers(data) {
-        const condition1  =  ` and u.roleId = 3`;
+        const condition1 = ` and u.roleId = 3`;
         const condition2 = ` and u.firstName LIKE '%${data.body.searchText}%'
                             or u.lastName LIKE '%${data.body.searchText}%'
                             or u.email LIKE '%${data.body.searchText}%'`;
@@ -155,27 +158,20 @@ export class UserService {
         return u;
     }
 
-    async validateUserByPhone(user) {
-        if (_.isEmpty(user) || _.isEmpty(user.phone) || _.isEmpty(user.otp)) {
-            throw {
-                code: ErrorCode.invalid_creds,
-                message: "Phone or OTP is missing"
-            };
-        }
-        const query = `select u.id
+    async loginUserByPhone(user) {
+        const query = `select u.id, u.roleId, v.verifiedAt
 						from ${table.user} u
 						join ${table.verification} v on v.phone = u.phone
                         where u.phone = '${user.phone}' 
                         and v.otp = '${user.otp}';`;
-        const u = await SqlService.getSingle(query);
-        console.log('+++++++++++ u +++++++++++ ', u);
-        if (_.isEmpty(u)) {
-            throw {
-                code: ErrorCode.invalid_creds,
-                message: "Phone or OTP is incorrect"
-            };
+        const _user = await SqlService.getSingle(query);
+        if (_.isEmpty(_user)) {
+            throw new ErrorModel(ErrorCode.invalid_creds, Message.phoneOrOtpIncorrect)
         }
-        return u;
+        if (_user.verifiedAt !== null) {
+            throw new ErrorModel(ErrorCode.otp_expired, Message.otpExpired)
+        }
+        return _user;
     }
 
     async updateLoginHistory(req, user) {
@@ -187,8 +183,12 @@ export class UserService {
             logTime: 'utc_timestamp()',
             loginStatus: 'login'
         };
-        const query = QueryBuilderService.getInsertQuery(table.loginHistory, loginDetails);
-        return SqlService.executeQuery(query);
+        const query1 = QueryBuilderService.getInsertQuery(table.loginHistory, loginDetails);
+        let query2 = ``;
+        if (Validator.isPhoneValid(req.body.phone, false) && Validator.isOTPValid(req.body.otp, false)) {
+            query2 = `update ${table.verification} set verifiedAt = utc_timestamp() where phone = '${req.body.phone}'`
+        }
+        return SqlService.executeMultipleQueries([query1, query2]);
     }
 
     async getLastLogin(userId, loginStatus = 'login') {
@@ -215,39 +215,24 @@ export class UserService {
             query = QueryBuilderService.getInsertQuery(table.verification, model);
         } else {
             query = `update ${table.verification} 
-                                set otp = '${otp}' 
-                                    and phone = '${phone}'
-                                    and sentAt = utc_timestamp()
-                                    and verifiedAt = null
+                                set otp = '${otp}', phone = '${phone}', sentAt = utc_timestamp(), verifiedAt = null
                                 where phone = '${phone}'`;
         }
         return await SqlService.executeQuery(query);
     }
 
     async verifyOTP(otp, phone, saveVerificationDate = false) {
-        if (_.isEmpty(phone) || _.isEmpty(otp)) {
-            throw {
-                code: ErrorCode.invalid_creds,
-                message: "Phone or OTP is missing"
-            };
-        }
         let query = `select id, verifiedAt from ${table.verification} 
-						where phone = '${phone} '
+						where phone = '${phone}'
 							and otp = '${otp}'
 							-- and TIMESTAMPDIFF(MINUTE, sentAt, utc_timestamp()) <= 15
 							;`;
         let verification = await SqlService.getSingle(query);
         if (_.isEmpty(verification)) {
-            throw {
-                code: ErrorCode.invalid_creds,
-                message: "OTP not verified"
-            };
+            throw new ErrorModel(ErrorCode.invalid_creds, Message.incorrectOtp);
         }
         if (!_.isEmpty(verification.verifiedAt)) {
-            throw {
-                code: ErrorCode.invalid_creds,
-                message: "OTP is used once, it cannot be used again."
-            };
+            throw new ErrorModel(ErrorCode.otp_expired, Message.otpExpired);
         }
         if (saveVerificationDate) {
             query = `update ${table.verification} set verifiedAt = utc_timestamp() where id = ${verification.id}`;
@@ -313,5 +298,11 @@ export class UserService {
 	    				where u.roleId <> 1
 	    				${!_.isEmpty(data.searchText) ? condition2 : ''}`;
         return SqlService.getSingle(query);
+    }
+
+    async isUserRegisteredByPhone(phone) {
+        const query = `select 1 from user where phone = '${phone}'`;
+        const user = await SqlService.getSingle(query);
+        return !_.isEmpty(user);
     }
 }

@@ -9,6 +9,7 @@ import Utils from "../service/utils";
 import {SMSService} from "../service/sms.service";
 import {Environment} from "../enum/common";
 import * as _ from "lodash";
+import Validator from "../service/validator.service";
 
 const router = express();
 
@@ -23,6 +24,12 @@ export class AuthRoutes {
 
     initRoutes() {
         router.post('/user/login', async (req, res) => {
+            if (_.isEmpty(req.body.platform)) {
+                throw {
+                    code: ErrorCode.invalid_platform,
+                    message: "Platform is required"
+                };
+            }
             if (req.body.platform === 'android') {
                 return res.redirect(307, '/user/login-android')
             }
@@ -41,18 +48,29 @@ export class AuthRoutes {
                 });
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.invalid_platform) {
+                    return res.status(HttpCodes.bad_request).send(e);
+                }
                 if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e.message);
+                    return res.status(HttpCodes.unauthorized).send(e);
                 }
                 res.sendStatus(HttpCodes.internal_server_error);
             }
         });
 
         router.post('/user/login-android', async (req, res) => {
-            console.log('working', req.body);
             try {
-                let user = req.body;
-                user = await this.userService.validateUserByPhone(user);
+                Validator.isPhoneValid(req.body.phone);
+                Validator.isOTPValid(req.body.otp);
+                const isUserRegistered = await this.userService.isUserRegisteredByPhone(req.body.phone);
+                if (!isUserRegistered) {
+                    return res.redirect(307, '/user/register-android')
+                }
+                let user = await this.userService.loginUserByPhone(req.body);
+                user = {
+                    id: user.id,
+                    roleId: user.roleId
+                };
                 await this.userService.updateLoginHistory(req, user);
                 const token = jwt.sign(
                     user,
@@ -60,45 +78,48 @@ export class AuthRoutes {
                     {expiresIn: Config.auth.expiryInSeconds}
                 );
                 return res.status(HttpCodes.ok).json({
-                    token
+                    token,
+                    user,
+                    isNewUser: false
                 });
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e.message);
+                if (e.code === ErrorCode.invalid_phone || e.code === ErrorCode.invalid_otp || e.code === ErrorCode.otp_expired) {
+                    return res.status(HttpCodes.bad_request).send(e);
                 }
                 res.sendStatus(HttpCodes.internal_server_error);
             }
         });
 
-        router.post('/user/register', async (req, res) => {
+        router.post('/user/register-android', async (req, res) => {
             try {
                 try {
                     const user = req.body;
-                    await this.userController.validateAndCheckIfUserRegisteredByPhone(user.phone);
                     await this.userService.verifyOTP(user.otp, user.phone, true);
-                    user.roleId = 3;
-                    delete user.otp;
-                    const result = await this.userService.createUser(user);
+                    const result = await this.userService.createUser({phone: user.phone, roleId: 3});
                     const token = jwt.sign(
                         {id: result.insertId, roleId: 3},
                         Config.auth.secretKey,
                         {expiresIn: Config.auth.expiryInSeconds}
                     );
-                    return res.json({
-                        token
+                    return await res.json({
+                        token,
+                        user: {
+                            id: result.insertId, roleId: 3
+                        },
+                        isNewUser: true
                     });
                 } catch (e) {
                     console.error(`${req.method}: ${req.url}`, e);
-                    if (e.code === ErrorCode.duplicate_entity || e.code === ErrorCode.invalid_phone || e.code === ErrorCode.invalid_creds) {
-                        return res.status(HttpCodes.bad_request).json(e);
+                    if (e.code === ErrorCode.otp_expired || e.code === ErrorCode.invalid_creds) {
+                        return res.status(HttpCodes.unauthorized).json(e);
                     }
                     return res.sendStatus(HttpCodes.internal_server_error);
                 }
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e.message);
+                    return res.status(HttpCodes.unauthorized).send(e);
                 }
                 res.sendStatus(HttpCodes.internal_server_error);
             }
@@ -106,10 +127,7 @@ export class AuthRoutes {
 
         router.post('/sendOTP', async (req, res) => {
             try {
-                const {phone, purpose} = req.body;
-                if (purpose === 'signup') {
-                    await this.userController.validateAndCheckIfUserRegisteredByPhone(phone);
-                }
+                const {phone} = req.body;
                 // const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
                 const otp = 8888;
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
@@ -121,7 +139,7 @@ export class AuthRoutes {
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.duplicate_entity || e.code === ErrorCode.invalid_phone) {
-                    return res.status(HttpCodes.bad_request).send(e.message);
+                    return res.status(HttpCodes.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCodes.internal_server_error);
             }
@@ -135,7 +153,7 @@ export class AuthRoutes {
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.bad_request).send(e.message);
+                    return res.status(HttpCodes.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCodes.internal_server_error);
             }

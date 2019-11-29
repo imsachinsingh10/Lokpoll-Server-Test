@@ -37,7 +37,7 @@ export class MoodRoutes {
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.duplicate_entity) {
-                    return res.status(HttpCodes.bad_request).send(e.message);
+                    return res.status(HttpCodes.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCodes.internal_server_error);
             }
@@ -50,7 +50,7 @@ export class MoodRoutes {
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e.message);
+                    return res.status(HttpCodes.unauthorized).send(e);
                 }
                 res.sendStatus(HttpCodes.internal_server_error);
             }

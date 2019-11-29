@@ -1,6 +1,7 @@
 import {Config} from '../config'
 import * as mysql from 'mysql';
 import {Environment} from "../enum/common";
+import _ from 'lodash';
 
 const db = Config.env === Environment.dev ? Config.dbDev : Config.dbProd;
 const pool = mysql.createPool(db);
@@ -9,7 +10,7 @@ console.log('mysql pool created');
 export class SqlService {
 
     static executeQuery(query) {
-        // console.log('query', query);
+        console.log('query', query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
@@ -30,6 +31,16 @@ export class SqlService {
                 }
             });
         });
+    }
+
+    static executeMultipleQueries(queries) {
+        let bigQuery = ``;
+        queries.forEach((query) => {
+            if (!_.isEmpty(query)) {
+                bigQuery += query;
+            }
+        });
+        return this.executeQuery(bigQuery);
     }
 
     static getSingle(query) {

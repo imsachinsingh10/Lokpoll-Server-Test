@@ -2,7 +2,7 @@ import {Environment} from "./enum/common";
 
 export class Config {
 
-    static env = Environment.prod;
+    static env = Environment.dev;
 
     static dbProd = {
         host: `node23483-asa-server.cloudjiffy.net`,
@@ -72,8 +72,8 @@ export class Config {
     };
 
     static version = {
-        majorRevision: 1,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        majorRevision: 2,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 2,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 5,  // (Only bug fixes not new feature)
     };
 }
