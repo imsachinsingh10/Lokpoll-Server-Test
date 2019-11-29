@@ -25,7 +25,6 @@ export class MoodService {
         const condition2 = ` where u.name LIKE '%${data.searchText}%'`;
         const query = `select u.*
 	    				from ${table.mood} u
-	    				${!_.isEmpty(data.searchText) ? condition2 : ''}
 	    				order by id desc`;
         return SqlService.executeQuery(query);
     }
