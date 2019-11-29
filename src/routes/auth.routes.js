@@ -8,6 +8,7 @@ import {Config} from "../config";
 import Utils from "../service/utils";
 import {SMSService} from "../service/sms.service";
 import {Environment} from "../enum/common";
+import * as _ from "lodash";
 
 const router = express();
 
@@ -74,7 +75,7 @@ export class AuthRoutes {
             try {
                 try {
                     const user = req.body;
-                    await this.userController.validateAndCheckIfUserRegisteredByPhone(user);
+                    await this.userController.validateAndCheckIfUserRegisteredByPhone(user.phone);
                     await this.userService.verifyOTP(user.otp, user.phone, true);
                     user.roleId = 3;
                     delete user.otp;
@@ -105,8 +106,12 @@ export class AuthRoutes {
 
         router.post('/sendOTP', async (req, res) => {
             try {
-                const {phone} = req.body;
-                const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
+                const {phone, purpose} = req.body;
+                if (purpose === 'signup') {
+                    await this.userController.validateAndCheckIfUserRegisteredByPhone(phone);
+                }
+                // const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
+                const otp = 8888;
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
                 if (isOTPSent) {
                     await this.userService.saveOTP(otp, phone);

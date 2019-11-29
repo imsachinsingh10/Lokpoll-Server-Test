@@ -1,5 +1,5 @@
 {
-  "name": "jpl-server",
+  "name": "lokpoll-server",
   "version": "1.0.0",
   "description": "",
   "main": "src/main.js",

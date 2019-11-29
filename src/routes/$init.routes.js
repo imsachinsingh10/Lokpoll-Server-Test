@@ -9,6 +9,9 @@ import {SqlService} from "../service/sql.service";
 import {AuthRoutes} from "./auth.routes";
 import _ from 'underscore'
 import {MinIOService} from "../service/minio.server";
+import Utils from "../service/utils";
+import {SMSService} from "../service/sms.service";
+import {ErrorCode} from "../enum/error-codes";
 
 export class InitRoutes {
 
@@ -30,14 +33,21 @@ export class InitRoutes {
     initTestApi(app) {
         app.get('/', async (req, res) => {
             return res.json({
-                version: "1.1.2",
+                version: Utils.getVersion(),
                 system_time: new Date()
             });
         });
 
         app.get('/db', async (req, res) => {
-            const data = await SqlService.getTable('user');
-            return res.json({username: data.firstName + ' ' + data.lastName});
+            try {
+                await SqlService.getTable('user');
+                return res.json({
+                    message: 'database working'
+                });
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.status(HttpCodes.internal_server_error).json(e);
+            }
         });
 
     }
