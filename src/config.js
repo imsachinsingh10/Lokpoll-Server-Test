@@ -9,7 +9,8 @@ export class Config {
         user: `root`,
         password: `16hstpssZz`,
         database: `lokpoll`,
-        port: 3306
+        port: 3306,
+        multipleStatements: true
     };
 
     static dbDev = {
@@ -31,9 +32,9 @@ export class Config {
     };
 
     static minioBucket = {
-        baseUrl: 'http://aeon-storage.cloudjiffy.net',
+        baseUrl: 'http://test-storage.cloudjiffy.net',
         bucket: {
-            Asa: 'asa'
+            Asa: 'lokpoll'
         }
     };
 
@@ -65,15 +66,18 @@ export class Config {
     };
 
     static minio = {
-        endPoint: 'aeon-storage.cloudjiffy.net',
         port: 80,
-        accessKey: 'BVLC6pGAY6',
-        secretKey: 'RLUjMTvwJ4'
+        // endPoint: 'aeon-storage.cloudjiffy.net',
+        //         // accessKey: 'BVLC6pGAY6',
+        //         // secretKey: 'RLUjMTvwJ4',
+        endPoint: 'test-storage.cloudjiffy.net',
+        accessKey: 'Vu2RLOswP3',
+        secretKey: 'WiJNdwX750'
     };
 
     static version = {
         majorRevision: 2,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 2,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 5,  // (Only bug fixes not new feature)
+        minorRevision: 3,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 7,  // (Only bug fixes not new feature)
     };
 }

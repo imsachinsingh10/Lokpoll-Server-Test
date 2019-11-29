@@ -4,6 +4,9 @@ import {Config} from '../config'
 import {ErrorCode} from "../enum/error-codes";
 import {UserService} from "../service/user.service";
 import {table} from "../enum/table";
+import Validator from "../service/validator.service";
+import jwt from "jsonwebtoken";
+import {HttpCodes} from "../enum/http-codes";
 
 export class UserController {
     constructor() {
@@ -92,4 +95,70 @@ export class UserController {
         return await this.userService.updateUser(_user);
     }
 
+    async loginAndroid(req, res) {
+        try {
+            Validator.isPhoneValid(req.body.phone);
+            Validator.isOTPValid(req.body.otp);
+            const isUserRegistered = await this.userService.isUserRegisteredByPhone(req.body.phone);
+            if (!isUserRegistered) {
+                return this.registerAndroid(req, res);
+            }
+            let user = await this.userService.loginUserByPhone(req.body);
+            user = {
+                id: user.id,
+                roleId: user.roleId
+            };
+            await this.userService.updateLoginHistory(req, user);
+            const token = jwt.sign(
+                user,
+                Config.auth.secretKey,
+                {expiresIn: Config.auth.expiryInSeconds}
+            );
+            return res.status(HttpCodes.ok).json({
+                token,
+                user,
+                isNewUser: false
+            });
+        } catch (e) {
+            console.error(`${req.method}: ${req.url}`, e);
+            if (e.code === ErrorCode.invalid_phone || e.code === ErrorCode.invalid_otp || e.code === ErrorCode.otp_expired) {
+                return res.status(HttpCodes.bad_request).send(e);
+            }
+            res.sendStatus(HttpCodes.internal_server_error);
+        }
+    }
+
+    async registerAndroid(req, res) {
+        try {
+            try {
+                const user = req.body;
+                await this.userService.verifyOTP(user.otp, user.phone, true);
+                const result = await this.userService.createUser({phone: user.phone, roleId: 3});
+                const token = jwt.sign(
+                    {id: result.insertId, roleId: 3},
+                    Config.auth.secretKey,
+                    {expiresIn: Config.auth.expiryInSeconds}
+                );
+                return await res.json({
+                    token,
+                    user: {
+                        id: result.insertId, roleId: 3
+                    },
+                    isNewUser: true
+                });
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === ErrorCode.otp_expired || e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).json(e);
+                }
+                return res.sendStatus(HttpCodes.internal_server_error);
+            }
+        } catch (e) {
+            console.error(`${req.method}: ${req.url}`, e);
+            if (e.code === ErrorCode.invalid_creds) {
+                return res.status(HttpCodes.unauthorized).send(e);
+            }
+            res.sendStatus(HttpCodes.internal_server_error);
+        }
+    }
 }

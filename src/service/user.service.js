@@ -186,7 +186,7 @@ export class UserService {
         const query1 = QueryBuilderService.getInsertQuery(table.loginHistory, loginDetails);
         let query2 = ``;
         if (Validator.isPhoneValid(req.body.phone, false) && Validator.isOTPValid(req.body.otp, false)) {
-            query2 = `update ${table.verification} set verifiedAt = utc_timestamp() where phone = '${req.body.phone}'`
+            query2 = `update ${table.verification} set verifiedAt = utc_timestamp() where phone = '${req.body.phone}';`
         }
         return SqlService.executeMultipleQueries([query1, query2]);
     }
