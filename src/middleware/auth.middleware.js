@@ -1,4 +1,4 @@
-import {HttpCodes} from "../enum/http-codes";
+import {HttpCode} from "../enum/http-code";
 import {ErrorModel} from "../model/error.model";
 import jwt from "jsonwebtoken";
 import {Config} from "../config";
@@ -10,14 +10,14 @@ export function validateAuthToken(req, res, next) {
     const token = req.body.token || req.query.token || req.headers.token;
     console.log('token', token);
     if (!token) {
-        return res.status(HttpCodes.unauthorized).json(
+        return res.status(HttpCode.unauthorized).json(
             new ErrorModel('no_token', 'Please add token')
         );
     }
     jwt.verify(token, Config.auth.secretKey, function (err, decoded) {
         if (err) {
             console.log('invalid_token', err);
-            return res.status(HttpCodes.unauthorized).json(
+            return res.status(HttpCode.unauthorized).json(
                 new ErrorModel('invalid_token', 'Token not verified')
             );
         } else {

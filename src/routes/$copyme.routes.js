@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import {HttpCodes} from "../enum/http-codes";
+import {HttpCode} from "../enum/http-code";
 import {FirmService} from "../service/firm.service";
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 import {FirmController} from "../controller/firm.controller";
 
 export class CopyMeRoute {
@@ -18,10 +18,10 @@ export class CopyMeRoute {
         this.app.post('/copy-me', async (req, res) => {
             try {
                 await this.firmService.inviteFirms(req.body);
-                res.sendStatus(HttpCodes.ok);
+                res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
     }

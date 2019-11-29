@@ -2,7 +2,7 @@ import axios from 'axios';
 import {Config} from "../config";
 import {Environment} from "../enum/common";
 import * as _ from "lodash";
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 
 export class SMSService {
 
@@ -10,7 +10,7 @@ export class SMSService {
 		if (_.isEmpty(phone) || phone.length !== 10) {
 			throw {
 				message: `Please enter valid phone number of 10 digits.`,
-				code: ErrorCode.invalid_phone
+				code: AppCode.invalid_phone
 			}
 		}
 		if (Config.env === Environment.dev || Config.env === Environment.prod) {

@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import {HttpCodes} from "../enum/http-codes";
-import {ErrorCode} from "../enum/error-codes";
+import {HttpCode} from "../enum/http-code";
+import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
@@ -10,6 +10,7 @@ import {SMSService} from "../service/sms.service";
 import {Environment} from "../enum/common";
 import * as _ from "lodash";
 import Validator from "../service/validator.service";
+import {ErrorModel} from "../model/error.model";
 
 const router = express();
 
@@ -25,56 +26,32 @@ export class AuthRoutes {
     initRoutes() {
         router.post('/user/login', async (req, res) => {
             if (_.isEmpty(req.body.platform)) {
-                throw {
-                    code: ErrorCode.invalid_platform,
-                    message: "Platform is required"
-                };
+                throw new ErrorModel(AppCode.invalid_platform,"Platform is required")
             }
             if (req.body.platform === 'android') {
                 return this.userController.loginAndroid(req, res);
-            }
-            try {
-                let user = req.body;
-                user = await this.userService.validateUserByEmail(user);
-                await this.userService.updateLoginHistory(req, user);
-                const token = jwt.sign(
-                    user,
-                    Config.auth.secretKey,
-                    {expiresIn: Config.auth.expiryInSeconds}
-                );
-                return res.status(HttpCodes.ok).json({
-                    token,
-                    user
-                });
-            } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_platform) {
-                    return res.status(HttpCodes.bad_request).send(e);
-                }
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
-                }
-                res.sendStatus(HttpCodes.internal_server_error);
+            } else if (req.body.platform === 'web') {
+                return this.userController.loginWeb(req, res);
             }
         });
 
         router.post('/sendOTP', async (req, res) => {
             try {
                 const {phone} = req.body;
-                // const otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
-                const otp = 8888;
+                let otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
+                otp = 8888;  //TODO: remove it after development
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
                 if (isOTPSent) {
                     await this.userService.saveOTP(otp, phone);
-                    return res.status(HttpCodes.ok).json("OTP sent");
+                    return res.status(HttpCode.ok).json("OTP sent");
                 }
-                return res.status(HttpCodes.bad_request).json("OTP not sent")
+                return res.status(HttpCode.bad_request).json("OTP not sent")
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.duplicate_entity || e.code === ErrorCode.invalid_phone) {
-                    return res.status(HttpCodes.bad_request).send(e);
+                if (e.code === AppCode.duplicate_entity || e.code === AppCode.invalid_phone) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -82,13 +59,13 @@ export class AuthRoutes {
             try {
                 const {phone, otp} = req.body;
                 await this.userService.verifyOTP(otp, phone, true);
-                return res.status(HttpCodes.ok).json("Phone verified");
+                return res.status(HttpCode.ok).json("Phone verified");
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.bad_request).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
     }

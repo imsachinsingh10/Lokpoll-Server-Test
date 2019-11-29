@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import {HttpCodes} from "../enum/http-codes";
-import {ErrorCode} from "../enum/error-codes";
+import {HttpCode} from "../enum/http-code";
+import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
@@ -33,7 +33,7 @@ export class LanguageRoutes {
                 return await res.json(languages);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
     }

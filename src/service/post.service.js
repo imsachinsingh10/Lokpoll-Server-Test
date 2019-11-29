@@ -3,7 +3,7 @@ import {SqlService} from "./sql.service";
 import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 
 export class PostService {
     constructor() {
@@ -16,8 +16,6 @@ export class PostService {
     }
 
     async getAllUsers(data) {
-
-
         const query = `select u.*
 	    				from ${table.user} u
 	    				where u.roleId = 3

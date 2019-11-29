@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import {HttpCodes} from "../enum/http-codes";
-import {ErrorCode} from "../enum/error-codes";
+import {HttpCode} from "../enum/http-code";
+import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
@@ -31,13 +31,13 @@ export class UserRoutes {
         router.post('/getProfile', async (req, res) => {
             try {
                 const user = await this.userService.getUserById(req.user.id);
-                return res.status(HttpCodes.ok).json({user});
+                return res.status(HttpCode.ok).json({user});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -48,10 +48,10 @@ export class UserRoutes {
                 return await res.json(roles);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -60,13 +60,13 @@ export class UserRoutes {
                 const user = req.body;
                 await this.userController.checkIfUserRegistered(user);
                 await this.userService.createUser(user);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.duplicate_entity) {
-                    return res.status(HttpCodes.bad_request).send(e);
+                if (e.code === AppCode.duplicate_entity) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -76,10 +76,10 @@ export class UserRoutes {
                 return await res.json(users);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -91,10 +91,10 @@ export class UserRoutes {
                     user.workingStatus = 'active'
                 }
                 await this.userService.updateUser(user);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -102,10 +102,10 @@ export class UserRoutes {
             try {
                 console.log('user to delete', req.params.userId);
                 await this.userService.deleteUser(req.params.userId);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -116,10 +116,10 @@ export class UserRoutes {
                 return await res.json(users);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -129,10 +129,10 @@ export class UserRoutes {
                 return await res.json(result.totalUsers);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
     }

@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import {HttpCodes} from "../enum/http-codes";
-import {ErrorCode} from "../enum/error-codes";
+import {HttpCode} from "../enum/http-code";
+import {AppCode} from "../enum/app-code";
 import {MoodService} from "../service/mood.service";
 import {MoodController} from "../controller/mood.controller";
 import {Config} from "../config";
@@ -33,13 +33,13 @@ export class MoodRoutes {
                 mood.createdBy = req.user.id;
                 await this.moodController.checkIfMoodRegistered(mood);
                 await this.moodService.createMood(mood);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.duplicate_entity) {
-                    return res.status(HttpCodes.bad_request).send(e);
+                if (e.code === AppCode.duplicate_entity) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -49,10 +49,10 @@ export class MoodRoutes {
                 return await res.json(moods);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).send(e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
                 }
-                res.sendStatus(HttpCodes.internal_server_error);
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
@@ -63,20 +63,20 @@ export class MoodRoutes {
                     mood.id = mood.id;
                 }
                 await this.moodService.updateMood(mood);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
         router.get('/delete/:moodId', async (req, res) => {
             try {
                 await this.moodService.deleteMood(req.params.moodId);
-                return res.sendStatus(HttpCodes.ok);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
 

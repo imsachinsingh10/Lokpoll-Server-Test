@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
         cb(null, './uploads');
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now());
+        cb(null, Utils.getRandomString(8, {specialChars: true}) + '-' + new Date().getTime() + '-' + file.originalname);
     }
 });
 
@@ -46,8 +46,7 @@ export class MinIOService {
                 fs.unlink(file.path, (err) => {});
                 const fileUrl = `${bucketConfig.baseUrl}/${bucketConfig.bucket.Asa}/${fileName}`;
                 return resolve({
-                    url: fileUrl,
-                    name: file.originalname
+                    url: fileUrl
                 })
             });
         })

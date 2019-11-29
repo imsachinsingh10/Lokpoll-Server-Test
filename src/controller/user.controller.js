@@ -1,12 +1,12 @@
 import * as _ from 'lodash';
 
 import {Config} from '../config'
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {table} from "../enum/table";
 import Validator from "../service/validator.service";
 import jwt from "jsonwebtoken";
-import {HttpCodes} from "../enum/http-codes";
+import {HttpCode} from "../enum/http-code";
 
 export class UserController {
     constructor() {
@@ -18,7 +18,7 @@ export class UserController {
         if (!_.isEmpty(_users)) {
             throw {
                 message: `user already registered with email ${user.email}`,
-                code: ErrorCode.duplicate_entity
+                code: AppCode.duplicate_entity
             }
         }
     }
@@ -27,14 +27,14 @@ export class UserController {
         if (_.isEmpty(phone) || phone.length !== 10) {
             throw {
                 message: `Please enter valid phone number of 10 digits.`,
-                code: ErrorCode.invalid_phone
+                code: AppCode.invalid_phone
             }
         }
         const _users = await this.userService.getUserByPhone(phone);
         if (!_.isEmpty(_users)) {
             throw {
                 message: `User already registered with phone ${phone}.`,
-                code: ErrorCode.duplicate_entity
+                code: AppCode.duplicate_entity
             }
         }
     }
@@ -68,15 +68,6 @@ export class UserController {
             _searchCriteria.offset = searchCriteria.offset;
 
         return this.userService.getLoginHistory(_searchCriteria);
-    }
-
-    validateUserDetails(firm) {
-        if (_.isEmpty(firm.phone)) {
-            throw {
-                code: ErrorCode.no_phone,
-                message: `Phone can not be empty.`
-            };
-        }
     }
 
     async updateUser(user) {
@@ -114,17 +105,17 @@ export class UserController {
                 Config.auth.secretKey,
                 {expiresIn: Config.auth.expiryInSeconds}
             );
-            return res.status(HttpCodes.ok).json({
+            return res.status(HttpCode.ok).json({
                 token,
                 user,
                 isNewUser: false
             });
         } catch (e) {
             console.error(`${req.method}: ${req.url}`, e);
-            if (e.code === ErrorCode.invalid_phone || e.code === ErrorCode.invalid_otp || e.code === ErrorCode.otp_expired) {
-                return res.status(HttpCodes.bad_request).send(e);
+            if (e.code === AppCode.invalid_phone || e.code === AppCode.invalid_otp || e.code === AppCode.otp_expired) {
+                return res.status(HttpCode.bad_request).send(e);
             }
-            res.sendStatus(HttpCodes.internal_server_error);
+            res.sendStatus(HttpCode.internal_server_error);
         }
     }
 
@@ -148,17 +139,43 @@ export class UserController {
                 });
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === ErrorCode.otp_expired || e.code === ErrorCode.invalid_creds) {
-                    return res.status(HttpCodes.unauthorized).json(e);
+                if (e.code === AppCode.otp_expired || e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).json(e);
                 }
-                return res.sendStatus(HttpCodes.internal_server_error);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         } catch (e) {
             console.error(`${req.method}: ${req.url}`, e);
-            if (e.code === ErrorCode.invalid_creds) {
-                return res.status(HttpCodes.unauthorized).send(e);
+            if (e.code === AppCode.invalid_creds) {
+                return res.status(HttpCode.unauthorized).send(e);
             }
-            res.sendStatus(HttpCodes.internal_server_error);
+            res.sendStatus(HttpCode.internal_server_error);
+        }
+    }
+
+    async loginWeb(req, res) {
+        try {
+            let user = req.body;
+            user = await this.userService.validateUserByEmail(user);
+            await this.userService.updateLoginHistory(req, user);
+            const token = jwt.sign(
+                user,
+                Config.auth.secretKey,
+                {expiresIn: Config.auth.expiryInSeconds}
+            );
+            return res.status(HttpCode.ok).json({
+                token,
+                user
+            });
+        } catch (e) {
+            console.error(`${req.method}: ${req.url}`, e);
+            if (e.code === AppCode.invalid_platform) {
+                return res.status(HttpCode.bad_request).send(e);
+            }
+            if (e.code === AppCode.invalid_creds) {
+                return res.status(HttpCode.unauthorized).send(e);
+            }
+            res.sendStatus(HttpCode.internal_server_error);
         }
     }
 }

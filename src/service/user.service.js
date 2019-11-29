@@ -3,7 +3,7 @@ import {SqlService} from "./sql.service";
 import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/error.model";
 import {Message} from "../enum/common";
 import Validator from "./validator.service";
@@ -139,7 +139,7 @@ export class UserService {
     async validateUserByEmail(user) {
         if (_.isEmpty(user) || _.isEmpty(user.email) || _.isEmpty(user.password)) {
             throw {
-                code: ErrorCode.invalid_creds,
+                code: AppCode.invalid_creds,
                 message: "Email or password is missing"
             };
         }
@@ -151,7 +151,7 @@ export class UserService {
         const u = await SqlService.getSingle(query);
         if (_.isEmpty(u)) {
             throw {
-                code: ErrorCode.invalid_creds,
+                code: AppCode.invalid_creds,
                 message: "Email or password is incorrect"
             };
         }
@@ -166,10 +166,10 @@ export class UserService {
                         and v.otp = '${user.otp}';`;
         const _user = await SqlService.getSingle(query);
         if (_.isEmpty(_user)) {
-            throw new ErrorModel(ErrorCode.invalid_creds, Message.phoneOrOtpIncorrect)
+            throw new ErrorModel(AppCode.invalid_creds, Message.phoneOrOtpIncorrect)
         }
         if (_user.verifiedAt !== null) {
-            throw new ErrorModel(ErrorCode.otp_expired, Message.otpExpired)
+            throw new ErrorModel(AppCode.otp_expired, Message.otpExpired)
         }
         return _user;
     }
@@ -229,10 +229,10 @@ export class UserService {
 							;`;
         let verification = await SqlService.getSingle(query);
         if (_.isEmpty(verification)) {
-            throw new ErrorModel(ErrorCode.invalid_creds, Message.incorrectOtp);
+            throw new ErrorModel(AppCode.invalid_creds, Message.incorrectOtp);
         }
         if (!_.isEmpty(verification.verifiedAt)) {
-            throw new ErrorModel(ErrorCode.otp_expired, Message.otpExpired);
+            throw new ErrorModel(AppCode.otp_expired, Message.otpExpired);
         }
         if (saveVerificationDate) {
             query = `update ${table.verification} set verifiedAt = utc_timestamp() where id = ${verification.id}`;
@@ -250,7 +250,7 @@ export class UserService {
         let result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
             throw {
-                code: ErrorCode.invalid_creds,
+                code: AppCode.invalid_creds,
                 message: "Email not verified"
             };
         }

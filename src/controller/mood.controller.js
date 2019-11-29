@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
 import {Config} from '../config'
-import {ErrorCode} from "../enum/error-codes";
+import {AppCode} from "../enum/app-code";
 import {MoodService} from "../service/mood.service";
 import {table} from "../enum/table";
 
@@ -15,7 +15,7 @@ export class MoodController {
         if (!_.isEmpty(_moods)) {
             throw {
                 message: `mood already registered with name ${mood.name}`,
-                code: ErrorCode.duplicate_entity
+                code: AppCode.duplicate_entity
             }
         }
     }
