@@ -17,7 +17,7 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
-            if (value !== "" && !isNaN(value) || value.indexOf('(') > -1) {
+            if (typeof value === 'number' || value.indexOf('(') > -1) {
                 query += `${value}, `;
             } else {
                 query += `'${value}', `;
@@ -38,7 +38,7 @@ export class QueryBuilderService {
             }
             if (value === '') {
                 query += `${prop} = '', `
-            } else if (!isNaN(value) || value.indexOf('(') > -1) {
+            } else if (typeof value === 'number' || value.indexOf('(') > -1) {
                 query += `${prop} = ${value}, `;
             } else {
                 query += `${prop} = '${value}', `;
@@ -64,9 +64,9 @@ export class QueryBuilderService {
         _.each(modelArray, model => {
             query += this.getRowValues(model) + ', ';
         });
-        console.log('query', query);
         query = query.slice(0, -2);
         query += ';';
+        console.log('query', query);
         return query;
     }
 
