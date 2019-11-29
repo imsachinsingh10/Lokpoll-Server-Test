@@ -29,6 +29,7 @@ export class PostRoutes {
         router.post('/add', async (req, res) => {
             try {
                 const post = req.body;
+                console.log(req);
                 await this.postService.createPost(post);
                 return res.sendStatus(HttpCodes.ok);
             } catch (e) {
@@ -43,7 +44,6 @@ export class PostRoutes {
 
         router.post('/getUsers', async (req, res) => {
             try {
-                console.log(456789);
                 let user = await this.postService.getAllUsers(req.body);
                 return await res.json(user);
             } catch (e) {
