@@ -35,7 +35,7 @@ export class PostService {
                             pm.type, pm.url,
                             m.name 'mood'
                         from post p 
-                            join post_media pm on pm.postId = p.id
+                            left join post_media pm on pm.postId = p.id
                             join user u on u.id = p.userId
                             join mood m on m.id = p.moodId;`;
         return SqlService.executeQuery(query);
