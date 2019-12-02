@@ -1,4 +1,5 @@
 const moment = require("moment");
+import fs from 'fs';
 
 export default class AppOverrides {
     constructor(app) {
@@ -11,6 +12,10 @@ export default class AppOverrides {
             i: (info) => {
                 // console.log(info)
             }
+        }
+
+        if (!fs.existsSync('./uploads')){
+            fs.mkdirSync('./uploads');
         }
     }
 

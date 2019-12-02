@@ -24,4 +24,29 @@ export class PostController {
         const result = await this.postService.createPost(post);
         return result.insertId;
     }
+
+    formatPosts(result) {
+        const postIds = _.map(result, r => r.postId);
+        const uniqPostIds = _.uniq(postIds);
+        const posts = [];
+        _.forEach(uniqPostIds, id => {
+
+            posts.push(this.getPost(id, result))
+        });
+        return posts;
+    }
+
+    getPost(postId, result) {
+        const filteredPosts = _.filter(result, result => result.postId === postId);
+        console.log('filteredPosts', filteredPosts);
+        const _p = _.omit(filteredPosts[0], ['url', 'type']);
+        const media = _.map(filteredPosts, p => ({
+            type: p.type,
+            url: p.url
+        }));
+        return {
+            ..._p,
+            media
+        }
+    }
 }

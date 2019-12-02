@@ -8,6 +8,8 @@ export const AppCode = {
     invalid_otp: 'invalid_otp',
     otp_expired: 'otp_expired',
     s3_error: 's3_error',
+    bucket_exists: 'bucket_exists',
+    bucket_created: 'bucket_created',
 };
 export const HttpCode = {
     ok: 200,

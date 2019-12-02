@@ -34,7 +34,10 @@ export class Config {
     static minioBucket = {
         baseUrl: 'http://test-storage.cloudjiffy.net',
         bucket: {
-            Asa: 'lokpoll'
+            root: 'lokpoll',
+            postImages: 'post/images/',
+            postVideos: 'post/videos/',
+            postThumbnails: 'post/thumbnails/',
         }
     };
 

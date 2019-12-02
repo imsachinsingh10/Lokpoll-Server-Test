@@ -29,6 +29,16 @@ export class PostService {
         return SqlService.getSingle(query);
     }
 
-
+    async getAllPosts() {
+        const query = `select p.id postId, p.createdAt, p.description,
+                            u.firstName, u.lastName,
+                            pm.type, pm.url,
+                            m.name 'mood'
+                        from post p 
+                            join post_media pm on pm.postId = p.id
+                            join user u on u.id = p.userId
+                            join mood m on m.id = p.moodId;`;
+        return SqlService.executeQuery(query);
+    }
 
 }

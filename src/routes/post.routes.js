@@ -9,7 +9,10 @@ import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import {MinIOService} from "../service/minio.server";
+import {
+    MinIOService,
+    uploadPostMediaMiddleware,
+} from "../service/minio.server";
 import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
 import {QueryBuilderService} from "../service/querybuilder.service";
@@ -59,24 +62,45 @@ export class PostRoutes {
             }
         });
 
-        router.post('/create', this.minioService.uploadMiddleware('multiple'), async (req, res) => {
+        router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const postId = await this.postController.createPost(req);
                 const promises = [];
-                _.forEach(req.files, file => {
-                    const filePromise = this.minioService.uploadFile(file);
-                    promises.push(filePromise);
-                });
-                let mediaFiles = await Promise.all(promises);
-                const postMedia = mediaFiles.map(file => {
-                    return {
-                        ...file,
-                        postId: postId
-                    };
-                });
-                console.log('postMedia after mapping', postMedia);
-                const query = QueryBuilderService.getMultiInsertQuery(table.post_media, postMedia);
-                await SqlService.executeQuery(query);
+                console.log('post images', req.files.image);
+                console.log('post videos', req.files.video);
+                if (req.files.image && req.files.image.length > 0) {
+                    _.forEach(req.files.image, file => {
+                        const filePromise = this.minioService.uploadPostMedia(file, 'image');
+                        promises.push(filePromise);
+                    });
+                }
+                if (req.files.video && req.files.video.length > 0) {
+                    _.forEach(req.files.video, file => {
+                        const filePromise = this.minioService.uploadPostMedia(file, 'video');
+                        promises.push(filePromise);
+                    });
+                }
+                if (req.files.thumbnail && req.files.thumbnail.length > 0) {
+                    _.forEach(req.files.thumbnail, file => {
+                        const filePromise = this.minioService.uploadPostMedia(file, 'thumbnail');
+                        promises.push(filePromise);
+                    });
+                }
+                if (promises.length > 0) {
+                    let mediaFiles = await Promise.all(promises);
+                    const thumbnails = _.filter(mediaFiles, file => file.type === 'thumbnail');
+                    console.log('thumbnails', thumbnails);
+                    mediaFiles = _.filter(mediaFiles, file => file.type !== 'thumbnail');
+                    console.log('mediaFiles', mediaFiles);
+                    const postMedia = mediaFiles.map(file => ({
+                        postId: postId,
+                        url: file.url,
+                        type: file.type
+                    }));
+                    console.log('postMedia after mapping', postMedia);
+                    const query = QueryBuilderService.getMultiInsertQuery(table.post_media, postMedia);
+                    await SqlService.executeQuery(query);
+                }
                 return res.status(HttpCode.ok).json({postId});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -91,6 +115,20 @@ export class PostRoutes {
             try {
                 let result = await this.postService.getTotalPosts(req.body);
                 return await res.json(result.totalPosts);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getAll', async (req, res) => {
+            try {
+                let result = await this.postService.getAllPosts();
+                result = this.postController.formatPosts(result);
+                return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
