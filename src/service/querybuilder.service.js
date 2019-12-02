@@ -17,7 +17,7 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
-            if (typeof value === 'number' || value === null || value.indexOf('(') > -1) {
+            if (typeof value === 'number' || value === null || value.endsWith('()')) {
                 query += `${value}, `;
             } else {
                 query += `'${value}', `;
@@ -38,7 +38,7 @@ export class QueryBuilderService {
             }
             if (value === '') {
                 query += `${prop} = '', `
-            } else if (typeof value === 'number' || value === null || value.indexOf('(') > -1) {
+            } else if (typeof value === 'number' || value === null || value.endsWith('()')) {
                 query += `${prop} = ${value}, `;
             } else {
                 query += `${prop} = '${value}', `;
@@ -66,7 +66,7 @@ export class QueryBuilderService {
         });
         query = query.slice(0, -2);
         query += ';';
-        console.log('query', query);
+        // console.log('query', query);
         return query;
     }
 
@@ -77,7 +77,9 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
-            if (value !== "" && !isNaN(value) || value.indexOf('(') > -1) {
+            if (value === '') {
+                rowString += ', ';
+            } else if (typeof value === 'number' || value === null || value.endsWith('()')) {
                 rowString += `${value}, `;
             } else {
                 rowString += `'${value}', `;

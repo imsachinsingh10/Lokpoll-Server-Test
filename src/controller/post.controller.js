@@ -4,10 +4,24 @@ import {Config} from '../config'
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
 import {table} from "../enum/table";
+import {QueryBuilderService} from "../service/querybuilder.service";
+import {SqlService} from "../service/sql.service";
 
 export class PostController {
     constructor() {
-        this.MoodService = new PostService();
+        this.postService = new PostService();
     }
 
+    async createPost(req) {
+        const reqBody = req.body;
+        const post = {
+            description: reqBody.description,
+            userId: reqBody.userId,
+            creatorId: req.user.id,
+            moodId: reqBody.moodId,
+            createdAt: 'utc_timestamp()'
+        };
+        const result = await this.postService.createPost(post);
+        return result.insertId;
+    }
 }

@@ -7,6 +7,7 @@ export const AppCode = {
     invalid_phone: 'invalid_phone',
     invalid_otp: 'invalid_otp',
     otp_expired: 'otp_expired',
+    s3_error: 's3_error',
 };
 export const HttpCode = {
     ok: 200,

@@ -3,11 +3,14 @@ import {Config} from "../config";
 
 export default class Utils {
     static formData = {remember: ''};
-    static getRandomString(maxChars = 100) {
-        const chars = _.shuffle('0123456789abcdefghijklmnopqrstuvqxyzABCDEFGHIJKLMNOPQRSTUVQXYZ@!#$%^&)(_@!#$%^&)(_').join('');
+    static getRandomString(maxChars = 100, exclude) {
+        let chars = _.shuffle('0123456789abcdefghijklmnopqrstuvqxyzABCDEFGHIJKLMNOPQRSTUVQXYZ@!#$%^&)(_@!#$%^&)(_').join('');
+        if (exclude && exclude.specialChars) {
+            chars = _.shuffle('0123456789abcdefghijklmnopqrstuvqxyzABCDEFGHIJKLMNOPQRSTUVQXYZ').join('');
+        }
         let link = '';
         for (let i = 0; i < maxChars; i++) {
-            link += chars[Math.floor(Math.random() * 82)];
+            link += chars[Math.floor(Math.random() * chars.length)];
         }
         return link;
     }
@@ -32,5 +35,14 @@ export default class Utils {
     static getVersion() {
         const v = Config.version;
         return `${v.majorRevision}.${v.minorRevision}.${v.bugFixes}`
+    }
+
+    static getMediaType(mimeType) {
+        if (mimeType.startsWith('image/')) {
+            return 'image';
+        }
+        else if (mimeType.startsWith('video/')) {
+            return 'video';
+        }
     }
 }

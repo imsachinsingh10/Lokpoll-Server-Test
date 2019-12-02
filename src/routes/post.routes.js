@@ -11,6 +11,8 @@ import {ErrorModel} from "../model/error.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import {MinIOService} from "../service/minio.server";
 import _ from 'lodash';
+import {PostController} from "../controller/post.controller";
+import {QueryBuilderService} from "../service/querybuilder.service";
 
 const router = express();
 
@@ -21,6 +23,7 @@ export class PostRoutes {
 
         this.postService = new PostService();
         this.minioService = new MinIOService();
+        this.postController = new PostController();
 
         this.initRoutes();
     }
@@ -58,25 +61,29 @@ export class PostRoutes {
 
         router.post('/create', this.minioService.uploadMiddleware('multiple'), async (req, res) => {
             try {
-                const result = await this.postService.createPost(req.body);
-                console.log('new post created with id', result.insertId);
-
+                const postId = await this.postController.createPost(req);
                 const promises = [];
                 _.forEach(req.files, file => {
                     const filePromise = this.minioService.uploadFile(file);
                     promises.push(filePromise);
                 });
-                let docs = await Promise.all(promises);
-                docs = docs.map(doc => {return {...doc, firmId: req.body.firmId, fundId: insertId};});
-                const query = QueryBuilderService.getMultiInsertQuery(table.docs, docs);
-                await this.sqlService.executeQuery(query);
-                return res.status(httpCodes.ok).json({newFundId: insertId});
+                let mediaFiles = await Promise.all(promises);
+                const postMedia = mediaFiles.map(file => {
+                    return {
+                        ...file,
+                        postId: postId
+                    };
+                });
+                console.log('postMedia after mapping', postMedia);
+                const query = QueryBuilderService.getMultiInsertQuery(table.post_media, postMedia);
+                await SqlService.executeQuery(query);
+                return res.status(HttpCode.ok).json({postId});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.duplicate_entity) {
-                    return res.status(httpCodes.bad_request).send(e.message);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-                return res.sendStatus(httpCodes.internal_server_error);
+                return res.status(HttpCode.internal_server_error).send(e);
             }
         });
 

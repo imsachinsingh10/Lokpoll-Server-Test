@@ -4,6 +4,8 @@ const fs = require('fs');
 import {Config} from '../config'
 import _ from "underscore";
 import Utils from "./utils";
+import {ErrorModel} from "../model/error.model";
+import {AppCode} from "../enum/app-code";
 
 const bucketConfig = Config.minioBucket;
 
@@ -15,12 +17,15 @@ const storage = multer.diskStorage({
         cb(null, './uploads');
     },
     filename: function (req, file, cb) {
-        cb(null, Utils.getRandomString(8, {specialChars: true}) + '-' + new Date().getTime() + '-' + file.originalname);
+        console.log('file', file);
+        cb(null, Utils.getRandomString(8, {specialChars: false}) + '-' + new Date().getTime() + '-' + file.originalname);
     }
 });
 
 const uploadSingleFileMiddleware = multer({ storage: storage }).single('file');
 const uploadMultipleFilesMiddleware = multer({ storage: storage }).array('file', 50);
+const uploadImageMiddleware = multer({ storage: storage }).array('image', 50);
+const uploadVideoMiddleware = multer({ storage: storage }).array('image', 50);
 
 export class MinIOService {
     constructor() {
@@ -35,18 +40,25 @@ export class MinIOService {
     }
 
     async uploadFile(file) {
+        console.log('file to upload ++++++++ ', file);
         return new Promise((resolve) => {
-            const fileName = Utils.getRandomString(8) + '-' + new Date().getTime() + '-' + file.originalname;
-            this.minioClient.fPutObject(bucketConfig.bucket.Asa, fileName, file.path, function (error, etag) {
+            if (!file) {
+                return resolve({
+                    url: null
+                })
+            }
+            const path = './uploads/' + file.filename;
+            this.minioClient.fPutObject(bucketConfig.bucket.Asa, file.filename, path, function (error, etag) {
                 if (error) {
                     console.log('error', error);
                     return resolve(error);
                 }
                 console.log('file.path to delete', file.path);
                 fs.unlink(file.path, (err) => {});
-                const fileUrl = `${bucketConfig.baseUrl}/${bucketConfig.bucket.Asa}/${fileName}`;
+                const fileUrl = `${bucketConfig.baseUrl}/${bucketConfig.bucket.Asa}/${file.filename}`;
                 return resolve({
-                    url: fileUrl
+                    url: fileUrl,
+                    type: Utils.getMediaType(file.mimetype)
                 })
             });
         })
