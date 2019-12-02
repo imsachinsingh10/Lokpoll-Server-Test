@@ -15,6 +15,14 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getAllUsers(data) {
+        const query = `select u.*
+	    				from ${table.user} u 
+	    				where u.roleId <> 1
+	    				order by id desc`;
+        return SqlService.executeQuery(query);
+    }
+
     async getTotalPosts(data) {
         const query = `select count("id") totalPosts
 	    				from ${table.post} u`;

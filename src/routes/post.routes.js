@@ -52,10 +52,10 @@ export class PostRoutes {
                 return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.invalid_creds) {
-                    return res.status(HttpCode.unauthorized).send(e);
+                if (e.code === ErrorCode.invalid_creds) {
+                    return res.status(HttpCodes.unauthorized).send(e.message);
                 }
-                res.sendStatus(HttpCode.internal_server_error);
+                res.sendStatus(HttpCodes.internal_server_error);
             }
         });
 
