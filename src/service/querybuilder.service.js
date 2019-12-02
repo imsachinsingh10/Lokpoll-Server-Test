@@ -17,7 +17,7 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
-            if (typeof value === 'number' || value.indexOf('(') > -1) {
+            if (typeof value === 'number' || value === null || value.indexOf('(') > -1) {
                 query += `${value}, `;
             } else {
                 query += `'${value}', `;
@@ -38,7 +38,7 @@ export class QueryBuilderService {
             }
             if (value === '') {
                 query += `${prop} = '', `
-            } else if (typeof value === 'number' || value.indexOf('(') > -1) {
+            } else if (typeof value === 'number' || value === null || value.indexOf('(') > -1) {
                 query += `${prop} = ${value}, `;
             } else {
                 query += `${prop} = '${value}', `;
