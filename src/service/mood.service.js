@@ -40,4 +40,10 @@ export class MoodService {
         const query = `delete from ${table.mood} where id = ${moodId};`;
         return SqlService.executeQuery(query);
     }
+
+    async getTotalMoods(data) {
+        const query = `select count("id") totalMoods
+	    				from ${table.mood} u`;
+        return SqlService.getSingle(query);
+    }
 }

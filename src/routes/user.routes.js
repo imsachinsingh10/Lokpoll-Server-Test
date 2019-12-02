@@ -87,7 +87,7 @@ export class UserRoutes {
             try {
                 const user = req.body;
                 if (_.isEmpty(user.id)) {
-                    user.id = req.user.id;
+                    user.id = user.id;
                     user.workingStatus = 'active'
                 }
                 await this.userService.updateUser(user);

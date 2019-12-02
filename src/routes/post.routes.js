@@ -87,5 +87,18 @@ export class PostRoutes {
             }
         });
 
+        router.post('/totalPosts', async (req, res) => {
+            try {
+                let result = await this.postService.getTotalPosts(req.body);
+                return await res.json(result.totalPosts);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
     }
 }
