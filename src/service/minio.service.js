@@ -38,13 +38,18 @@ const storage = multer.diskStorage({
 
 const uploadSingleFileMiddleware = multer({storage: storage}).single('file');
 const uploadMultipleFilesMiddleware = multer({storage: storage}).array('file', 50);
+
 export const uploadPostMediaMiddleware = multer({storage: storage})
     .fields([
         {name: 'image', maxCount: 50},
         {name: 'video', maxCount: 50},
         {name: 'thumbnail', maxCount: 50},
     ]);
-
+export const uploadProfilePictures = multer({storage})
+    .fields([
+        {name: 'image', maxCount: 1},
+        {name: 'bgImage', maxCount: 1},
+    ]);
 
 export class MinIOService {
     constructor() {
@@ -61,7 +66,10 @@ export class MinIOService {
     async uploadPostMedia(file, mediaType) {
         return new Promise(async (resolve) => {
             if (!file) {
-                return resolve({url: null})
+                return resolve({
+                    url: null,
+                    type: mediaType,
+                })
             }
 
             await this.createBucket(bucketConfig.bucket.root);
@@ -74,6 +82,24 @@ export class MinIOService {
                 type: mediaType,
                 originalName: file.originalName
             });
+        })
+    }
+
+    async uploadProfilePicture(file, type) {
+        return new Promise(async (resolve) => {
+            if (!file) {
+                return resolve({url: null, type})
+            }
+
+            await this.createBucket(bucketConfig.bucket.root);
+            const url = await this.uploadFileToMinio(bucketConfig.bucket.user, file.filename, file.path);
+
+            await fs.unlink(file.path, console.log);
+            if (type === 'image') {
+                return resolve({imageUrl: url});
+            } else if (type === 'bgImage') {
+                return resolve({bgImageUrl: url});
+            }
         })
     }
 
@@ -90,10 +116,6 @@ export class MinIOService {
             });
         })
     }
-
-    /*
-    * SAyegVkT-1575284103263-ABHI.mp4thumbnail.png
-    * */
 
     async createBucket(bucketName) {
         return new Promise((resolve, reject) => {

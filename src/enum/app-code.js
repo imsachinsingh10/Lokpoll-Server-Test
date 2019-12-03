@@ -4,6 +4,7 @@ export const AppCode = {
     invalid_creds: 'invalid_creds',
     invalid_platform: 'invalid_platform',
     invalid_token: 'invalid_token',
+    invalid_request: 'invalid_request',
     invalid_phone: 'invalid_phone',
     invalid_otp: 'invalid_otp',
     otp_expired: 'otp_expired',

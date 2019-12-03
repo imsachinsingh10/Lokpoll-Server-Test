@@ -38,6 +38,7 @@ export class Config {
             postImages: 'post/images/',
             postVideos: 'post/videos/',
             postThumbnails: 'post/thumbnails/',
+            user: 'user/images/',
         }
     };
 

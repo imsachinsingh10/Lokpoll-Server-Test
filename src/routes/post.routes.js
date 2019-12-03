@@ -34,21 +34,6 @@ export class PostRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/add', async (req, res) => {
-            try {
-                const post = req.body;
-                console.log(req);
-                await this.postService.createPost(post);
-                return res.sendStatus(HttpCode.ok);
-            } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.duplicate_entity) {
-                    return res.status(HttpCode.bad_request).send(e);
-                }
-                return res.sendStatus(HttpCode.internal_server_error);
-            }
-        });
-
         router.post('/getUsers', async (req, res) => {
             try {
                 let user = await this.postService.getAllUsers(req.body);

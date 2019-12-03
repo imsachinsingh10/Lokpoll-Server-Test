@@ -11,6 +11,8 @@ import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
+import {MinIOService, uploadProfilePictures} from "../service/minio.service";
+import {QueryBuilderService} from "../service/querybuilder.service";
 
 const router = express();
 
@@ -22,6 +24,7 @@ export class UserRoutes {
 
         this.userService = new UserService();
         this.userController = new UserController();
+        this.minioService = new MinIOService();
         this.initRoutes();
     }
 
@@ -135,6 +138,31 @@ export class UserRoutes {
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/updateProfilePics', uploadProfilePictures, async (req, res) => {
+            try {
+                const promises = [];
+                if (req.files.image && req.files.image[0]) {
+                    promises.push(this.minioService.uploadProfilePicture(req.files.image[0], 'image'));
+                }
+                if (req.files.bgImage && req.files.bgImage[0]) {
+                    promises.push(this.minioService.uploadProfilePicture(req.files.bgImage[0], 'bgImage'))
+                }
+                if (promises.length === 0) {
+                    throw new ErrorModel(AppCode.invalid_request, 'Please select files, no files to upload');
+                }
+                const result = await Promise.all(promises);
+                const user = Object.assign({id: req.user.id}, result[0], result[1]);
+                await this.userService.updateUser(user);
+                return await res.json(_.omit(user, ['id']));
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        })
     }
 }
 
