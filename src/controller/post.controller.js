@@ -30,7 +30,6 @@ export class PostController {
         const uniqPostIds = _.uniq(postIds);
         const posts = [];
         _.forEach(uniqPostIds, id => {
-
             posts.push(this.getPost(id, result))
         });
         return posts;
@@ -38,9 +37,8 @@ export class PostController {
 
     getPost(postId, result) {
         const filteredPosts = _.filter(result, result => result.postId === postId);
-        console.log('filteredPosts', filteredPosts);
         const _p = _.omit(filteredPosts[0], ['url', 'type']);
-        const media = _.map(filteredPosts, p => ({
+        const media = result.filter(result => result.url !== null).map(p => ({
             type: p.type,
             url: p.url
         }));
