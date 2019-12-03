@@ -100,7 +100,7 @@ export class MinIOService {
             this.minioClient.bucketExists(bucketName, (error, exists) => {
                 if (error) {
                     console.log('+++++++ check if bucket exists ++++++', error);
-                    return reject(new ErrorModel(AppCode.s3_error, error.S3Error));
+                    throw new ErrorModel(AppCode.s3_error, error.S3Error);
                 }
                 if (exists) {
                     return resolve(new ErrorModel(AppCode.bucket_exists))
@@ -108,12 +108,12 @@ export class MinIOService {
                 this.minioClient.makeBucket(bucketName, 'in-west-1', (err) => {
                     if (err && err.code !== 'BucketAlreadyOwnedByYou') {
                         console.log('+++++++ create bucket ++++++', err);
-                        return reject(new ErrorModel(AppCode.s3_error, err.S3Error));
+                        throw new ErrorModel(AppCode.s3_error, err.S3Error);
                     }
                     this.minioClient.setBucketPolicy(bucketName, policy, (err1, result) => {
                         if (err1) {
                             console.log('error while setting bucket policy', err1);
-                            return reject(new ErrorModel(AppCode.s3_error, err1.S3Error));
+                            throw new ErrorModel(AppCode.s3_error, err1.S3Error);
                         }
                         return resolve(new ErrorModel(AppCode.bucket_exists))
                     });

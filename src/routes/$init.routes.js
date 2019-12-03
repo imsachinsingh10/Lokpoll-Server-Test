@@ -8,7 +8,7 @@ import {Config} from "../config";
 import {SqlService} from "../service/sql.service";
 import {AuthRoutes} from "./auth.routes";
 import _ from 'underscore'
-import {MinIOService} from "../service/minio.server";
+import {MinIOService} from "../service/minio.service";
 import Utils from "../service/utils";
 import {SMSService} from "../service/sms.service";
 import {AppCode} from "../enum/app-code";

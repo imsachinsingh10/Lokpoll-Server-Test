@@ -12,7 +12,7 @@ import {validateAuthToken} from "../middleware/auth.middleware";
 import {
     MinIOService,
     uploadPostMediaMiddleware,
-} from "../service/minio.server";
+} from "../service/minio.service";
 import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
 import {QueryBuilderService} from "../service/querybuilder.service";

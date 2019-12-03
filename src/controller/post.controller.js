@@ -38,10 +38,12 @@ export class PostController {
     getPost(postId, result) {
         const filteredPosts = _.filter(result, result => result.postId === postId);
         const _p = _.omit(filteredPosts[0], ['url', 'type']);
-        const media = result.filter(result => result.url !== null).map(p => ({
-            type: p.type,
-            url: p.url
-        }));
+        const media = result
+            .filter(result => result.postId === postId && result.url !== null)
+            .map(p => ({
+                type: p.type,
+                url: p.url
+            }));
         return {
             ..._p,
             media
