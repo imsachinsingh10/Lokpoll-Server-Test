@@ -83,7 +83,7 @@ export class PostRoutes {
                         type: file.type
                     }));
                     console.log('postMedia after mapping', postMedia);
-                    const query = QueryBuilderService.getMultiInsertQuery(table.post_media, postMedia);
+                    const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
                     await SqlService.executeQuery(query);
                 }
                 return res.status(HttpCode.ok).json({postId});
@@ -123,5 +123,17 @@ export class PostRoutes {
             }
         });
 
+        router.get('/getAllTypes', async (req, res) => {
+            try {
+                let result = await this.postService.getAllPostTypes();
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }

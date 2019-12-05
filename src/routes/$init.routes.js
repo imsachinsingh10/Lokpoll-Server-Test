@@ -12,6 +12,7 @@ import {MinIOService} from "../service/minio.service";
 import Utils from "../service/utils";
 import {SMSService} from "../service/sms.service";
 import {AppCode} from "../enum/app-code";
+import {ProfileTypeRoutes} from "./profile-type.routes";
 
 export class InitRoutes {
 
@@ -28,6 +29,7 @@ export class InitRoutes {
         new LanguageRoutes(app);
         new MoodRoutes(app);
         new PostRoutes(app);
+        new ProfileTypeRoutes(app)
     }
 
     initTestApi(app) {

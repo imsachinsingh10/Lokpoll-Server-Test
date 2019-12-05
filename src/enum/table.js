@@ -12,7 +12,9 @@ export const table = {
     ageRange: "age_range",
     mood: "mood",
     post: "post",
-    post_media: "post_media",
+    postMedia: "post_media",
+    profileType: "profile_type",
+    postType: "post_type",
 };
 
 export const dbview = {

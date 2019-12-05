@@ -41,4 +41,9 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getAllPostTypes() {
+        return SqlService.getTable(table.postType, 0);
+    }
 }
+
+
