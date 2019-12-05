@@ -32,8 +32,7 @@ export class UserService {
 
     async getAllUsers(data) {
         const condition1 = ` and u.roleId = 3`;
-        const condition2 = ` and u.firstName LIKE '%${data.body.searchText}%'
-                            or u.lastName LIKE '%${data.body.searchText}%'
+        const condition2 = ` and u.name LIKE '%${data.body.searchText}%'
                             or u.email LIKE '%${data.body.searchText}%'`;
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
@@ -81,7 +80,7 @@ export class UserService {
 
     async getLoginHistory(searchCriteria) {
         const query = `select 
-							concat(u.firstName, ' ', u.lastName) userName, ur.name 'role',
+							u.name userName, ur.name 'role',
 							lh.operatingSystem os, lh.ip, lh.logTime, lh.loginStatus, '1 hr(s)' sessionDuration 
 						from ${table.loginHistory} lh
 							join ${table.user} u on u.id = lh.userId
@@ -281,16 +280,14 @@ export class UserService {
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
 	    				where u.roleId <> 1
-                            and u.firstName LIKE '%${searchData}%'
-                            or u.lastName LIKE '%${searchData}%'
+                            and u.name LIKE '%${searchData}%'
                             or u.email LIKE '%${searchData}%'
                         order by id desc;`;
         return SqlService.executeQuery(query);
     }
 
     async getTotalUsers(data) {
-        const condition2 = ` and u.firstName LIKE '%${data.searchText}%'
-                            or u.lastName LIKE '%${data.searchText}%'
+        const condition2 = ` and u.name LIKE '%${data.searchText}%'
                             or u.email LIKE '%${data.searchText}%'`;
         const query = `select count("id") totalUsers
 	    				from ${table.user} u 

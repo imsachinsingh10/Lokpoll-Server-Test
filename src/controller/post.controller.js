@@ -19,7 +19,9 @@ export class PostController {
             userId: reqBody.userId,
             creatorId: req.user.id,
             moodId: reqBody.moodId,
-            createdAt: 'utc_timestamp()'
+            createdAt: 'utc_timestamp()',
+            postTypeId:  reqBody.postTypeId,
+            profileTypeId:  reqBody.profileTypeId,
         };
         const result = await this.postService.createPost(post);
         return result.insertId;

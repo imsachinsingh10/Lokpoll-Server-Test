@@ -31,7 +31,7 @@ export class PostService {
 
     async getAllPosts() {
         const query = `select p.id postId, p.createdAt, p.description,
-                            u.firstName, u.lastName,
+                            u.name,
                             pm.type, pm.url,
                             m.name 'mood'
                         from post p 

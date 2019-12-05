@@ -73,8 +73,7 @@ export class UserController {
     async updateUser(user) {
         const _user = {
             id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            name: user.name,
             email: user.email,
             alternateEmail: user.alternateEmail,
             country: user.country,

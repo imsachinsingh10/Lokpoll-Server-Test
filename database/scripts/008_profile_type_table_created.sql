@@ -32,3 +32,19 @@ alter table post add column postTypeId bigint(20);
 INSERT INTO `post_type` (`id`,`name`) VALUES (1,'Normal');
 INSERT INTO `post_type` (`id`,`name`) VALUES (2,'Selling');
 INSERT INTO `post_type` (`id`,`name`) VALUES (3,'Offer');
+
+-- -----------------------------------------------------
+-- Table `user_profile`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `user_profile`;
+CREATE TABLE `user_profile` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `userId` varchar(20) DEFAULT NULL,
+  `profileTypeId` varchar(20) DEFAULT NULL,
+  `name` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+ALTER TABLE `user`
+DROP COLUMN `lastName`,
+CHANGE COLUMN `firstName` `name` VARCHAR(50) NULL DEFAULT NULL ;
