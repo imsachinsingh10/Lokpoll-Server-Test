@@ -14,6 +14,33 @@ export default class Utils {
         }
         return link;
     }
+    static getRandomStringV2(maxChars = 100, config = {smallLetters: false, capitalLetters: false, numbers: false, symbols: false}) {
+        let numbers = '0123456789';
+        let smallLetters = 'abcdefghijklmnopqrstuvwxyz';
+        let capitalLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let symbols = '@!#$%^&)(_^';
+        let chars = '';
+        if (config.smallLetters) {
+            chars += smallLetters;
+        }
+        if (config.capitalLetters) {
+            chars += capitalLetters;
+        }
+        if (config.numbers) {
+            chars += numbers;
+        }
+        if (config.symbols) {
+            chars += symbols;
+        }
+        let string = '';
+        if (chars === '') {
+            return '';
+        }
+        for (let i = 0; i < maxChars; i++) {
+            string += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return string;
+    }
 
     static getRandomNumber(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);

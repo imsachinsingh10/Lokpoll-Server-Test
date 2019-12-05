@@ -5,14 +5,14 @@ import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
-import {SqlService} from "../service/sql.service";
+import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
 import {MinIOService, uploadProfilePictures} from "../service/minio.service";
-import {QueryBuilderService} from "../service/querybuilder.service";
+import {QueryBuilderService} from "../service/base/querybuilder.service";
 
 const router = express();
 
@@ -62,7 +62,10 @@ export class UserRoutes {
             try {
                 const user = req.body;
                 await this.userController.checkIfUserRegistered(user);
-                await this.userService.createUser(user);
+                const result = await this.userService.createUser(user);
+                if (user.roleId === 3) {
+                    await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+                }
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

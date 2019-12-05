@@ -4,8 +4,8 @@ import {Config} from '../config'
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
 import {table} from "../enum/table";
-import {QueryBuilderService} from "../service/querybuilder.service";
-import {SqlService} from "../service/sql.service";
+import {QueryBuilderService} from "../service/base/querybuilder.service";
+import {SqlService} from "../service/base/sql.service";
 
 export class PostController {
     constructor() {

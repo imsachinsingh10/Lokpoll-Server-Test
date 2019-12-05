@@ -4,7 +4,7 @@ import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
 import {Config} from "../config";
-import {SqlService} from "../service/sql.service";
+import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
@@ -15,7 +15,7 @@ import {
 } from "../service/minio.service";
 import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
-import {QueryBuilderService} from "../service/querybuilder.service";
+import {QueryBuilderService} from "../service/base/querybuilder.service";
 import {ProfileTypeService} from "../service/profile-type.service";
 
 const router = express();

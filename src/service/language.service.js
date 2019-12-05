@@ -1,5 +1,5 @@
-import {QueryBuilderService} from "./querybuilder.service";
-import {SqlService} from "./sql.service";
+import {QueryBuilderService} from "./base/querybuilder.service";
+import {SqlService} from "./base/sql.service";
 import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";

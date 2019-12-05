@@ -7,8 +7,8 @@ import path from 'path';
 
 import {Config} from '../config'
 import {table} from "../enum/table";
-import {QueryBuilderService} from "./querybuilder.service";
-import {SqlService} from "./sql.service";
+import {QueryBuilderService} from "./base/querybuilder.service";
+import {SqlService} from "./base/sql.service";
 
 export class EmailService {
 

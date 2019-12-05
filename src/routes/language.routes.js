@@ -5,7 +5,7 @@ import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
-import {SqlService} from "../service/sql.service";
+import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";

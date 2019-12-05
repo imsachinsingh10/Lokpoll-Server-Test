@@ -4,7 +4,7 @@ import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
 import {Config} from "../config";
-import {SqlService} from "../service/sql.service";
+import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
 import {ErrorModel} from "../model/error.model";
@@ -15,7 +15,7 @@ import {
 } from "../service/minio.service";
 import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
-import {QueryBuilderService} from "../service/querybuilder.service";
+import {QueryBuilderService} from "../service/base/querybuilder.service";
 
 const router = express();
 
@@ -51,8 +51,6 @@ export class PostRoutes {
             try {
                 const postId = await this.postController.createPost(req);
                 const promises = [];
-                console.log('post images', req.files.image);
-                console.log('post videos', req.files.video);
                 if (req.files.image && req.files.image.length > 0) {
                     _.forEach(req.files.image, file => {
                         const filePromise = this.minioService.uploadPostMedia(file, 'image');
@@ -74,15 +72,12 @@ export class PostRoutes {
                 if (promises.length > 0) {
                     let mediaFiles = await Promise.all(promises);
                     const thumbnails = _.filter(mediaFiles, file => file.type === 'thumbnail');
-                    console.log('thumbnails', thumbnails);
                     mediaFiles = _.filter(mediaFiles, file => file.type !== 'thumbnail');
-                    console.log('mediaFiles', mediaFiles);
                     const postMedia = mediaFiles.map(file => ({
                         postId: postId,
                         url: file.url,
                         type: file.type
                     }));
-                    console.log('postMedia after mapping', postMedia);
                     const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
                     await SqlService.executeQuery(query);
                 }

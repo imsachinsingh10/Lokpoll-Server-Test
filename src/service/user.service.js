@@ -1,5 +1,5 @@
-import {QueryBuilderService} from "./querybuilder.service";
-import {SqlService} from "./sql.service";
+import {QueryBuilderService} from "./base/querybuilder.service";
+import {SqlService} from "./base/sql.service";
 import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";
@@ -301,5 +301,22 @@ export class UserService {
         const query = `select 1 from user where phone = '${phone}'`;
         const user = await SqlService.getSingle(query);
         return !_.isEmpty(user);
+    }
+
+    async createAnonymousAndBusinessProfiles(userId) {
+        const profiles = [];
+        const profileTypes = await SqlService.getTable(table.profileType, 0);
+        profileTypes.forEach((pt) => {
+            if (pt.id > 1) {
+                const profile = {
+                    profileTypeId: pt.id,
+                    userId,
+                    name: Utils.getRandomStringV2(16, {capitalLetters: true, numbers: true})
+                };
+                profiles.push(profile);
+            }
+        });
+        const query = QueryBuilderService.getMultiInsertQuery(table.userProfile, profiles);
+        return SqlService.executeQuery(query);
     }
 }

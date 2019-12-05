@@ -5,7 +5,7 @@ import {PostRoutes} from "./post.routes";
 import {HttpCode} from "../enum/http-code";
 import jwt from 'jsonwebtoken';
 import {Config} from "../config";
-import {SqlService} from "../service/sql.service";
+import {SqlService} from "../service/base/sql.service";
 import {AuthRoutes} from "./auth.routes";
 import _ from 'underscore'
 import {MinIOService} from "../service/minio.service";

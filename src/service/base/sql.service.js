@@ -1,6 +1,6 @@
-import {Config} from '../config'
+import {Config} from '../../config'
 import * as mysql from 'mysql';
-import {Environment} from "../enum/common";
+import {Environment} from "../../enum/common";
 import _ from 'lodash';
 
 const db = Config.env === Environment.dev ? Config.dbDev : Config.dbProd;

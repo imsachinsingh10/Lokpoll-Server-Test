@@ -124,6 +124,7 @@ export class UserController {
                 const user = req.body;
                 await this.userService.verifyOTP(user.otp, user.phone, true);
                 const result = await this.userService.createUser({phone: user.phone, roleId: 3});
+                await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
                 const token = jwt.sign(
                     {id: result.insertId, roleId: 3},
                     Config.auth.secretKey,

@@ -20,4 +20,5 @@ fs.readdir(`${__dirname}/${dirname}` , async function (err, fileNames) {
         fullSql = fullSql + response + "\r\n\n";
     }
     await writeFile("database/full-db.sql", fullSql);
+    console.log('database/full-db.sql file generated');
 });
