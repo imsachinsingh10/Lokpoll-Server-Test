@@ -20,8 +20,10 @@ export class PostController {
             creatorId: req.user.id,
             moodId: reqBody.moodId,
             createdAt: 'utc_timestamp()',
-            postTypeId:  reqBody.postTypeId,
-            profileTypeId:  reqBody.profileTypeId,
+            postTypeId: reqBody.postTypeId,
+            profileTypeId: reqBody.profileTypeId,
+            latitude: reqBody.latitude,
+            longitude: reqBody.longitude,
         };
         const result = await this.postService.createPost(post);
         return result.insertId;
