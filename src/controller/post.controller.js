@@ -60,13 +60,34 @@ export class PostController {
     }
 
     getFormattedComments(comments) {
-        console.log('comments', comments);
-        const final = {};
-        const levels = _.uniq(comments.map(c => c.level));
-        comments.forEach((c) => {
+        const final = [];
 
-        });
-        return comments;
+        while(!_.isEmpty(comments)) {
+            const consumedCommentIds = [];
+            final.push(this.getFormattedComment(comments[0], comments, consumedCommentIds));
+            comments = comments.filter(c => consumedCommentIds.indexOf(c.id) < 0)
+        }
+        return final;
+    }
+
+    getFormattedComment(comment, allComments, consumedCommentIds) {
+        consumedCommentIds.push(comment.id);
+        return {
+            id: comment.id,
+            comment: comment.comment,
+            user: {
+              name: comment.name,
+              imageUrl: comment.imageUrl
+            },
+            replies: this.getCommentReplies(comment.id, allComments, consumedCommentIds)
+        };
+    }
+
+    getCommentReplies(commentId, allComments, consumedCommentIds) {
+        const comments = allComments.filter(c => c.replyToCommentId === commentId);
+        return comments.map(c => {
+            return this.getFormattedComment(c, allComments, consumedCommentIds)
+        })
     }
 
     getBasicPostDetails(post) {
