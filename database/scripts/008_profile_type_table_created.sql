@@ -25,10 +25,10 @@ CREATE TABLE `post_type` (
 alter table post add column postTypeId bigint(20);
 
 -- -----------------------------------------------------
--- Table `user_profile`
+-- Table `profile`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `user_profile`;
-CREATE TABLE `user_profile` (
+DROP TABLE IF EXISTS `profile`;
+CREATE TABLE `profile` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `userId` varchar(20) DEFAULT NULL,
   `profileTypeId` varchar(20) DEFAULT NULL,
