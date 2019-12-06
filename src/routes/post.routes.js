@@ -107,7 +107,7 @@ export class PostRoutes {
         router.post('/getAll', async (req, res) => {
             try {
                 let result = await this.postService.getAllPosts();
-                result = this.postController.formatPosts(result);
+                result = await this.postController.formatPosts(result);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

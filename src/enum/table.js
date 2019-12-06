@@ -14,6 +14,7 @@ export const table = {
     mood: "mood",
     post: "post",
     postMedia: "post_media",
+    postComment: "post_comment",
     profileType: "profile_type",
     postType: "post_type",
 };

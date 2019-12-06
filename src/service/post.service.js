@@ -35,7 +35,7 @@ export class PostService {
                         pst.name 'postType',
                         prt.name 'profileType',
                         pro.name 'displayName', 
-                        u.name userName, 
+                        u.name userName, u.imageUrl, u.bgImageUrl,
                         pm.type, pm.url,
                         m.name 'mood'
                         from post p 
@@ -51,6 +51,16 @@ export class PostService {
 
     async getAllPostTypes() {
         return SqlService.getTable(table.postType, 0);
+    }
+
+    async getComments(postIds, levels = [0, 1]) {
+        const query = `select pc.*, u.name, u.imageUrl
+                        from ${table.postComment} pc
+                            join user u on u.id = pc.userId
+                        where 
+                            postId in ${Utils.getRange(postIds)} 
+                            and level in ${Utils.getRange(levels)};`;
+        return SqlService.executeQuery(query);
     }
 }
 

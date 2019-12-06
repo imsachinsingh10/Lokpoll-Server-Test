@@ -18,28 +18,32 @@ export class PostController {
             description: reqBody.description,
             userId: reqBody.userId,
             creatorId: req.user.id,
-            moodId: reqBody.moodId,
             createdAt: 'utc_timestamp()',
             postTypeId: reqBody.postTypeId,
             profileTypeId: reqBody.profileTypeId,
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
         };
+        if (reqBody.moodId > 0) {
+            post.moodId = reqBody.moodId;
+        }
         const result = await this.postService.createPost(post);
         return result.insertId;
     }
 
-    formatPosts(result) {
-        const postIds = _.map(result, r => r.id);
+    async formatPosts(rawPosts) {
+        const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
+        const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
         const posts = [];
         _.forEach(uniqPostIds, id => {
-            posts.push(this.getPost(id, result))
+            const postComments = comments.filter(comment => comment.postId === id);
+            posts.push(this.getPost(id, rawPosts, postComments))
         });
         return posts;
     }
 
-    getPost(postId, posts) {
+    getPost(postId, posts, postComments) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(filteredPosts[0]);
         const media = posts
@@ -50,8 +54,19 @@ export class PostController {
             }));
         return {
             ...basicDetails,
-            media
+            media,
+            comments: this.getFormattedComments(postComments)
         }
+    }
+
+    getFormattedComments(comments) {
+        console.log('comments', comments);
+        const final = {};
+        const levels = _.uniq(comments.map(c => c.level));
+        comments.forEach((c) => {
+
+        });
+        return comments;
     }
 
     getBasicPostDetails(post) {
@@ -65,7 +80,9 @@ export class PostController {
             mood: post.mood,
             user: {
                 displayName: post.displayName || post.userName,
-                profileType: post.profileType
+                profileType: post.profileType,
+                imageUrl: post.imageUrl,
+                bgImageUrl: post.bgImageUrl,
             },
             location: {
                 latitude: post.latitude,
