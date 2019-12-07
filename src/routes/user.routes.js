@@ -8,7 +8,7 @@ import {Config} from "../config";
 import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
 import {MinIOService, uploadProfilePictures} from "../service/minio.service";
@@ -91,13 +91,14 @@ export class UserRoutes {
 
         router.post('/update', async (req, res) => {
             try {
-                const user = req.body;
+                let user = req.body;
                 if (_.isEmpty(user.id)) {
-                    user.id = user.id;
+                    user.id = req.user.id;
                     user.workingStatus = 'active'
                 }
                 await this.userService.updateUser(user);
-                return res.sendStatus(HttpCode.ok);
+                user = await this.userController.getUserDetails(user.id);
+                return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);

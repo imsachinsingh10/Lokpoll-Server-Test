@@ -11,6 +11,8 @@ export const AppCode = {
     s3_error: 's3_error',
     bucket_exists: 'bucket_exists',
     bucket_created: 'bucket_created',
+    success: 'success',
+    failure: 'failure',
 };
 export const HttpCode = {
     ok: 200,

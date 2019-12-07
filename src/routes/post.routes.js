@@ -7,7 +7,7 @@ import {Config} from "../config";
 import {SqlService} from "../service/base/sql.service";
 import {table} from "../enum/table";
 import AppOverrides from "../service/app.overrides";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import {
     MinIOService,

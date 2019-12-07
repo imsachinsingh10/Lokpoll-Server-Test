@@ -5,7 +5,7 @@ const fs = require('fs');
 import {Config} from '../config'
 import _ from "underscore";
 import Utils from "./utils";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel} from "../model/common.model";
 import {AppCode} from "../enum/app-code";
 
 const bucketConfig = Config.minioBucket;

@@ -17,6 +17,7 @@ export const table = {
     postComment: "post_comment",
     profileType: "profile_type",
     postType: "post_type",
+    hobby: "hobby",
 };
 
 export const dbview = {

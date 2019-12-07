@@ -10,7 +10,7 @@ import {SMSService} from "../service/sms.service";
 import {Environment} from "../enum/common";
 import * as _ from "lodash";
 import Validator from "../service/validator.service";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel, SuccessModel} from "../model/common.model";
 
 const router = express();
 
@@ -26,7 +26,7 @@ export class AuthRoutes {
     initRoutes() {
         router.post('/user/login', async (req, res) => {
             if (_.isEmpty(req.body.platform)) {
-                throw new ErrorModel(AppCode.invalid_platform,"Platform is required")
+                throw new ErrorModel(AppCode.invalid_platform, "Platform is required")
             }
             if (req.body.platform === 'android') {
                 return this.userController.loginAndroid(req, res);
@@ -43,9 +43,9 @@ export class AuthRoutes {
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
                 if (isOTPSent) {
                     await this.userService.saveOTP(otp, phone);
-                    return res.status(HttpCode.ok).json("OTP sent");
+                    return res.status(HttpCode.ok).json(new SuccessModel(AppCode.success, "OTP sent"));
                 }
-                return res.status(HttpCode.bad_request).json("OTP not sent")
+                return res.status(HttpCode.bad_request).json(new ErrorModel(AppCode.failure, "OTP not sent."))
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity || e.code === AppCode.invalid_phone) {
@@ -59,7 +59,7 @@ export class AuthRoutes {
             try {
                 const {phone, otp} = req.body;
                 await this.userService.verifyOTP(otp, phone, true);
-                return res.status(HttpCode.ok).json("Phone verified");
+                return res.status(HttpCode.ok).json(new SuccessModel(AppCode.success, "Phone verified"));
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {

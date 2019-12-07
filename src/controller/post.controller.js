@@ -61,7 +61,6 @@ export class PostController {
 
     getFormattedComments(comments) {
         const final = [];
-
         while(!_.isEmpty(comments)) {
             const consumedCommentIds = [];
             final.push(this.getFormattedComment(comments[0], comments, consumedCommentIds));

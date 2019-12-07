@@ -4,7 +4,7 @@ import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
 import Utils from "./utils";
 import {AppCode} from "../enum/app-code";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel} from "../model/common.model";
 import {Message} from "../enum/common";
 import Validator from "./validator.service";
 
@@ -119,7 +119,8 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async updateUser(user) {
+    async updateUser($user) {
+        const user = _.clone($user);
         const condition = `where id = ${user.id}`;
         user.id = undefined;
         const query = QueryBuilderService.getUpdateQuery(table.user, user, condition);
@@ -127,12 +128,20 @@ export class UserService {
     }
 
     async getUserById(id) {
-        const query = `select u.*, ur.name role 
+        const query = `select u.id, u.name, u.email, u.phone, 
+                                u.gender, u.imageUrl, u.bgImageUrl, u.address, u.ageRangeId, 
+                                u.profession, u.company, u.latitude, u.longitude,
+                        ur.name role 
 						from ${table.user} u
 		 					left join ${table.userRole} ur on u.roleId = ur.id
 						where
 		  					u.id = ${id} limit 1;`;
-        return await SqlService.getSingle(query);
+        return SqlService.getSingle(query);
+    }
+
+    async getHobbiesByUserId(id) {
+        const query = `select hobby from ${table.hobby} where userId = ${id};`;
+        return SqlService.executeQuery(query);
     }
 
     async validateUserByEmail(user) {

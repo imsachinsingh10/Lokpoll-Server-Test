@@ -1,6 +1,6 @@
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
-import {ErrorModel} from "../model/error.model";
+import {ErrorModel} from "../model/common.model";
 
 export default class Validator {
     static isPhoneValid(phone, throwException = true) {

@@ -91,7 +91,7 @@ export class UserController {
             Validator.isOTPValid(req.body.otp);
             const isUserRegistered = await this.userService.isUserRegisteredByPhone(req.body.phone);
             if (!isUserRegistered) {
-                return this.registerAndroid(req, res);
+                return this.registerAndroidUser(req, res);
             }
             let user = await this.userService.loginUserByPhone(req.body);
             user = {
@@ -118,13 +118,17 @@ export class UserController {
         }
     }
 
-    async registerAndroid(req, res) {
+    async registerAndroidUser(req, res) {
         try {
             try {
-                const user = req.body;
+                let user = req.body;
                 await this.userService.verifyOTP(user.otp, user.phone, true);
-                const result = await this.userService.createUser({phone: user.phone, roleId: 3});
+                user = {
+                    phone: user.phone, roleId: 3, regDate: 'utc_timestamp()'
+                };
+                const result = await this.userService.createUser(user);
                 await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+                user = await this.userService.getUserById(result.insertId);
                 const token = jwt.sign(
                     {id: result.insertId, roleId: 3},
                     Config.auth.secretKey,
@@ -132,9 +136,7 @@ export class UserController {
                 );
                 return await res.json({
                     token,
-                    user: {
-                        id: result.insertId, roleId: 3
-                    },
+                    user,
                     isNewUser: true
                 });
             } catch (e) {
@@ -176,6 +178,21 @@ export class UserController {
                 return res.status(HttpCode.unauthorized).send(e);
             }
             res.sendStatus(HttpCode.internal_server_error);
+        }
+    }
+
+    async getUserDetails(userId) {
+        const user = await this.userService.getUserById(userId);
+        const hobbies = await this.userService.getHobbiesByUserId(userId);
+        const basicDetails = _.omit(user, ['latitude', 'longitude', 'address']);
+        return {
+            ...basicDetails,
+            hobbies,
+            location: {
+                latitude: user.latitude,
+                longitude: user.longitude,
+                address: user.address,
+            }
         }
     }
 }
