@@ -89,7 +89,7 @@ export class UserRoutes {
             }
         });
 
-        router.post('/getAgeRanges', async (req, res) => {
+        router.get('/getAgeRanges', async (req, res) => {
             try {
                 let ageRanges = await this.userService.getAgeRanges();
                 return await res.json(ageRanges);
