@@ -45,8 +45,8 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async getUsersByRole(roleId) {
-        const query = `select * from ${table.user} where roleId = ${roleId};`;
+    async getAgeRanges() {
+        const query = `select * from ${table.ageRange}`;
         return SqlService.executeQuery(query);
     }
 
@@ -141,7 +141,20 @@ export class UserService {
 
     async getHobbiesByUserId(id) {
         const query = `select hobby from ${table.hobby} where userId = ${id};`;
-        return SqlService.executeQuery(query);
+        const result = await SqlService.executeQuery(query);
+        return result.map((r) => r.hobby);
+    }
+
+    async updateHobbies(hobbies, userId) {
+        const query1 = `delete from ${table.hobby} where userId = ${userId};`;
+
+        const model = hobbies.map(hobby => {
+            return {
+                hobby, userId
+            }
+        });
+        const query2 = QueryBuilderService.getMultiInsertQuery(table.hobby, model);
+        return SqlService.executeMultipleQueries([query1, query2]);
     }
 
     async validateUserByEmail(user) {

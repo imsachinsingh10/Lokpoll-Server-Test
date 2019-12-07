@@ -33,8 +33,8 @@ export class UserRoutes {
 
         router.post('/getProfile', async (req, res) => {
             try {
-                const user = await this.userService.getUserById(req.user.id);
-                return res.status(HttpCode.ok).json({user});
+                const user = await this.userController.getUserDetails(req.user.id);
+                return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
@@ -89,6 +89,19 @@ export class UserRoutes {
             }
         });
 
+        router.post('/getAgeRanges', async (req, res) => {
+            try {
+                let ageRanges = await this.userService.getAgeRanges();
+                return await res.json(ageRanges);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
         router.post('/update', async (req, res) => {
             try {
                 let user = req.body;
@@ -96,7 +109,8 @@ export class UserRoutes {
                     user.id = req.user.id;
                     user.workingStatus = 'active'
                 }
-                await this.userService.updateUser(user);
+                await this.userController.updateUser(user);
+                await this.userController.updateHobbies(user.hobbies, user.id);
                 user = await this.userController.getUserDetails(user.id);
                 return await res.json(user);
             } catch (e) {

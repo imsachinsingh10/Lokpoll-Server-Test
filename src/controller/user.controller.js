@@ -75,14 +75,22 @@ export class UserController {
             id: user.id,
             name: user.name,
             email: user.email,
-            alternateEmail: user.alternateEmail,
-            country: user.country,
-            phone: user.phone,
-            residentialAddress: user.residentialAddress,
-            roleId: user.roleId,
-            workingStatus: user.workingStatus
+            gender: user.gender,
+            address: user.address,
+            latitude: user.latitude,
+            longitude: user.longitude,
+            profession: user.profession,
+            company: user.company,
+            ageRangeId: user.ageRangeId,
         };
-        return await this.userService.updateUser(_user);
+        return this.userService.updateUser(_user);
+    }
+
+    async updateHobbies(hobbies, userId) {
+        if (_.isEmpty(hobbies)) {
+            return
+        }
+        await this.userService.updateHobbies(hobbies, userId)
     }
 
     async loginAndroid(req, res) {
