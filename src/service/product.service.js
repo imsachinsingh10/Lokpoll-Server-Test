@@ -18,6 +18,10 @@ export class ProductService {
         if (_.isEmpty(tags)) {
             return;
         }
+        if (typeof tags === 'string') {
+            tags = [tags];
+        }
+        console.log('tags', tags, typeof tags);
         const _tags = tags.map(tag => ({name: tag}));
         let query = QueryBuilderService.getMultiInsertQuery(table.productTag, _tags);
         query = query.replace(/;/, ` on duplicate key update name = name;`);
