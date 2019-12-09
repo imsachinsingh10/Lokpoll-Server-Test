@@ -1,12 +1,12 @@
-import {QueryBuilderService} from "./base/querybuilder.service";
-import {SqlService} from "./base/sql.service";
+import {QueryBuilderService} from "./sql/querybuilder.service";
+import {SqlService} from "./sql/sql.service";
 import {dbview, table} from "../enum/table";
 import * as _ from 'lodash';
-import Utils from "./utils";
+import Utils from "./common/utils";
 import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/common.model";
-import {Message} from "../enum/common";
-import Validator from "./validator.service";
+import {Message} from "../enum/common.enum";
+import Validator from "./common/validator.service";
 
 export class UserService {
     constructor() {

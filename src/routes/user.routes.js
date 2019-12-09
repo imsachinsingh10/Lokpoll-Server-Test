@@ -1,18 +1,15 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
-import {Config} from "../config";
-import {SqlService} from "../service/base/sql.service";
+import {SqlService} from "../service/sql/sql.service";
 import {table} from "../enum/table";
-import AppOverrides from "../service/app.overrides";
+import AppOverrides from "../service/common/app.overrides";
 import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
-import {MinIOService, uploadProfilePictures} from "../service/minio.service";
-import {QueryBuilderService} from "../service/base/querybuilder.service";
+import {MinIOService, uploadProfilePictures} from "../service/common/minio.service";
 
 const router = express();
 

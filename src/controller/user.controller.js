@@ -3,8 +3,7 @@ import * as _ from 'lodash';
 import {Config} from '../config'
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
-import {table} from "../enum/table";
-import Validator from "../service/validator.service";
+import Validator from "../service/common/validator.service";
 import jwt from "jsonwebtoken";
 import {HttpCode} from "../enum/http-code";
 

@@ -1,8 +1,8 @@
 import axios from 'axios';
-import {Config} from "../config";
-import {Environment} from "../enum/common";
+import {Config} from "../../config";
+import {Environment} from "../../enum/common.enum";
 import * as _ from "lodash";
-import {AppCode} from "../enum/app-code";
+import {AppCode} from "../../enum/app-code";
 
 export class SMSService {
 

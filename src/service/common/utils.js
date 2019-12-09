@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {Config} from "../config";
+import {Config} from "../../config";
 
 export default class Utils {
     static formData = {remember: ''};

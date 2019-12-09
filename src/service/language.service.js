@@ -1,9 +1,6 @@
-import {QueryBuilderService} from "./base/querybuilder.service";
-import {SqlService} from "./base/sql.service";
-import {dbview, table} from "../enum/table";
-import * as _ from 'lodash';
-import Utils from "./utils";
-import {AppCode} from "../enum/app-code";
+import {QueryBuilderService} from "./sql/querybuilder.service";
+import {SqlService} from "./sql/sql.service";
+import {table} from "../enum/table";
 
 export class LanguageService {
     constructor() {

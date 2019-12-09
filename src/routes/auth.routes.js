@@ -1,15 +1,13 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
 import {Config} from "../config";
-import Utils from "../service/utils";
-import {SMSService} from "../service/sms.service";
-import {Environment} from "../enum/common";
+import Utils from "../service/common/utils";
+import {SMSService} from "../service/common/sms.service";
+import {Environment} from "../enum/common.enum";
 import * as _ from "lodash";
-import Validator from "../service/validator.service";
 import {ErrorModel, SuccessModel} from "../model/common.model";
 
 const router = express();

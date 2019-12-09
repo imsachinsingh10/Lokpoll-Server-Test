@@ -1,8 +1,8 @@
 import express from 'express';
 import BodyParser from 'body-parser';
 import {InitRoutes} from './routes/$init.routes';
-import AppOverrides from "./service/app.overrides";
-import AppEventHandler from "./service/app.eventHandler";
+import AppOverrides from "./service/common/app.overrides";
+import AppEventHandler from "./service/common/app.eventHandler";
 
 const app = express();
 

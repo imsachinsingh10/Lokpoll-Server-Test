@@ -12,6 +12,7 @@ export const table = {
     gender: "gender",
     ageRange: "age_range",
     mood: "mood",
+    productTag: "product_tag",
     post: "post",
     postMedia: "post_media",
     postComment: "post_comment",

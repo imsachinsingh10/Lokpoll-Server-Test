@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 export class QueryBuilderService {
 
     static getInsertQuery(tableName, model) {
+        console.log('sql model', model);
         let query = `insert into ${tableName} (`;
         for (const prop in model) {
             const value = model[prop];
@@ -17,6 +18,7 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
+            console.log('model value', value, typeof value);
             if (typeof value === 'number' || value === null || value.endsWith('()')) {
                 query += `${value}, `;
             } else {

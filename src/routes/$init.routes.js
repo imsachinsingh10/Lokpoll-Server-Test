@@ -3,33 +3,19 @@ import {LanguageRoutes} from "./language.routes";
 import {MoodRoutes} from "./mood.routes";
 import {PostRoutes} from "./post.routes";
 import {HttpCode} from "../enum/http-code";
-import jwt from 'jsonwebtoken';
-import {Config} from "../config";
-import {SqlService} from "../service/base/sql.service";
+import {SqlService} from "../service/sql/sql.service";
 import {AuthRoutes} from "./auth.routes";
-import _ from 'underscore'
-import {MinIOService} from "../service/minio.service";
-import Utils from "../service/utils";
-import {SMSService} from "../service/sms.service";
-import {AppCode} from "../enum/app-code";
+import Utils from "../service/common/utils";
 import {ProfileTypeRoutes} from "./profile-type.routes";
+import {ProductRoutes} from "./product.routes";
 
 export class InitRoutes {
 
     constructor(app) {
-        this.init(app);
-    }
-
-    init(app) {
         new SqlService();
 
         this.initTestApi(app);
-        new AuthRoutes(app);
-        new UserRoutes(app);
-        new LanguageRoutes(app);
-        new MoodRoutes(app);
-        new PostRoutes(app);
-        new ProfileTypeRoutes(app)
+        this.initRoutes(app);
     }
 
     initTestApi(app) {
@@ -52,5 +38,15 @@ export class InitRoutes {
             }
         });
 
+    }
+
+    initRoutes(app) {
+        new AuthRoutes(app);
+        new UserRoutes(app);
+        new LanguageRoutes(app);
+        new MoodRoutes(app);
+        new PostRoutes(app);
+        new ProfileTypeRoutes(app);
+        new ProductRoutes(app);
     }
 }

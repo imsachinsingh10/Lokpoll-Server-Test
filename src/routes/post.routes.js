@@ -1,21 +1,19 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
-import {Config} from "../config";
-import {SqlService} from "../service/base/sql.service";
+import {SqlService} from "../service/sql/sql.service";
 import {table} from "../enum/table";
-import AppOverrides from "../service/app.overrides";
-import {ErrorModel} from "../model/common.model";
+import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import {
     MinIOService,
     uploadPostMediaMiddleware,
-} from "../service/minio.service";
+} from "../service/common/minio.service";
 import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
-import {QueryBuilderService} from "../service/base/querybuilder.service";
+import {QueryBuilderService} from "../service/sql/querybuilder.service";
+import {ProductService} from "../service/product.service";
 
 const router = express();
 
@@ -25,7 +23,7 @@ export class PostRoutes {
         app.use('/post', router);
 
         this.postService = new PostService();
-        this.minioService = new MinIOService();
+        this.productService = new ProductService();
         this.postController = new PostController();
 
         this.initRoutes();
@@ -50,37 +48,8 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const postId = await this.postController.createPost(req);
-                const promises = [];
-                if (req.files.image && req.files.image.length > 0) {
-                    _.forEach(req.files.image, file => {
-                        const filePromise = this.minioService.uploadPostMedia(file, 'image');
-                        promises.push(filePromise);
-                    });
-                }
-                if (req.files.video && req.files.video.length > 0) {
-                    _.forEach(req.files.video, file => {
-                        const filePromise = this.minioService.uploadPostMedia(file, 'video');
-                        promises.push(filePromise);
-                    });
-                }
-                if (req.files.thumbnail && req.files.thumbnail.length > 0) {
-                    _.forEach(req.files.thumbnail, file => {
-                        const filePromise = this.minioService.uploadPostMedia(file, 'thumbnail');
-                        promises.push(filePromise);
-                    });
-                }
-                if (promises.length > 0) {
-                    let mediaFiles = await Promise.all(promises);
-                    const thumbnails = _.filter(mediaFiles, file => file.type === 'thumbnail');
-                    mediaFiles = _.filter(mediaFiles, file => file.type !== 'thumbnail');
-                    const postMedia = mediaFiles.map(file => ({
-                        postId: postId,
-                        url: file.url,
-                        type: file.type
-                    }));
-                    const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
-                    await SqlService.executeQuery(query);
-                }
+                await this.postController.uploadPostMedia(req, postId);
+                await this.productService.addTags(req.body.productTags);
                 return res.status(HttpCode.ok).json({postId});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

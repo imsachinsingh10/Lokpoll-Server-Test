@@ -5,10 +5,10 @@ import vash from 'vash';
 import fs from 'fs';
 import path from 'path';
 
-import {Config} from '../config'
-import {table} from "../enum/table";
-import {QueryBuilderService} from "./base/querybuilder.service";
-import {SqlService} from "./base/sql.service";
+import {Config} from '../../config'
+import {table} from "../../enum/table";
+import {QueryBuilderService} from "../sql/querybuilder.service";
+import {SqlService} from "../sql/sql.service";
 
 export class EmailService {
 

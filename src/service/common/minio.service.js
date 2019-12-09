@@ -1,12 +1,11 @@
 import multer from "multer";
+import {Config} from '../../config'
+import Utils from "./utils";
+import {ErrorModel} from "../../model/common.model";
+import {AppCode} from "../../enum/app-code";
 
 const Minio = require('minio');
 const fs = require('fs');
-import {Config} from '../config'
-import _ from "underscore";
-import Utils from "./utils";
-import {ErrorModel} from "../model/common.model";
-import {AppCode} from "../enum/app-code";
 
 const bucketConfig = Config.minioBucket;
 const policy = JSON.stringify({
@@ -120,7 +119,7 @@ export class MinIOService {
     async createBucket(bucketName) {
         return new Promise((resolve, reject) => {
             this.minioClient.bucketExists(bucketName, (error, exists) => {
-                if (error) {
+                if (error && error.code !== "UnknownError") {
                     console.log('+++++++ check if bucket exists ++++++', error);
                     throw new ErrorModel(AppCode.s3_error, error.S3Error);
                 }

@@ -1,15 +1,14 @@
 import * as _ from 'lodash';
-
-import {Config} from '../config'
-import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
+import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
-import {QueryBuilderService} from "../service/base/querybuilder.service";
-import {SqlService} from "../service/base/sql.service";
+import {SqlService} from "../service/sql/sql.service";
+import {MinIOService} from "../service/common/minio.service";
 
 export class PostController {
     constructor() {
         this.postService = new PostService();
+        this.minioService = new MinIOService();
     }
 
     async createPost(req) {
@@ -108,6 +107,40 @@ export class PostController {
                 latitude: post.latitude,
                 longitude: post.longitude
             }
+        }
+    }
+
+    async uploadPostMedia(req, postId) {
+        const promises = [];
+        if (req.files.image && req.files.image.length > 0) {
+            _.forEach(req.files.image, file => {
+                const filePromise = this.minioService.uploadPostMedia(file, 'image');
+                promises.push(filePromise);
+            });
+        }
+        if (req.files.video && req.files.video.length > 0) {
+            _.forEach(req.files.video, file => {
+                const filePromise = this.minioService.uploadPostMedia(file, 'video');
+                promises.push(filePromise);
+            });
+        }
+        if (req.files.thumbnail && req.files.thumbnail.length > 0) {
+            _.forEach(req.files.thumbnail, file => {
+                const filePromise = this.minioService.uploadPostMedia(file, 'thumbnail');
+                promises.push(filePromise);
+            });
+        }
+        if (promises.length > 0) {
+            let mediaFiles = await Promise.all(promises);
+            const thumbnails = _.filter(mediaFiles, file => file.type === 'thumbnail');
+            mediaFiles = _.filter(mediaFiles, file => file.type !== 'thumbnail');
+            const postMedia = mediaFiles.map(file => ({
+                postId: postId,
+                url: file.url,
+                type: file.type
+            }));
+            const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
+            return SqlService.executeQuery(query);
         }
     }
 }
