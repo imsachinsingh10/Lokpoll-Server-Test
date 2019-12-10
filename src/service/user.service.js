@@ -45,6 +45,21 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
+    async getFormattedUsers() {
+        const query = `select u.id, u.name, p.name anonymousName 
+                        from ${table.user} u 
+                        join profile p on p.userId = u.id and p.profileTypeId = 3
+                        order by u.id desc
+                        ;`;
+        const users = await SqlService.executeQuery(query);
+        return users.map(u => {
+            return {
+                id: u.id,
+                name: u.name || u.anonymousName
+            }
+        })
+    }
+
     async getAgeRanges() {
         const query = `select * from ${table.ageRange}`;
         return SqlService.executeQuery(query);

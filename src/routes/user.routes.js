@@ -86,6 +86,19 @@ export class UserRoutes {
             }
         });
 
+        router.get('/getFormattedUsers', async (req, res) => {
+            try {
+                let user = await this.userService.getFormattedUsers();
+                return await res.json(user);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e.message);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
         router.get('/getAgeRanges', async (req, res) => {
             try {
                 let ageRanges = await this.userService.getAgeRanges();
