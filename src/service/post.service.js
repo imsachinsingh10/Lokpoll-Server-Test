@@ -21,20 +21,21 @@ export class PostService {
 
     async getAllPosts() {
         const query = `select p.id, p.createdAt, p.description, p.latitude, p.longitude , 
-                        0 'respects', 0 'comments',
-                        pst.name 'postType',
-                        prt.name 'profileType',
-                        pro.name 'displayName', 
-                        u.name userName, u.imageUrl, u.bgImageUrl,
-                        pm.type, pm.url,
-                        m.name 'mood'
+                            0 'respects', 0 'comments',
+                            pst.name 'postType',
+                            prt.name 'profileType',
+                            pro.name 'displayName', 
+                            u.name userName, u.imageUrl, u.bgImageUrl,
+                            pm.type, pm.url,
+                            m.name 'mood'
                         from post p 
-                        left join post_media pm on pm.postId = p.id
-                        join user u on u.id = p.userId
-                        left join mood m on m.id = p.moodId
-                        join profile_type prt on prt.id = p.profileTypeId
-                        join post_type pst on pst.id = p.postTypeId
-                        left join profile pro on pro.profileTypeId = prt.id and pro.userId = u.id
+                            left join post_media pm on pm.postId = p.id
+                            join user u on u.id = p.userId
+                            left join mood m on m.id = p.moodId
+                            join profile_type prt on prt.id = p.profileTypeId
+                            join post_type pst on pst.id = p.postTypeId
+                            left join profile pro on pro.profileTypeId = prt.id and pro.userId = u.id
+                        order by p.id desc
                         ;`;
         return SqlService.executeQuery(query);
     }
