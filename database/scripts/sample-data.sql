@@ -18,15 +18,7 @@ INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('mara
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('gujarati', 'gu', '1', 'गुजराती');
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('bengali', 'bn', '1', 'बंगाली');
 
-INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (1,18,24);
-INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (2,25,34);
-INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (3,35,40);
-INSERT INTO `age_range` (`id`,`min`,`max`) VALUES (4,41,NULL);
-
-INSERT INTO `profile_type` (`id`,`name`) VALUES (1,'Personal');
-INSERT INTO `profile_type` (`id`,`name`) VALUES (2,'Business');
-INSERT INTO `profile_type` (`id`,`name`) VALUES (3,'Anonymous');
-
-INSERT INTO `post_type` (`id`,`name`) VALUES (1,'Normal');
-INSERT INTO `post_type` (`id`,`name`) VALUES (2,'Selling');
-INSERT INTO `post_type` (`id`,`name`) VALUES (3,'Offer');
+INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (1,'Party',NULL,1,NULL,'#0000ff');
+INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (2,'Masti',NULL,1,NULL,'#ff00ff');
+INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (3,'Happy',NULL,1,NULL,'#ffff00');
+INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (4,'Sad',NULL,1,NULL,'#8080ff');

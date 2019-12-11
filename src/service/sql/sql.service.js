@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 const db = Config.env === Environment.dev ? Config.dbDev : Config.dbProd;
 const pool = mysql.createPool(db);
-console.log('mysql pool created');
+// console.log('mysql pool created');
 
 export class SqlService {
 
@@ -44,7 +44,7 @@ export class SqlService {
     }
 
     static getSingle(query) {
-        console.log('query', query);
+        // console.log('query', query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {

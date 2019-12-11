@@ -22,7 +22,7 @@ export class ProfileTypeRoutes {
 
         router.get('/getAll', async (req, res) => {
             try {
-                let result = await this.profileTypeService.getAllProfileTypes();
+                let result = this.profileTypeService.getAllProfileTypes();
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

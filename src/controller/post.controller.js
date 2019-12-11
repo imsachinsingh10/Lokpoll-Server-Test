@@ -4,6 +4,7 @@ import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
+import {PostReaction} from "../enum/common.enum";
 
 export class PostController {
     constructor() {
@@ -18,8 +19,8 @@ export class PostController {
             userId: reqBody.userId,
             creatorId: req.user.id,
             createdAt: 'utc_timestamp()',
-            postTypeId: reqBody.postTypeId,
-            profileTypeId: reqBody.profileTypeId,
+            type: reqBody.type,
+            profileType: reqBody.profileType,
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
         };
@@ -31,6 +32,9 @@ export class PostController {
     }
 
     async formatPosts(rawPosts) {
+        if (_.isEmpty(rawPosts)) {
+            return [];
+        }
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
@@ -142,5 +146,9 @@ export class PostController {
             const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
             return SqlService.executeQuery(query);
         }
+    }
+
+    getReactionTypes() {
+        return PostReaction
     }
 }

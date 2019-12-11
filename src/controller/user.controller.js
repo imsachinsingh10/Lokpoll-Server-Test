@@ -6,6 +6,9 @@ import {UserService} from "../service/user.service";
 import Validator from "../service/common/validator.service";
 import jwt from "jsonwebtoken";
 import {HttpCode} from "../enum/http-code";
+import {table} from "../enum/table";
+import {SqlService} from "../service/sql/sql.service";
+import {AgeRange} from "../enum/common.enum";
 
 export class UserController {
     constructor() {
@@ -201,5 +204,9 @@ export class UserController {
                 address: user.address,
             }
         }
+    }
+
+    getAgeRanges() {
+        return AgeRange;
     }
 }

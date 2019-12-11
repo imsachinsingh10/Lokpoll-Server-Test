@@ -14,6 +14,7 @@ import _ from 'lodash';
 import {PostController} from "../controller/post.controller";
 import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {ProductService} from "../service/product.service";
+import {PostType} from "../enum/common.enum";
 
 const router = express();
 
@@ -62,8 +63,20 @@ export class PostRoutes {
 
         router.post('/getAll', async (req, res) => {
             try {
-                let result = await this.postService.getAllPosts();
-                result = await this.postController.formatPosts(result);
+                const request = {
+                    "latitude": req.body.latitude || 21.251385,
+                    "longitude": req.body.longitude || 81.629639,
+                    "type": req.body.type || 'normal',
+                    "radiusInMeter": req.body.radiusInMeter || 10000000000,
+                    "lastPostId": req.body.lastPostId,
+                    "postCount": req.body.postCount || 40
+                };
+                let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
+                let result = [];
+                if (qualifiedPostIds.length > 0) {
+                    result = await this.postService.getAllPosts(qualifiedPostIds);
+                    result = await this.postController.formatPosts(result);
+                }
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -76,7 +89,19 @@ export class PostRoutes {
 
         router.get('/getAllTypes', async (req, res) => {
             try {
-                let result = await this.postService.getAllPostTypes();
+                return await res.json(PostType);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/getReactionTypes', async (req, res) => {
+            try {
+                let result = this.postController.getReactionTypes();
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

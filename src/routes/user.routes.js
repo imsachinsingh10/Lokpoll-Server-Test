@@ -10,6 +10,7 @@ import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
 import {MinIOService, uploadProfilePictures} from "../service/common/minio.service";
+import {ProfileType} from "../enum/common.enum";
 
 const router = express();
 
@@ -101,8 +102,20 @@ export class UserRoutes {
 
         router.get('/getAgeRanges', async (req, res) => {
             try {
-                let ageRanges = await this.userService.getAgeRanges();
+                let ageRanges = this.userController.getAgeRanges();
                 return await res.json(ageRanges);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/getProfileTypes', async (req, res) => {
+            try {
+                return await res.json(ProfileType);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {

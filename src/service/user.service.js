@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import Utils from "./common/utils";
 import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/common.model";
-import {Message} from "../enum/common.enum";
+import {Message, ProfileType} from "../enum/common.enum";
 import Validator from "./common/validator.service";
 
 export class UserService {
@@ -48,7 +48,7 @@ export class UserService {
     async getFormattedUsers() {
         const query = `select u.id, u.name, p.name anonymousName 
                         from ${table.user} u 
-                        join profile p on p.userId = u.id and p.profileTypeId = 3
+                        join profile p on p.userId = u.id and p.type = 'anonymous'
                         order by u.id desc
                         ;`;
         const users = await SqlService.executeQuery(query);
@@ -341,19 +341,16 @@ export class UserService {
     }
 
     async createAnonymousAndBusinessProfiles(userId) {
-        const profiles = [];
-        const profileTypes = await SqlService.getTable(table.profileType, 0);
-        profileTypes.forEach((pt) => {
-            if (pt.id > 1) {
-                const profile = {
-                    profileTypeId: pt.id,
-                    userId,
-                    name: Utils.getRandomStringV2(16, {capitalLetters: true, numbers: true})
-                };
-                profiles.push(profile);
-            }
-        });
-        const query = QueryBuilderService.getMultiInsertQuery(table.userProfile, profiles);
+        const profiles = [{
+            type: ProfileType.business,
+            userId,
+            name: 'Business@' + Utils.getRandomStringV2(8, {capitalLetters: true, numbers: true})
+        }, {
+            type: ProfileType.anonymous,
+            userId,
+            name: 'Anonymous@' + Utils.getRandomStringV2(8, {capitalLetters: true, numbers: true})
+        }];
+        const query = QueryBuilderService.getMultiInsertQuery(table.profile, profiles);
         return SqlService.executeQuery(query);
     }
 }

@@ -88,14 +88,3 @@ CREATE TABLE `verification` (
   `verifiedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
-
--- -----------------------------------------------------
--- Table `age_range`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `age_range`;
-CREATE TABLE `age_range` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `min` bigint(20) DEFAULT NULL,
-  `max` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-);

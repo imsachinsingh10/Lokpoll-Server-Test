@@ -10,7 +10,33 @@ export const Message = {
 };
 
 export const WorkingStatus = {
-  active: 'active',
-  inactive: 'inactive',
-  blocked: 'blocked'
+    active: 'active',
+    inactive: 'inactive',
+    blocked: 'blocked'
+};
+
+export const PostReaction = {
+    respect: 'respect',
+    voteUp: 'vote_up',
+    voteDown: 'vote_down',
+    share: 'share'
+};
+
+export const AgeRange = {
+    1: {"min": 18, "max": 24},
+    2: {"min": 25, "max": 34},
+    3: {"min": 35, "max": 40},
+    4: {"min": 41, "max": null}
+};
+
+export const ProfileType = {
+    personal: 'personal',
+    business: 'business',
+    anonymous: 'anonymous'
+};
+
+export const PostType = {
+    normal: 'normal',
+    sellingAroundMe: 'selling_around_me',
+    offersAroundMe: 'offers_around_me',
 };

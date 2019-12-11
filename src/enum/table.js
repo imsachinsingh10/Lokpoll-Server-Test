@@ -1,6 +1,6 @@
 export const table = {
     user: 'user',
-    userProfile: 'profile',
+    profile: 'profile',
     userRole: 'user_role',
     loginHistory: 'login_history',
     fund: 'fund',
