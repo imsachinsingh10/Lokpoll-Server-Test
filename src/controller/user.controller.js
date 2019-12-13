@@ -104,7 +104,7 @@ export class UserController {
                 return this.registerAndroidUser(req, res);
             }
             let user = await this.userService.loginUserByPhone(req.body);
-            user = await this.userService.getUserDetails(user.id);
+            user = await this.getUserDetails(user.id);
             await this.userService.updateLoginHistory(req, user);
             const token = jwt.sign(
                 user,
@@ -135,7 +135,7 @@ export class UserController {
                 };
                 const result = await this.userService.createUser(user);
                 await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
-                user = await this.userService.getUserDetails(result.insertId);
+                user = await this.getUserDetails(result.insertId);
                 const token = jwt.sign(
                     {id: result.insertId, roleId: 3},
                     Config.auth.secretKey,
