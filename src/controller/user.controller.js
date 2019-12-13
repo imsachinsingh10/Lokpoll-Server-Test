@@ -118,10 +118,12 @@ export class UserController {
             });
         } catch (e) {
             console.error(`${req.method}: ${req.url}`, e);
-            if (e.code === AppCode.invalid_phone || e.code === AppCode.invalid_otp || e.code === AppCode.otp_expired) {
+            if (e.code === AppCode.invalid_phone || e.code === AppCode.invalid_otp || e.code === AppCode.otp_expired || e.code === AppCode.invalid_creds) {
                 return res.status(HttpCode.bad_request).send(e);
+            } else if (e.code === AppCode.invalid_creds) {
+                return res.status(HttpCode.unauthorized).send(e);
             }
-            res.sendStatus(HttpCode.internal_server_error);
+            res.status(HttpCode.internal_server_error).json(e);
         }
     }
 
