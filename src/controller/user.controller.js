@@ -196,8 +196,8 @@ export class UserController {
             ...basicDetails,
             hobbies,
             location: {
-                latitude: +user.latitude,
-                longitude: +user.longitude,
+                latitude: user.latitude ? +user.latitude : null,
+                longitude: user.longitude ? +user.longitude : null,
                 address: user.address,
             }
         }
