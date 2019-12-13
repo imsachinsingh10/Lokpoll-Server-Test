@@ -104,10 +104,7 @@ export class UserController {
                 return this.registerAndroidUser(req, res);
             }
             let user = await this.userService.loginUserByPhone(req.body);
-            user = {
-                id: user.id,
-                roleId: user.roleId
-            };
+            user = await this.userService.getUserById(user.id);
             await this.userService.updateLoginHistory(req, user);
             const token = jwt.sign(
                 user,
