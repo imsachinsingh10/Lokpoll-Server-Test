@@ -44,7 +44,7 @@ export class Config {
 
     static auth = {
         secretKey: '2c56a05a-da7f-4842-a992-cbce9de1d6ae',
-        expiryInSeconds: 3.154e+7 * 60
+        expiryInSeconds: 3.154e+7
     };
 
     static sendMail = {
