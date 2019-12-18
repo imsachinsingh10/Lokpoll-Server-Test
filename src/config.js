@@ -44,7 +44,7 @@ export class Config {
 
     static auth = {
         secretKey: '2c56a05a-da7f-4842-a992-cbce9de1d6ae',
-        expiryInSeconds: 10000 * 60
+        expiryInSeconds: 3.154e+7 * 60
     };
 
     static sendMail = {
@@ -82,6 +82,6 @@ export class Config {
     static version = {
         majorRevision: 8,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 11,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 20,  // (Only bug fixes not new feature)
+        bugFixes: 21,  // (Only bug fixes not new feature)
     };
 }
