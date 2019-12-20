@@ -18,7 +18,8 @@ export class PostService {
 
     async getTotalPosts(data) {
         const query = `select count("id") totalPosts
-	    				from ${table.post} u`;
+	    				from ${table.post} p
+	    				join user u on u.id = p.userId;`;
         return SqlService.getSingle(query);
     }
 

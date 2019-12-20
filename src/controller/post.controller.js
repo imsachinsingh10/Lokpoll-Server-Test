@@ -103,7 +103,7 @@ export class PostController {
             mood: post.mood,
             user: {
                 displayName: post.displayName || post.userName,
-                profileType: post.profileType,
+                profileType: post.profileType || "Personal",
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
             },
