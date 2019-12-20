@@ -7,7 +7,7 @@ import {AppCode} from "../../enum/app-code";
 const Minio = require('minio');
 const fs = require('fs');
 
-const bucketConfig = Config.minioBucket;
+const minioConfig = Config.minio;
 const policy = JSON.stringify({
     "Version": "2012-10-17",
     "Statement": [
@@ -16,7 +16,7 @@ const policy = JSON.stringify({
             "Effect": "Allow",
             "Principal": "*",
             "Action": ["s3:GetObject"],
-            "Resource": [`arn:aws:s3:::${bucketConfig.bucket.root}/*`]
+            "Resource": [`arn:aws:s3:::${minioConfig.bucket.root}/*`]
         }
     ]
 });
@@ -53,7 +53,7 @@ export const uploadProfilePictures = multer({storage})
 export class MinIOService {
     constructor() {
         this.minioClient = new Minio.Client({
-            ...Config.minio,
+            ...Config.minio.config,
             useSSL: false,
         });
     }
@@ -71,7 +71,7 @@ export class MinIOService {
                 })
             }
 
-            await this.createBucket(bucketConfig.bucket.root);
+            await this.createBucket(minioConfig.bucket.root);
             let bucketPath = this.getBucketPath(mediaType);
             const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
 
@@ -90,8 +90,8 @@ export class MinIOService {
                 return resolve({url: null, type})
             }
 
-            await this.createBucket(bucketConfig.bucket.root);
-            const url = await this.uploadFileToMinio(bucketConfig.bucket.user, file.filename, file.path);
+            await this.createBucket(minioConfig.bucket.root);
+            const url = await this.uploadFileToMinio(minioConfig.bucket.user, file.filename, file.path);
 
             await fs.unlink(file.path, console.log);
             if (type === 'image') {
@@ -103,14 +103,14 @@ export class MinIOService {
     }
 
     async uploadFileToMinio(bucketPath, fileName, filePath) {
-        const bucketName = bucketConfig.bucket.root;
+        const bucketName = minioConfig.bucket.root;
         return new Promise((resolve, reject) => {
             this.minioClient.fPutObject(bucketName, bucketPath + fileName, filePath, function (error, etag) {
                 if (error) {
                     console.log('+++++++ s3 error ++++++', error);
                     return reject(new ErrorModel(AppCode.s3_error, error.S3Error));
                 }
-                const fileUrl = `${bucketConfig.baseUrl}/${bucketName}/${bucketPath + fileName}`;
+                const fileUrl = `${minioConfig.baseUrl}/${bucketName}/${bucketPath + fileName}`;
                 return resolve(fileUrl)
             });
         })
@@ -145,11 +145,11 @@ export class MinIOService {
 
     getBucketPath(mediaType) {
         if (mediaType === 'image') {
-            return bucketConfig.bucket.postImages;
+            return minioConfig.bucket.postImages;
         } else if (mediaType === 'video') {
-            return bucketConfig.bucket.postVideos;
+            return minioConfig.bucket.postVideos;
         } else if (mediaType === 'thumbnail') {
-            return bucketConfig.bucket.postThumbnails
+            return minioConfig.bucket.postThumbnails
         }
     }
 

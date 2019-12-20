@@ -42,6 +42,19 @@ export class Config {
         }
     };
 
+    static minio = {
+        baseUrl: 'http://common-storage.cloudjiffy.net',
+        bucket: {
+            root: 'lokpoll'
+        },
+        config: {
+            port: 80,
+            endPoint: 'common-storage.cloudjiffy.net',
+            accessKey: 'HWD8GLm526',
+            secretKey: 'iZMpmL57q5'
+        }
+    };
+
     static auth = {
         secretKey: '2c56a05a-da7f-4842-a992-cbce9de1d6ae',
         expiryInSeconds: 3.154e+7
@@ -67,16 +80,6 @@ export class Config {
                 refreshToken: "1//04zRBQM8Qt32VCgYIARAAGAQSNwF-L9IrUN6nBtqAk0Cesj-6UaDb10HE9hOxpOenkJe9M33JHRP-97Ya_QotLdKdVpmsZ2ivhbc"
             },
         }
-    };
-
-    static minio = {
-        port: 80,
-        // endPoint: 'aeon-storage.cloudjiffy.net',
-        //         // accessKey: 'BVLC6pGAY6',
-        //         // secretKey: 'RLUjMTvwJ4',
-        endPoint: 'test-storage.cloudjiffy.net',
-        accessKey: 'Vu2RLOswP3',
-        secretKey: 'WiJNdwX750'
     };
 
     static version = {
