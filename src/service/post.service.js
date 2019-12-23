@@ -5,6 +5,7 @@ import Utils from "./common/utils";
 import geolib from 'geolib';
 // const geolib = require('geolib');
 import _ from 'lodash';
+import {AppCode} from "../enum/app-code";
 
 export class PostService {
     constructor() {
@@ -98,5 +99,47 @@ export class PostService {
                             and level in ${Utils.getRange(levels)};`;
         return SqlService.executeQuery(query);
     }
+
+    async deletePost(model) {
+        const query = `update ${table.post} 
+                        set isDeleted = 1 
+                        where id = ${model.postId};`;
+        return SqlService.executeQuery(query);
+    }
+
+
+    async createPostComment(postComment) {
+        const query = QueryBuilderService.getInsertQuery(table.postComment, postComment);
+        return SqlService.executeQuery(query);
+    }
+
+    async createUpDownVote(req) {
+        let query = `select id from ${table.postReaction} 
+						where reactedBy = ${req.reactedBy} 
+							and postId = ${req.postId} 
+						order by id desc;`;
+        let result = await SqlService.getSingle(query);
+        console.log(result.id);
+        if (_.isEmpty(result)) {
+            const postReaction = {
+                postId: req.postId,
+                reactedBy: req.reactedBy,
+                reactedAt: 'utc_timestamp()',
+                type: req.type,
+            };
+            const query = QueryBuilderService.getInsertQuery(table.postReaction, postReaction);
+            return SqlService.executeQuery(query);
+        }else{
+            const query = `update ${table.postReaction} 
+                        set type = '${req.type}'
+                        where id = ${result.id};`;
+            return SqlService.executeQuery(query);
+
+        }
+
+
+    }
+
+
 }
 

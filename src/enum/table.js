@@ -18,6 +18,7 @@ export const table = {
     postComment: "post_comment",
     profileType: "profile_type",
     postType: "post_type",
+    postReaction: "post_reaction",
     hobby: "hobby",
 };
 

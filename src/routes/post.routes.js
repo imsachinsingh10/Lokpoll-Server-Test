@@ -111,5 +111,44 @@ export class PostRoutes {
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/delete', async (req, res) => {
+            try {
+                console.log(req.body);
+                await this.postService.deletePost(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/createComment', async (req, res) => {
+            try {
+                const postCommentId = await this.postController.createPostComment(req);
+                return res.status(HttpCode.ok).json({postCommentId});
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+        router.post('/upDownVote', async (req, res) => {
+            try {
+               await this.postService.createUpDownVote(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
     }
 }

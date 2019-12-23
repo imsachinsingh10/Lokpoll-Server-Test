@@ -5,6 +5,7 @@ import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
 import {PostReaction} from "../enum/common.enum";
+import {AppCode} from "../enum/app-code";
 
 export class PostController {
     constructor() {
@@ -151,4 +152,21 @@ export class PostController {
     getReactionTypes() {
         return PostReaction
     }
+
+    async createPostComment(req) {
+        const reqBody = req.body;
+        const post = {
+            postId: reqBody.postId,
+            userId: reqBody.userId,
+            createdAt: 'utc_timestamp()',
+            comment: reqBody.comment,
+        };
+        if (reqBody.replyToCommentId !== null && reqBody.replyToCommentId !== '') {
+            post.replyToCommentId = reqBody.replyToCommentId;
+        }
+        const result = await this.postService.createPostComment(post);
+        return result.insertId;
+    }
+
+
 }
