@@ -128,7 +128,7 @@ export class PostRoutes {
         router.post('/createComment', async (req, res) => {
             try {
                 const postCommentId = await this.postController.createPostComment(req);
-                return res.status(HttpCode.ok).json({postCommentId});
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
