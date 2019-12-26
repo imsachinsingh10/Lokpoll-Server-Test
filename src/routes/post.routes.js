@@ -126,7 +126,7 @@ export class PostRoutes {
 
         router.post('/comment', async (req, res) => {
             try {
-                await this.postController.commentOnPost(req.body);
+                await this.postController.commentOnPost(req);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

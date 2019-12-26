@@ -72,4 +72,10 @@ export default class Utils {
             return 'video';
         }
     }
+
+    static getNumericDate(date = '2019-12-09T09:50:13.000Z') {
+        const _date = new Date(date);
+        const time = _date.getTime();
+        return time;
+    }
 }

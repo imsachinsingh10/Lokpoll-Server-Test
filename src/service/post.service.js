@@ -68,7 +68,7 @@ export class PostService {
     }
 
     async getAllPosts(postIds) {
-        const query = `select p.id, p.createdAt, p.description, p.latitude, p.longitude , 
+        const query = `select p.id, p.createdAt, p.description, p.latitude, p.longitude, p.address, 
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',

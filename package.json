@@ -7,7 +7,7 @@
     "dev": "nodemon --exec babel-node src/main.js",
     "build": "babel src --out-dir dist/lokpoll-server",
     "serve": "node dist/main.js",
-    "test": "nodemon --exec babel-node src/test.js",
+    "test": "babel-node test.js",
     "sql": "node database/generate-full-db.js"
   },
   "author": "Himanshu Sharma",

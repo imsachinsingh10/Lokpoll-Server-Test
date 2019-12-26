@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.prod;
+    static env = Environment.dev;
 
     static dbProd = {
         host: `node23483-asa-server.cloudjiffy.net`,

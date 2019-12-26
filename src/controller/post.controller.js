@@ -8,6 +8,7 @@ import {PostReaction} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
+import Utils from "../service/common/utils";
 
 export class PostController {
     constructor() {
@@ -26,6 +27,7 @@ export class PostController {
             profileType: reqBody.profileType,
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
+            address: reqBody.address,
         };
         if (reqBody.moodId > 0) {
             post.moodId = reqBody.moodId;
@@ -98,7 +100,7 @@ export class PostController {
     getBasicPostDetails(post) {
         return {
             id: post.id,
-            createdAt: post.createdAt,
+            createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,
             type: post.postType,
             respects: 100,
@@ -112,7 +114,8 @@ export class PostController {
             },
             location: {
                 latitude: post.latitude,
-                longitude: post.longitude
+                longitude: post.longitude,
+                address: post.address
             }
         }
     }
@@ -155,13 +158,14 @@ export class PostController {
         return PostReaction
     }
 
-    async commentOnPost(reqBody) {
+    async commentOnPost(req) {
+        const reqBody = req.body;
         const post = {
             postId: reqBody.postId,
-            userId: reqBody.userId,
+            userId: req.user.id,
             createdAt: 'utc_timestamp()',
             comment: reqBody.comment,
-            replyToCommentId: reqBody.replyToCommentId
+            replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined
         };
         const result = await this.postService.createPostComment(post);
         return result.insertId;
