@@ -18,7 +18,6 @@ export class SqlService {
                     return;
                 } else {
                     connection.query(query, (err1, rows) => {
-
                         if (err1) {
                             connection.release();
                             reject(err1);

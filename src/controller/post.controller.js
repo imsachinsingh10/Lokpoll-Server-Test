@@ -6,6 +6,8 @@ import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
 import {PostReaction} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
+import Validator from "../service/common/validator.service";
+import {ErrorModel} from "../model/common.model";
 
 export class PostController {
     constructor() {
@@ -153,20 +155,23 @@ export class PostController {
         return PostReaction
     }
 
-    async createPostComment(req) {
-        const reqBody = req.body;
+    async commentOnPost(reqBody) {
         const post = {
             postId: reqBody.postId,
             userId: reqBody.userId,
             createdAt: 'utc_timestamp()',
             comment: reqBody.comment,
+            replyToCommentId: reqBody.replyToCommentId
         };
-        if (reqBody.replyToCommentId !== null && reqBody.replyToCommentId !== '') {
-            post.replyToCommentId = reqBody.replyToCommentId;
-        }
         const result = await this.postService.createPostComment(post);
         return result.insertId;
     }
 
+    async votePost(req) {
+        if (!Validator.isValidPostReactionType(req.body.type)) {
+            throw new ErrorModel(AppCode.invalid_request, "Invalid post react type");
+        }
+        return this.postService.votePost(req);
+    }
 
 }

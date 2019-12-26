@@ -1,5 +1,6 @@
 import {AppCode} from "../../enum/app-code";
 import {ErrorModel} from "../../model/common.model";
+import {PostReaction} from "../../enum/common.enum";
 
 export default class Validator {
     static isPhoneValid(phone, throwException = true) {
@@ -22,5 +23,14 @@ export default class Validator {
             throw new ErrorModel(AppCode.invalid_otp, 'Please enter valid OTP')
         }
         return false;
+    }
+
+    static isValidPostReactionType(type) {
+        for (let key in PostReaction) {
+            if (PostReaction[key] === type) {
+                return true;
+            }
+        }
+        return false
     }
 }

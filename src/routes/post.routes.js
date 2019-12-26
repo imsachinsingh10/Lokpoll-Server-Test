@@ -114,7 +114,6 @@ export class PostRoutes {
 
         router.post('/delete', async (req, res) => {
             try {
-                console.log(req.body);
                 await this.postService.deletePost(req.body);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
@@ -125,9 +124,9 @@ export class PostRoutes {
             }
         });
 
-        router.post('/createComment', async (req, res) => {
+        router.post('/comment', async (req, res) => {
             try {
-                const postCommentId = await this.postController.createPostComment(req);
+                await this.postController.commentOnPost(req.body);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -138,9 +137,9 @@ export class PostRoutes {
             }
         });
 
-        router.post('/upDownVote', async (req, res) => {
+        router.post('/vote', async (req, res) => {
             try {
-               await this.postService.createUpDownVote(req.body);
+               await this.postController.votePost(req);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

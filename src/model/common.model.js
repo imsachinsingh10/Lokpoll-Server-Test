@@ -1,10 +1,12 @@
 export class ErrorModel {
     code;
     message;
+    description;
 
-    constructor(code, message) {
+    constructor(code, message, description) {
         this.code = code;
         this.message = message;
+        this.description = description
     }
 }
 

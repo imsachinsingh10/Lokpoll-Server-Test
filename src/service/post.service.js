@@ -108,38 +108,33 @@ export class PostService {
     }
 
 
-    async createPostComment(postComment) {
-        const query = QueryBuilderService.getInsertQuery(table.postComment, postComment);
+    async createPostComment(comment) {
+        const query = QueryBuilderService.getInsertQuery(table.postComment, comment);
         return SqlService.executeQuery(query);
     }
 
-    async createUpDownVote(req) {
+    async votePost(req) {
+        const reqBody = req.body;
         let query = `select id from ${table.postReaction} 
-						where reactedBy = ${req.reactedBy} 
-							and postId = ${req.postId} 
-						order by id desc;`;
+                        where reactedBy = ${req.user.id} 
+                            and postId = ${reqBody.postId} 
+                        limit 1;`;
         let result = await SqlService.getSingle(query);
-        console.log(result.id);
-        if (_.isEmpty(result)) {
-            const postReaction = {
-                postId: req.postId,
-                reactedBy: req.reactedBy,
-                reactedAt: 'utc_timestamp()',
-                type: req.type,
-            };
-            const query = QueryBuilderService.getInsertQuery(table.postReaction, postReaction);
-            return SqlService.executeQuery(query);
-        }else{
-            const query = `update ${table.postReaction} 
+        if (!_.isEmpty(result)) {
+            query = `update ${table.postReaction} 
                         set type = '${req.type}'
                         where id = ${result.id};`;
             return SqlService.executeQuery(query);
-
         }
-
-
+        const postReaction = {
+            postId: reqBody.postId,
+            reactedBy: req.user.id,
+            reactedAt: 'utc_timestamp()',
+            type: reqBody.type,
+        };
+        query = QueryBuilderService.getInsertQuery(table.postReaction, postReaction);
+        return SqlService.executeQuery(query);
     }
-
 
 }
 
