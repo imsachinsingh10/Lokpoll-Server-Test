@@ -144,7 +144,6 @@ export class UserRoutes {
 
         router.get('/delete/:userId', async (req, res) => {
             try {
-                console.log('user to delete', req.params.userId);
                 await this.userService.deleteUser(req.params.userId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {

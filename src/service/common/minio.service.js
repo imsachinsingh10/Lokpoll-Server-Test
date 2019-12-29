@@ -3,9 +3,11 @@ import {Config} from '../../config'
 import Utils from "./utils";
 import {ErrorModel} from "../../model/common.model";
 import {AppCode} from "../../enum/app-code";
+import {promisify} from 'util';
 
 const Minio = require('minio');
 const fs = require('fs');
+const unlink = promisify(fs.unlink);
 
 const minioConfig = Config.minio;
 const policy = JSON.stringify({
@@ -42,8 +44,8 @@ export const uploadPostMediaMiddleware = multer({storage: storage})
     .fields([
         {name: 'image', maxCount: 50},
         {name: 'video', maxCount: 50},
-        {name: 'thumbnail', maxCount: 50},
     ]);
+
 export const uploadProfilePictures = multer({storage})
     .fields([
         {name: 'image', maxCount: 1},
@@ -74,12 +76,21 @@ export class MinIOService {
             await this.createBucket(minioConfig.bucket.root);
             let bucketPath = this.getBucketPath(mediaType);
             const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
+            unlink(file.path);
 
-            await fs.unlink(file.path, console.log);
+            let thumbnailUrl;
+            if (file.thumbnail) {
+                const thumbnail = file.thumbnail;
+                bucketPath = this.getBucketPath('thumbnail');
+                thumbnailUrl = await this.uploadFileToMinio(bucketPath, thumbnail.filename, thumbnail.path);
+                unlink(thumbnail.path);
+            }
+
             return resolve({
                 url: fileUrl,
                 type: mediaType,
-                originalName: file.originalName
+                originalName: file.originalName,
+                thumbnailUrl
             });
         })
     }
@@ -93,7 +104,7 @@ export class MinIOService {
             await this.createBucket(minioConfig.bucket.root);
             const url = await this.uploadFileToMinio(minioConfig.bucket.user, file.filename, file.path);
 
-            await fs.unlink(file.path, console.log);
+            unlink(file.path);
             if (type === 'image') {
                 return resolve({imageUrl: url});
             } else if (type === 'bgImage') {
@@ -150,6 +161,8 @@ export class MinIOService {
             return minioConfig.bucket.postVideos;
         } else if (mediaType === 'thumbnail') {
             return minioConfig.bucket.postThumbnails
+        } else {
+            return minioConfig.bucket.other
         }
     }
 

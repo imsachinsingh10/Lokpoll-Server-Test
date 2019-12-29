@@ -16,7 +16,7 @@ export class EmailService {
         return new Promise((resolve, reject) => {
             fs.readFile(path.resolve('./template', `${templateName}.html`), async (err, data) => {
                 if (err) {
-                    console.log(err);
+                    console.log('err in send mail', err);
                     return reject({
                         code: 'no_template_found'
                     })

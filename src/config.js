@@ -31,27 +31,21 @@ export class Config {
         baseUrlDev: 'http://localhost:9000',
     };
 
-    static minioBucket = {
-        baseUrl: 'http://test-storage.cloudjiffy.net',
+    static minio = {
+        baseUrl: 'http://common-storage.cloudjiffy.net',
+        config: {
+            port: 80,
+            endPoint: 'common-storage.cloudjiffy.net',
+            accessKey: 'HWD8GLm526',
+            secretKey: 'iZMpmL57q5'
+        },
         bucket: {
             root: 'lokpoll',
             postImages: 'post/images/',
             postVideos: 'post/videos/',
             postThumbnails: 'post/thumbnails/',
             user: 'user/images/',
-        }
-    };
-
-    static minio = {
-        baseUrl: 'http://common-storage.cloudjiffy.net',
-        bucket: {
-            root: 'lokpoll'
-        },
-        config: {
-            port: 80,
-            endPoint: 'common-storage.cloudjiffy.net',
-            accessKey: 'HWD8GLm526',
-            secretKey: 'iZMpmL57q5'
+            other: 'post/others/'
         }
     };
 
@@ -83,7 +77,7 @@ export class Config {
     };
 
     static version = {
-        majorRevision: 9,  // (new UI, lots of new features, conceptual change, etc.)
+        majorRevision: 10,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 14,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 28,  // (Only bug fixes not new feature)
     };

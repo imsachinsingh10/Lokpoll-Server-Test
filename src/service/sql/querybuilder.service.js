@@ -86,4 +86,18 @@ export class QueryBuilderService {
         rowString += ')';
         return rowString;
     }
+
+    static getColumns(array) {
+        const obj = array[0];
+        const keys = Object.keys(obj);
+        const result = {};
+        keys.forEach(key => {
+            array.forEach(obj => {
+                if (obj[key] !== undefined) {
+                    result[key] = obj[key];
+                }
+            })
+        });
+        return result;
+    }
 }

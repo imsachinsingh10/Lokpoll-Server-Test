@@ -33,4 +33,13 @@ export default class Validator {
         }
         return false
     }
+
+    static validateRequiredFields(reqBody) {
+        for (let key in reqBody) {
+            const value = reqBody[key];
+            if (value === undefined) {
+                throw new ErrorModel(AppCode.invalid_request, `${key} is not valid`);
+            }
+        }
+    }
 }

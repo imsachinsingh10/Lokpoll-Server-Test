@@ -2,19 +2,13 @@ import express from 'express';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {PostService} from "../service/post.service";
-import {SqlService} from "../service/sql/sql.service";
-import {table} from "../enum/table";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import {
-    MinIOService,
-    uploadPostMediaMiddleware,
-} from "../service/common/minio.service";
-import _ from 'lodash';
+import {uploadPostMediaMiddleware,} from "../service/common/minio.service";
 import {PostController} from "../controller/post.controller";
-import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {ProductService} from "../service/product.service";
 import {PostType} from "../enum/common.enum";
+import {extractThumbnailsMiddleware} from "../middleware/thumbnail.middleware";
 
 const router = express();
 
@@ -33,7 +27,7 @@ export class PostRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
+        router.post('/create', uploadPostMediaMiddleware, extractThumbnailsMiddleware, async (req, res) => {
             try {
                 const postId = await this.postController.createPost(req);
                 await this.postController.uploadPostMedia(req, postId);
@@ -139,7 +133,7 @@ export class PostRoutes {
 
         router.post('/vote', async (req, res) => {
             try {
-               await this.postController.votePost(req);
+                await this.postController.votePost(req);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

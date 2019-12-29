@@ -20,7 +20,7 @@ export class PostController {
         const reqBody = req.body;
         const post = {
             description: reqBody.description,
-            userId: reqBody.userId,
+            userId: reqBody.userId || req.user.id,
             creatorId: req.user.id,
             createdAt: 'utc_timestamp()',
             type: reqBody.type,
@@ -29,9 +29,9 @@ export class PostController {
             longitude: reqBody.longitude,
             address: reqBody.address,
         };
-        if (reqBody.moodId > 0) {
-            post.moodId = reqBody.moodId;
-        }
+        post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
+        Validator.validateRequiredFields(post);
+
         const result = await this.postService.createPost(post);
         return result.insertId;
     }
@@ -134,20 +134,13 @@ export class PostController {
                 promises.push(filePromise);
             });
         }
-        if (req.files.thumbnail && req.files.thumbnail.length > 0) {
-            _.forEach(req.files.thumbnail, file => {
-                const filePromise = this.minioService.uploadPostMedia(file, 'thumbnail');
-                promises.push(filePromise);
-            });
-        }
         if (promises.length > 0) {
             let mediaFiles = await Promise.all(promises);
-            const thumbnails = _.filter(mediaFiles, file => file.type === 'thumbnail');
-            mediaFiles = _.filter(mediaFiles, file => file.type !== 'thumbnail');
             const postMedia = mediaFiles.map(file => ({
                 postId: postId,
                 url: file.url,
-                type: file.type
+                type: file.type,
+                thumbnailUrl: file.thumbnailUrl
             }));
             const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
             return SqlService.executeQuery(query);
