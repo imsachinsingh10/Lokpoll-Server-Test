@@ -58,7 +58,8 @@ export class PostController {
             .filter(result => result.id === postId && result.url !== null)
             .map(p => ({
                 type: p.type,
-                url: p.url
+                url: p.url,
+                thumbnailUrl: p.thumbnailUrl
             }));
         return {
             ...basicDetails,
@@ -140,7 +141,7 @@ export class PostController {
                 postId: postId,
                 url: file.url,
                 type: file.type,
-                thumbnailUrl: file.thumbnailUrl
+                thumbnailUrl: file.thumbnailUrl || null
             }));
             const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
             return SqlService.executeQuery(query);

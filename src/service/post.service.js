@@ -73,7 +73,7 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.name userName, u.imageUrl, u.bgImageUrl,
-                            pm.type, pm.url,
+                            pm.type, pm.url, pm.thumbnailUrl,
                             m.name 'mood'
                         from post p 
                             left join post_media pm on pm.postId = p.id

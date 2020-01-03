@@ -35,7 +35,7 @@ export class PostRoutes {
                 return res.status(HttpCode.ok).json({postId});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.s3_error) {
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.status(HttpCode.internal_server_error).send(e);

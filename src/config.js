@@ -32,12 +32,12 @@ export class Config {
     };
 
     static minio = {
-        baseUrl: 'http://common-storage.cloudjiffy.net',
+        baseUrl: 'https://env-1159215.cloudjiffy.net',
         config: {
             port: 80,
-            endPoint: 'common-storage.cloudjiffy.net',
-            accessKey: 'HWD8GLm526',
-            secretKey: 'iZMpmL57q5'
+            endPoint: 'env-1159215.cloudjiffy.net',
+            accessKey: 'NRE10R08j6',
+            secretKey: 'j9BA4FLzv9'
         },
         bucket: {
             root: 'lokpoll',
@@ -77,8 +77,8 @@ export class Config {
     };
 
     static version = {
-        majorRevision: 10,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 14,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 29,  // (Only bug fixes not new feature)
+        majorRevision: 11,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 15,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 30,  // (Only bug fixes not new feature)
     };
 }
