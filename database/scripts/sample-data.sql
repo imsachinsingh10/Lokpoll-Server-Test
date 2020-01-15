@@ -8,7 +8,7 @@ INSERT INTO `user_role` (`id`,`name`) VALUES (2,'content creator');
 INSERT INTO `user_role` (`id`,`name`) VALUES (3,'user');
 
 delete from user where id > 0;
-INSERT INTO `user` (`name`, `email`, `password`, `roleId`, `workingStatus`, `loginStatus`, `avatarBG`) VALUES ('super admin', 'sa@lokpoll.com', '1234', '1', 'active', 'online', '#4c5264');
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `roleId`, `workingStatus`, `loginStatus`, `avatarBG`) VALUES ('1', 'super admin', 'sa@lokpoll.com', '1234', '1', 'active', 'online', '#4c5264');
 
 
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('odiya', 'or', '1', 'उड़िया');

@@ -32,12 +32,12 @@ export class Config {
     };
 
     static minio = {
-        baseUrl: 'https://env-1159215.cloudjiffy.net',
+        baseUrl: 'https://common-storage.cloudjiffy.net',
         config: {
             port: 80,
-            endPoint: 'env-1159215.cloudjiffy.net',
-            accessKey: 'NRE10R08j6',
-            secretKey: 'j9BA4FLzv9'
+            endPoint: 'common-storage.cloudjiffy.net',
+            accessKey: 'I7hkcdR8S8',
+            secretKey: 'ijrvX7CWe0'
         },
         bucket: {
             root: 'lokpoll',
