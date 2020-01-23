@@ -78,4 +78,11 @@ export default class Utils {
         const time = _date.getTime();
         return time;
     }
+
+    static wait(seconds) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, 1000 * seconds);
+        })
+    }
+
 }

@@ -3,26 +3,25 @@ const ffmpeg = require('hs-node-ffmpeg');
 import _ from 'lodash';
 import jimp from "jimp";
 
-export const extractThumbnailsMiddleware = async (req, res, next) => {
-    if (!_.isEmpty(req.files) && !_.isEmpty(req.files.video)) {
-        const length = req.files.video.length;
+export const extractThumbnailsMiddleware = async (files, res, next) => {
+    if (!_.isEmpty(files) && !_.isEmpty(files.video)) {
+        const length = files.video.length;
         for (let i = 0; i < length; i++) {
-            const file = req.files.video[i];
+            const file = files.video[i];
             const thumbnail = await extractThumbnailFromVideo(file);
-            req.files.video[i] = {...file, thumbnail};
+            files.video[i] = {...file, thumbnail};
         }
     }
 
-    if (!_.isEmpty(req.files) && !_.isEmpty(req.files.image)) {
-        const length = req.files.image.length;
+    if (!_.isEmpty(files) && !_.isEmpty(files.image)) {
+        const length = files.image.length;
         for (let i = 0; i < length; i++) {
-            const file = req.files.image[i];
+            const file = files.image[i];
             const thumbnail = await extractThumbnailFromImage(file);
-            req.files.image[i] = {...file, thumbnail};
+            files.image[i] = {...file, thumbnail};
         }
     }
-    next()
-    // res.send('ok');
+    return files;
 };
 
 export const extractThumbnailFromVideo = async (file) => {

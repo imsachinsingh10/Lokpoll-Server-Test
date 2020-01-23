@@ -77,8 +77,8 @@ export class Config {
     };
 
     static version = {
-        majorRevision: 11,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 16,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        majorRevision: 12,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 18,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 30,  // (Only bug fixes not new feature)
     };
 }

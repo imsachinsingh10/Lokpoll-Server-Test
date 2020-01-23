@@ -121,16 +121,16 @@ export class PostController {
         }
     }
 
-    async uploadPostMedia(req, postId) {
+    async uploadPostMedia(files, postId) {
         const promises = [];
-        if (req.files.image && req.files.image.length > 0) {
-            _.forEach(req.files.image, file => {
+        if (files.image && files.image.length > 0) {
+            _.forEach(files.image, file => {
                 const filePromise = this.minioService.uploadPostMedia(file, 'image');
                 promises.push(filePromise);
             });
         }
-        if (req.files.video && req.files.video.length > 0) {
-            _.forEach(req.files.video, file => {
+        if (files.video && files.video.length > 0) {
+            _.forEach(files.video, file => {
                 const filePromise = this.minioService.uploadPostMedia(file, 'video');
                 promises.push(filePromise);
             });
