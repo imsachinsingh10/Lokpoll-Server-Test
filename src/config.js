@@ -4,6 +4,12 @@ export class Config {
 
     static env = Environment.prod;
 
+    static version = {
+        majorRevision: 12,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 18,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 32,  // (Only bug fixes not new feature)
+    };
+
     static dbProd = {
         host: `node23483-asa-server.cloudjiffy.net`,
         user: `root`,
@@ -76,9 +82,7 @@ export class Config {
         }
     };
 
-    static version = {
-        majorRevision: 12,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 18,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 30,  // (Only bug fixes not new feature)
-    };
+    static firebase = {
+        serverKey: 'AAAAOwz4hOo:APA91bEXIOPMCjB-1r8UumEuGG9z7xHUJLI7FnJfgOaimi8kLO-AGoikhyGjZswyg_P12sbj1AkpkUPjg0zMb3KW_zcWy6m0kt1EncAcFVvk5dt7lof1Ze7eY3dfEcOxhrTowgrxs4h5'
+    }
 }

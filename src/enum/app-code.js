@@ -13,6 +13,8 @@ export const AppCode = {
     bucket_created: 'bucket_created',
     success: 'success',
     failure: 'failure',
+    message_sent: 'message_sent',
+    sending_message_failed: 'sending_message_failed',
 };
 export const HttpCode = {
     ok: 200,

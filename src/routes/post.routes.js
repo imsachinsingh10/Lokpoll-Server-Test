@@ -7,9 +7,10 @@ import {validateAuthToken} from "../middleware/auth.middleware";
 import {uploadPostMediaMiddleware,} from "../service/common/minio.service";
 import {PostController} from "../controller/post.controller";
 import {ProductService} from "../service/product.service";
-import {PostType} from "../enum/common.enum";
+import {Environment, PostType} from "../enum/common.enum";
 import path from "path";
 import childProcess from 'child_process';
+import {Config} from "../config";
 
 const router = express();
 
@@ -30,17 +31,18 @@ export class PostRoutes {
 
         router.post('/create', (req, res, next) => {console.log(new Date().toISOString()); next()}, uploadPostMediaMiddleware, async (req, res) => {
             try {
-                const postId = await this.postController.createPost(req);
-                const taskProcessor = childProcess.fork(path.resolve('src', 'service', 'media-queue-processor.js'), null, {serialization: "json"});
+                const {id, userId} = await this.postController.createPost(req);
+                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
 
                 taskProcessor.on('disconnect', function (msg) {
                     this.kill();
                 });
 
                 taskProcessor.send(JSON.stringify({
-                    files: req.files, postId, productTags: req.body.productTags
+                    files: req.files, postId: id, productTags: req.body.productTags, userId
                 }));
-                return res.status(HttpCode.ok).json({postId});
+                return res.status(HttpCode.ok).json({postId: id});
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {

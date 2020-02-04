@@ -51,8 +51,8 @@ export const extractThumbnailFromImage = async (file) => {
     const destination = path.resolve('uploads', 'thumbnails', file.filename);
     try {
         const image = await jimp.read(file.path);
-        // console.log('image height', image.bitmap.height);
-        image.resize(320, jimp.AUTO);
+        // console.log('image height', image.bitmap.data.length);
+        image.resize(420, jimp.AUTO);
         image.quality(60);
         await image.writeAsync(destination);
         return {

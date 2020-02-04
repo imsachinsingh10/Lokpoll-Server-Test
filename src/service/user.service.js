@@ -60,16 +60,6 @@ export class UserService {
         })
     }
 
-    async getAgeRanges() {
-        const query = `select * from ${table.ageRange}`;
-        return SqlService.executeQuery(query);
-    }
-
-    async getUsersByWorkingStatus(status) {
-        const query = `select * from ${table.user} where workingStatus = '${status}';`;
-        return SqlService.executeQuery(query);
-    }
-
     async searchUsers(searchCriteria) {
         let condition1 = ``;
         if (Array.isArray(searchCriteria.roleId)) {
@@ -103,29 +93,6 @@ export class UserService {
 						order by lh.logTime desc
 						limit ${searchCriteria.limit} 
                         offset ${searchCriteria.offset}`;
-        return SqlService.executeQuery(query);
-    }
-
-    async getUsersCount(searchCriteria) {
-        let condition1 = ``;
-        if (Array.isArray(searchCriteria.roleId)) {
-            condition1 = `and roleId in ${Utils.getRange(searchCriteria.roleId)}`;
-        } else if (searchCriteria.roleId > 0) {
-            condition1 = `and roleId = '${searchCriteria.roleId}'`;
-        }
-        const condition2 = `and workingStatus = '${searchCriteria.workingStatus}'`;
-        const query = `select count(1) count from ${table.user}
-						where 
-						    id > 0
-                        	${condition1}
-							${!_.isEmpty(searchCriteria.workingStatus) ? condition2 : ''};`;
-        return SqlService.getSingle(query);
-    }
-
-    async updateWorkingStatus(model) {
-        const query = `update ${table.user} 
-                        set workingStatus = '${model.workingStatus}' 
-                        where id = ${model.userId};`;
         return SqlService.executeQuery(query);
     }
 
@@ -227,20 +194,6 @@ export class UserService {
         return SqlService.executeMultipleQueries([query1, query2]);
     }
 
-    async getLastLogin(userId, loginStatus = 'login') {
-
-        const query = `select * from ${table.loginHistory} lh 
-						where userId = ${userId} 
-							and loginStatus = '${loginStatus}'
-						order by id desc`;
-        return await SqlService.getSingle(query);
-    }
-
-    async getAllUserRoles() {
-        const query = `select * from ${table.userRole};`;
-        return SqlService.executeQuery(query);
-    }
-
     async saveOTP(otp, phone) {
         const model = {
             otp, phone, sentAt: 'utc_timestamp()'
@@ -275,41 +228,6 @@ export class UserService {
             await SqlService.executeQuery(query);
         }
         return true;
-    }
-
-    async verifyEmail(otp, userId) {
-        let query = `select id from ${table.verification} 
-						where userId = ${userId} 
-							and otp = ${otp} 
-							-- and TIMESTAMPDIFF(MINUTE, sentAt, utc_timestamp()) <= 15
-						order by id desc;`;
-        let result = await SqlService.getSingle(query);
-        if (_.isEmpty(result)) {
-            throw {
-                code: AppCode.invalid_creds,
-                message: "Email not verified"
-            };
-        }
-        return true;
-    }
-
-    async updateDocs(docs) {
-        const condition = `where id = ${docs.id}`;
-        docs.id = undefined;
-        const query = QueryBuilderService.getUpdateQuery(table.docs, docs, condition);
-        return SqlService.executeQuery(query);
-    }
-
-    async getDocsByUserId(userId) {
-        const query = `select * from ${table.docs} where userId = ${userId};`;
-        return SqlService.executeQuery(query);
-    }
-
-    async resetPassword(model) {
-        const password = _.isEmpty(model.newPassword) ? Utils.getRandomString(10) : model.newPassword;
-        const query = `update ${table.user} set password = '${password}' where id = ${model.userId}`;
-        await SqlService.executeQuery(query);
-        return password;
     }
 
     async getSearchUsers(searchData) {
@@ -352,5 +270,9 @@ export class UserService {
         }];
         const query = QueryBuilderService.getMultiInsertQuery(table.profile, profiles);
         return SqlService.executeQuery(query);
+    }
+
+    async getDeviceTokens() {
+
     }
 }

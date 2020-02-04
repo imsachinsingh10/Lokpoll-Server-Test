@@ -9,6 +9,7 @@ import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
+import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 
 export class PostController {
     constructor() {
@@ -33,7 +34,8 @@ export class PostController {
         Validator.validateRequiredFields(post);
 
         const result = await this.postService.createPost(post);
-        return result.insertId;
+        delete post.createdAt;
+        return {id: result.insertId, ...post};
     }
 
     async formatPosts(rawPosts) {
@@ -172,4 +174,12 @@ export class PostController {
         return this.postService.votePost(req);
     }
 
+    async notifyUser(userId, postId) {
+        const query = `select deviceToken from ${table.user} where id = ${userId};`;
+        const result = await SqlService.getSingle(query);
+        if (_.isEmpty(result) || _.isEmpty(result.deviceToken)) {
+            return console.log('+++++ no user found to notify +++++');
+        }
+        return FirebaseService.sendMessage([result.deviceToken], FirebaseMessage.PostCreated)
+    };
 }
