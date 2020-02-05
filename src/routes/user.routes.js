@@ -202,7 +202,23 @@ export class UserRoutes {
                 }
                 return res.status(HttpCode.internal_server_error).send(e);
             }
-        })
+        });
+
+        router.post('/respect', async (req, res) => {
+            try {
+                const model = {
+                    createdAt: 'utc_timestamp()',
+                    respectFor: req.body.respectFor,
+                    respectBy: req.user.id
+                };
+
+                let result = await this.userService.updateRespect(model);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }
 

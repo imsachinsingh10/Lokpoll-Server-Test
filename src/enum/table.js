@@ -20,6 +20,7 @@ export const table = {
     postType: "post_type",
     postReaction: "post_reaction",
     hobby: "hobby",
+    respect: "respect",
 };
 
 export const dbview = {

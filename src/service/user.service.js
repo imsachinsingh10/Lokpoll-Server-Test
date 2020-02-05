@@ -272,7 +272,21 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async getDeviceTokens() {
-
+    async updateRespect(model) {
+        let q =  `select * from ${table.respect} 
+                        where respectFor = ${model.respectFor} 
+                                and respectBy = ${model.respectBy}
+                        limit 1;`;
+        const respect = await SqlService.getSingle(q);
+        let status = '';
+        if(_.isEmpty(respect)) {
+           q = QueryBuilderService.getInsertQuery(table.respect, model);
+           status = 'Respect added';
+        } else {
+            q = `delete from ${table.respect} where id = ${respect.id};`;
+            status = 'Respect removed';
+        }
+        await SqlService.executeQuery(q);
+        return {status}
     }
 }
