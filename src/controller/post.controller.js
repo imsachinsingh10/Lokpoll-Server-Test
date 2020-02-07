@@ -38,24 +38,26 @@ export class PostController {
         return {id: result.insertId, ...post};
     }
 
-    async formatPosts(rawPosts) {
+    async formatPosts(req, rawPosts) {
         if (_.isEmpty(rawPosts)) {
             return [];
         }
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
+        const respects = await this.postService.getRespects();
+        const grouped = _.groupBy(respects, 'respectFor');
         const posts = [];
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
-            posts.push(this.getPost(id, rawPosts, postComments))
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped))
         });
         return posts;
     }
 
-    getPost(postId, posts, postComments) {
+    getPost(req, postId, posts, postComments, respects, grouped) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
-        const basicDetails = this.getBasicPostDetails(filteredPosts[0]);
+        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped);
         const media = posts
             .filter(result => result.id === postId && result.url !== null)
             .map(p => ({
@@ -63,16 +65,18 @@ export class PostController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
+        const comments = this.getFormattedComments(postComments);
         return {
             ...basicDetails,
             media,
-            comments: this.getFormattedComments(postComments)
+            comments,
+            commentCount: comments.length
         }
     }
 
     getFormattedComments(comments) {
         const final = [];
-        while(!_.isEmpty(comments)) {
+        while (!_.isEmpty(comments)) {
             const consumedCommentIds = [];
             final.push(this.getFormattedComment(comments[0], comments, consumedCommentIds));
             comments = comments.filter(c => consumedCommentIds.indexOf(c.id) < 0)
@@ -86,8 +90,8 @@ export class PostController {
             id: comment.id,
             comment: comment.comment,
             user: {
-              name: comment.name,
-              imageUrl: comment.imageUrl
+                name: comment.name,
+                imageUrl: comment.imageUrl
             },
             replies: this.getCommentReplies(comment.id, allComments, consumedCommentIds)
         };
@@ -100,20 +104,25 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(post) {
+    getBasicPostDetails(req, post, respects, grouped) {
+        const respectedByMe = _.find(respects, (r) => {
+            return req.user.id === r.respectBy && post.userId === r.respectFor;
+        });
+        const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
         return {
             id: post.id,
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,
             type: post.postType,
-            respects: 100,
-            comments: 250,
             mood: post.mood,
             user: {
+                id: post.userId,
                 displayName: post.displayName || post.userName,
                 profileType: post.profileType || "Personal",
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
+                respectCount: respectCount,
+                respectedByMe: !_.isEmpty(respectedByMe)
             },
             location: {
                 latitude: post.latitude,

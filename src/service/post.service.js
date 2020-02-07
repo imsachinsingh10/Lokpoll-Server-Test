@@ -62,7 +62,9 @@ export class PostService {
                 return a > b ? 1 : -1;
             });
             qualifiedPostIds.reverse();
-            qualifiedPostIds = qualifiedPostIds.slice(0, req.postCount);
+            if (req.postCount > 0) {
+                qualifiedPostIds = qualifiedPostIds.slice(0, req.postCount);
+            }
         }
         return qualifiedPostIds;
     }
@@ -72,7 +74,7 @@ export class PostService {
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
-                            u.name userName, u.imageUrl, u.bgImageUrl,
+                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl,
                             pm.type, pm.url, pm.thumbnailUrl,
                             m.name 'mood'
                         from post p 
@@ -136,5 +138,9 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getRespects() {
+        const query = `select * from ${table.respect}`;
+        return SqlService.executeQuery(query);
+    }
 }
 

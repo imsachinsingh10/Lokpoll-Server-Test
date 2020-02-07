@@ -73,13 +73,13 @@ export class PostRoutes {
                     "type": req.body.type || 'normal',
                     "radiusInMeter": req.body.radiusInMeter || 10000000000,
                     "lastPostId": req.body.lastPostId,
-                    "postCount": req.body.postCount || 40
+                    "postCount": req.body.postCount
                 };
                 let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = [];
                 if (qualifiedPostIds.length > 0) {
                     result = await this.postService.getAllPosts(qualifiedPostIds);
-                    result = await this.postController.formatPosts(result);
+                    result = await this.postController.formatPosts(req, result);
                 }
                 return await res.json(result);
             } catch (e) {
