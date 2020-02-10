@@ -46,18 +46,19 @@ export class PostController {
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
         const respects = await this.postService.getRespects();
+        const reactions = await this.postService.getPostReactions();
         const grouped = _.groupBy(respects, 'respectFor');
         const posts = [];
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped))
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, reactions))
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped) {
+    getPost(req, postId, posts, postComments, respects, grouped, reactions) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
-        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped);
+        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, reactions);
         const media = posts
             .filter(result => result.id === postId && result.url !== null)
             .map(p => ({
@@ -104,9 +105,12 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(req, post, respects, grouped) {
+    getBasicPostDetails(req, post, respects, grouped, reactions) {
         const respectedByMe = _.find(respects, (r) => {
             return req.user.id === r.respectBy && post.userId === r.respectFor;
+        });
+        const trust = _.find(reactions, (r) => {
+            return req.user.id === r.reactedBy && post.id === r.postId;
         });
         const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
         return {
@@ -115,6 +119,7 @@ export class PostController {
             description: post.description,
             type: post.postType,
             mood: post.mood,
+            trust: _.isEmpty(trust) ? null : trust.type,
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
@@ -122,7 +127,7 @@ export class PostController {
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
                 respectCount: respectCount,
-                respectedByMe: !_.isEmpty(respectedByMe)
+                respectedByMe: !_.isEmpty(respectedByMe),
             },
             location: {
                 latitude: post.latitude,
@@ -177,6 +182,9 @@ export class PostController {
     }
 
     async votePost(req) {
+        if (req.body.type === null) {
+            return this.postService.deleteVote(req);
+        }
         if (!Validator.isValidPostReactionType(req.body.type)) {
             throw new ErrorModel(AppCode.invalid_request, "Invalid post react type");
         }

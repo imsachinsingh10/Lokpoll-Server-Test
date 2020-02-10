@@ -124,7 +124,7 @@ export class PostService {
         let result = await SqlService.getSingle(query);
         if (!_.isEmpty(result)) {
             query = `update ${table.postReaction} 
-                        set type = '${req.type}'
+                        set type = '${reqBody.type}'
                         where id = ${result.id};`;
             return SqlService.executeQuery(query);
         }
@@ -138,8 +138,20 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async deleteVote(req) {
+        const query = `delete from ${table.postReaction}
+                            where reactedBy = ${req.user.id} 
+                            and postId = ${req.body.postId};`;
+        return SqlService.executeQuery(query);
+    }
+
     async getRespects() {
         const query = `select * from ${table.respect}`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostReactions() {
+        const query = `select * from ${table.postReaction} where type in ('vote_up', 'vote_down');`;
         return SqlService.executeQuery(query);
     }
 }
