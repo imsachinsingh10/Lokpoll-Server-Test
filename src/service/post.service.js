@@ -33,12 +33,16 @@ export class PostService {
         if (req.lastPostId > 0) {
             condition1 = `and id < ${req.lastPostId}`;
         }
+        let condition2 = ``;
+        if (req.postByUserId > 0) {
+            condition2 = `and userId = ${req.postByUserId}`;
+        }
         const query = `select 
                             id, latitude, longitude 
                        from post
                        where 
                         latitude is not null and longitude is not null
-                        ${condition1}
+                        ${condition1} ${condition2}
                        -- limit ${req.postCount * 5}
                        ;`;
         let posts = await SqlService.executeQuery(query);
