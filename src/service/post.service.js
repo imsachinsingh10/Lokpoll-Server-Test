@@ -127,6 +127,9 @@ export class PostService {
                         limit 1;`;
         let result = await SqlService.getSingle(query);
         if (!_.isEmpty(result)) {
+            if (result.type === reqBody.type) {
+                return this.deleteVote(req);
+            }
             query = `update ${table.postReaction} 
                         set type = '${reqBody.type}'
                         where id = ${result.id};`;

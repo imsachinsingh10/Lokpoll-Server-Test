@@ -120,6 +120,7 @@ export class PostController {
             type: post.postType,
             mood: post.mood,
             trust: _.isEmpty(trust) ? null : trust.type,
+            linkToShare: "https://www.socialmediatoday.com",
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
@@ -182,9 +183,6 @@ export class PostController {
     }
 
     async votePost(req) {
-        if (req.body.type === null) {
-            return this.postService.deleteVote(req);
-        }
         if (!Validator.isValidPostReactionType(req.body.type)) {
             throw new ErrorModel(AppCode.invalid_request, "Invalid post react type");
         }
