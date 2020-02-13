@@ -112,6 +112,12 @@ export class PostController {
         const trust = _.find(reactions, (r) => {
             return req.user.id === r.reactedBy && post.id === r.postId;
         });
+        const voteUpCount = _.filter(reactions, (r) => {
+           return r.postId === post.id && r.type === PostReaction.voteUp;
+        }).length;
+        const voteDownCount = _.filter(reactions, (r) => {
+           return r.postId === post.id && r.type === PostReaction.voteDown;
+        }).length;
         const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
         return {
             id: post.id,
@@ -121,13 +127,14 @@ export class PostController {
             mood: post.mood,
             trust: _.isEmpty(trust) ? null : trust.type,
             linkToShare: "https://www.socialmediatoday.com",
+            voteUpCount, voteDownCount,
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
                 profileType: post.profileType || "Personal",
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
-                respectCount: respectCount,
+                respectCount,
                 respectedByMe: !_.isEmpty(respectedByMe),
             },
             location: {

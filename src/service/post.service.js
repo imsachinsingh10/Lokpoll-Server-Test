@@ -121,7 +121,7 @@ export class PostService {
 
     async votePost(req) {
         const reqBody = req.body;
-        let query = `select id from ${table.postReaction} 
+        let query = `select id, type from ${table.postReaction} 
                         where reactedBy = ${req.user.id} 
                             and postId = ${reqBody.postId} 
                         limit 1;`;
