@@ -6,6 +6,8 @@ import geolib from 'geolib';
 // const geolib = require('geolib');
 import _ from 'lodash';
 import {AppCode} from "../enum/app-code";
+import fs from "fs";
+import path from 'path';
 
 export class PostService {
     constructor() {
@@ -160,6 +162,45 @@ export class PostService {
     async getPostReactions() {
         const query = `select * from ${table.postReaction} where type in ('vote_up', 'vote_down');`;
         return SqlService.executeQuery(query);
+    }
+
+    async streamVideo(req, res) {
+        //let res;
+        const _path = path.resolve('assets/video', 'how_great_leaders_inspire_action.mp4');
+        console.log(_path);
+        const stat = fs.statSync(_path);
+        const fileSize = stat.size;
+        console.log('stat', stat);
+        const range = req.headers.range;
+        console.log('range', range);
+        if(range) {
+            const  parts = range.replace(/bytes=/,"").split("_");
+            console.log('parts', parts);
+            const start = parseInt(parts[0], 10);
+            console.log('start', start);
+            const end = parts[1] ? parseInt(parts[1],10) : fileSize -1;
+            console.log('end', end);
+            const chunkSize = (end - start) + 1;
+            console.log('chunkSize', chunkSize);
+            const file = fs.createReadStream(_path, {start, end});
+            const head = {
+                'Content-Range' : `bytes ${start} - ${end} / ${fileSize}`,
+                'Accept-Ranges' : `bytes`,
+                'Content-Length' : chunkSize,
+                'Content-Type' : 'video/mp4'
+            };
+            res.writeHead(206, head);
+            file.pipe(res);
+        } else {
+            const head = {
+                'Content-Length' : fileSize,
+                'Content-Type' : 'video/mp4'
+            };
+            res.writeHead(200, head);
+            console.log('pipe(res) else', fs.createReadStream(_path).pipe(res));
+            fs.createReadStream(_path).pipe(res);
+        }
+        console.log('end post service for video stream');
     }
 }
 

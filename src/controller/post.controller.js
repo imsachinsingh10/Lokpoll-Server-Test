@@ -10,6 +10,7 @@ import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
+import fs from 'fs';
 
 export class PostController {
     constructor() {

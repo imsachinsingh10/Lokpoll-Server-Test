@@ -44,6 +44,7 @@ export const uploadPostMediaMiddleware = multer({storage: storage})
     .fields([
         {name: 'image', maxCount: 50},
         {name: 'video', maxCount: 50},
+        {name: 'audio', maxCount: 50},
     ]);
 
 export const uploadProfilePictures = multer({storage})

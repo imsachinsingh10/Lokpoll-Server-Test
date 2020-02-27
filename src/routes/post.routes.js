@@ -29,28 +29,30 @@ export class PostRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/create', (req, res, next) => {console.log(new Date().toISOString()); next()}, uploadPostMediaMiddleware, async (req, res) => {
-            try {
-                const {id, userId} = await this.postController.createPost(req);
-                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
-                const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
+        router.post('/create',
+            uploadPostMediaMiddleware,
+            async (req, res) => {
+                try {
+                    const {id, userId} = await this.postController.createPost(req);
+                    const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                    const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
 
-                taskProcessor.on('disconnect', function (msg) {
-                    this.kill();
-                });
+                    taskProcessor.on('disconnect', function (msg) {
+                        this.kill();
+                    });
 
-                taskProcessor.send(JSON.stringify({
-                    files: req.files, postId: id, productTags: req.body.productTags, userId
-                }));
-                return res.status(HttpCode.ok).json({postId: id});
-            } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
-                    return res.status(HttpCode.bad_request).send(e);
+                    taskProcessor.send(JSON.stringify({
+                        files: req.files, postId: id, productTags: req.body.productTags, userId
+                    }));
+                    return res.status(HttpCode.ok).json({postId: id});
+                } catch (e) {
+                    console.error(`${req.method}: ${req.url}`, e);
+                    if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                        return res.status(HttpCode.bad_request).send(e);
+                    }
+                    return res.status(HttpCode.internal_server_error).send(e);
                 }
-                return res.status(HttpCode.internal_server_error).send(e);
-            }
-        });
+            });
 
         router.post('/totalPosts', async (req, res) => {
             try {
@@ -129,7 +131,7 @@ export class PostRoutes {
             }
         });
 
-        router.post('/comment', async (req, res) => {
+        router.post('/comment', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 await this.postController.commentOnPost(req);
                 return res.sendStatus(HttpCode.ok);
@@ -146,6 +148,21 @@ export class PostRoutes {
             try {
                 await this.postController.votePost(req);
                 return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+        router.get('/videoStream', async (req, res) => {
+            try {
+                console.log("In Video Stream");
+                await this.postService.streamVideo(req, res);
+                console.log("In Video HttpCode.ok");
+                //return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {

@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.prod;
+    static env = Environment.dev;
 
     static version = {
         majorRevision: 12,  // (new UI, lots of new features, conceptual change, etc.)
@@ -22,7 +22,7 @@ export class Config {
     static dbDev = {
         host: `127.0.0.1`,
         user: `root`,
-        // password: `root`,
+        password: `root`,
         database: `lokpoll`,
         multipleStatements: true
     };
