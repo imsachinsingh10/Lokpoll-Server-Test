@@ -99,11 +99,12 @@ export class PostService {
     }
 
     async getComments(postIds, levels = [0, 1]) {
-        const query = `select pc.*, u.name, u.imageUrl
+        const query = `select pc.*, u.name, u.imageUrl, pm.url, pm.type
                         from ${table.postComment} pc
-                            join user u on u.id = pc.userId
+                            left join user u on u.id = pc.userId
+                            left join ${table.postMedia} pm on pm.commentId = pc.id
                         where 
-                            postId in ${Utils.getRange(postIds)} 
+                            pc.postId in ${Utils.getRange(postIds)} 
                             and level in ${Utils.getRange(levels)};`;
         return SqlService.executeQuery(query);
     }
@@ -160,7 +161,7 @@ export class PostService {
     }
 
     async getPostReactions() {
-        const query = `select * from ${table.postReaction} where type in ('vote_up', 'vote_down');`;
+        const query = `select * from ${table.postReaction} where type in ('vote_up', 'no_vote', 'vote_down');`;
         return SqlService.executeQuery(query);
     }
 

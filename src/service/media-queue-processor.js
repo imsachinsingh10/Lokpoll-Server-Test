@@ -8,7 +8,7 @@ process.on('message', async (res) => {
     const postController = new PostController();
     const productService = new ProductService();
 
-    if (files.video) {
+    if (files.video || files.image) {
         files = await extractThumbnailsMiddleware(files);
     }
     await productService.addTags(productTags);

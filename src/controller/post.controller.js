@@ -91,6 +91,10 @@ export class PostController {
         return {
             id: comment.id,
             comment: comment.comment,
+            media: {
+                type: comment.type,
+                url: comment.url
+            },
             user: {
                 name: comment.name,
                 imageUrl: comment.imageUrl
