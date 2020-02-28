@@ -1,6 +1,7 @@
 import {UserRoutes} from './user.routes';
 import {LanguageRoutes} from "./language.routes";
 import {MoodRoutes} from "./mood.routes";
+import {MediaRoutes} from "./media.routes";
 import {PostRoutes} from "./post.routes";
 import {HttpCode} from "../enum/http-code";
 import {SqlService} from "../service/sql/sql.service";
@@ -48,5 +49,6 @@ export class InitRoutes {
         new PostRoutes(app);
         new ProfileTypeRoutes(app);
         new ProductRoutes(app);
+        new MediaRoutes(app);
     }
 }

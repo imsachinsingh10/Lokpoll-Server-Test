@@ -146,7 +146,7 @@ export class PostController {
         }
     }
 
-    async uploadPostMedia(files, postId) {
+    async uploadPostMedia(files, postId, commentId) {
         const promises = [];
         if (files.image && files.image.length > 0) {
             _.forEach(files.image, file => {
@@ -160,10 +160,17 @@ export class PostController {
                 promises.push(filePromise);
             });
         }
+        if (files.audio && files.audio.length > 0) {
+            _.forEach(files.audio, file => {
+                const filePromise = this.minioService.uploadPostMedia(file, 'audio');
+                promises.push(filePromise);
+            });
+        }
         if (promises.length > 0) {
             let mediaFiles = await Promise.all(promises);
             const postMedia = mediaFiles.map(file => ({
                 postId: postId,
+                commentId: commentId,
                 url: file.url,
                 type: file.type,
                 thumbnailUrl: file.thumbnailUrl || null
