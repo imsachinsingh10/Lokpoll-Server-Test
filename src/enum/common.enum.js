@@ -19,6 +19,7 @@ export const PostReaction = {
     respect: 'respect',
     voteUp: 'vote_up',
     voteDown: 'vote_down',
+    noVote: 'no_vote',
     share: 'share'
 };
 

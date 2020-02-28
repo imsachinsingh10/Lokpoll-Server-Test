@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken";
 import {Config} from "../config";
 
 export function validateAuthToken(req, res, next) {
-    console.log("testing login flutter");
-    next();
-    return ;
+    // console.log("testing login flutter");
+    // next();
+    // return ;
     if (req.method === 'OPTIONS') {
         return res.send();
     }

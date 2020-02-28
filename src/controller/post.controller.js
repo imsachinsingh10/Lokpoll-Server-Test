@@ -119,6 +119,9 @@ export class PostController {
         const voteDownCount = _.filter(reactions, (r) => {
            return r.postId === post.id && r.type === PostReaction.voteDown;
         }).length;
+        const noVoteCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.noVote;
+        }).length;
         const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
         return {
             id: post.id,
@@ -128,7 +131,7 @@ export class PostController {
             mood: post.mood,
             trust: _.isEmpty(trust) ? null : trust.type,
             linkToShare: "https://www.socialmediatoday.com",
-            voteUpCount, voteDownCount,
+            voteUpCount, voteDownCount, noVoteCount,
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
@@ -194,11 +197,12 @@ export class PostController {
             replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined
         };
         const result = await this.postService.createPostComment(post);
-        return result.insertId;
+
+        return {id: result.insertId, ...post}
     }
 
     async votePost(req) {
-        if (!Validator.isValidPostReactionType(req.body.type)) {
+        if (!Validator.isValidPostReactionType(req.body.postId)) {
             throw new ErrorModel(AppCode.invalid_request, "Invalid post react type");
         }
         return this.postService.votePost(req);
