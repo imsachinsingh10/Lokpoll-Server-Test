@@ -36,13 +36,15 @@ export class PostRoutes {
                     const {id, userId} = await this.postController.createPost(req);
                     const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
-                    const isAudio   =   'false';
                     taskProcessor.on('disconnect', function (msg) {
                         this.kill();
                     });
 
                     taskProcessor.send(JSON.stringify({
-                        files: req.files, postId: id, productTags: req.body.productTags, userId ,isAudio:isAudio
+                        files: req.files,
+                        postId: id,
+                        productTags: req.body.productTags,
+                        userId
                     }));
                     return res.status(HttpCode.ok).json({postId: id});
                 } catch (e) {
@@ -133,7 +135,19 @@ export class PostRoutes {
 
         router.post('/comment', uploadPostMediaMiddleware, async (req, res) => {
             try {
-                await this.postController.commentOnPost(req);
+                const {id, postId, userId} = await this.postController.commentOnPost(req);
+                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
+                taskProcessor.on('disconnect', function (msg) {
+                    this.kill();
+                });
+
+                taskProcessor.send(JSON.stringify({
+                    files: req.files,
+                    postId: postId,
+                    userId,
+                    commentId: id
+                }));
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
