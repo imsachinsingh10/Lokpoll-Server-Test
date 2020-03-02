@@ -61,7 +61,7 @@ export class PostController {
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, reactions);
         const media = posts
-            .filter(result => result.id === postId && result.url !== null)
+            .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
             .map(p => ({
                 type: p.type,
                 url: p.url,
@@ -206,8 +206,8 @@ export class PostController {
     }
 
     async votePost(req) {
-        if (!Validator.isValidPostReactionType(req.body.postId)) {
-            throw new ErrorModel(AppCode.invalid_request, "Invalid post react type");
+        if (!Validator.isValidPostReactionType(req.body.type)) {
+            throw new ErrorModel(AppCode.invalid_request, `Invalid post react type ${req.body.type}`);
         }
         return this.postService.votePost(req);
     }
