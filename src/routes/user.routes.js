@@ -219,6 +219,28 @@ export class UserRoutes {
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/getWhoRespectingMe', async (req, res) => {
+            try {
+
+                let result = await this.userService.getWhoRespectingMe(req);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getWhoRespectedByMe', async (req, res) => {
+            try {
+
+                let result = await this.userService.getWhoRespectedByMe(req);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }
 

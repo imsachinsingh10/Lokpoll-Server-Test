@@ -289,4 +289,23 @@ export class UserService {
         await SqlService.executeQuery(q);
         return {status}
     }
+
+    async getWhoRespectingMe(req) {
+        const query = `select r.*, u.name, u.imageUrl
+                        from ${table.respect} r
+                            left join user u on u.id = r.respectBy
+                        where 
+                            r.respectFor = ${req.user.id};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getWhoRespectedByMe(req) {
+        console.log(req.user);
+        const query = `select r.id, u.name as displayName, u.imageUrl
+                        from ${table.respect} r
+                            left join user u on u.id = r.respectFor
+                        where 
+                            r.respectBy = ${req.user.id};`;
+        return SqlService.executeQuery(query);
+    }
 }
