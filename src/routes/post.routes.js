@@ -56,8 +56,8 @@ export class PostRoutes {
 
         router.post('/totalPosts', async (req, res) => {
             try {
-                let result = await this.postService.getTotalPosts(req.body);
-                return await res.json(result.totalPosts);
+                let result = await this.postService.getTotalPostCount(req.body);
+                return await res.json(result.count);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
@@ -77,6 +77,7 @@ export class PostRoutes {
                     "lastPostId": req.body.lastPostId,
                     "postCount": req.body.postCount,
                     "postByUserId": req.body.postByUserId,
+                    "moodIds": req.body.moodIds,
                 };
                 let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = [];
