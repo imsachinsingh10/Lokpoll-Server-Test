@@ -19,8 +19,8 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async getTotalPosts(data) {
-        const query = `select count("id") totalPosts
+    async getTotalPostCount(data) {
+        const query = `select count("id") count
 	    				from ${table.post} p
 	    				join user u on u.id = p.userId;`;
         return SqlService.getSingle(query);
@@ -39,12 +39,22 @@ export class PostService {
         if (req.postByUserId > 0) {
             condition2 = `and userId = ${req.postByUserId}`;
         }
+        let condition3 = ``;
+        try {
+            const moodIds = JSON.parse(req.moodIds);
+            if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
+                condition3 = `and moodId in ${Utils.getRange(moodIds)}`
+            }
+        } catch (e) {
+
+        }
+
         const query = `select 
                             id, latitude, longitude 
                        from post
                        where 
                         latitude is not null and longitude is not null
-                        ${condition1} ${condition2}
+                        ${condition1} ${condition2} ${condition3}
                        -- limit ${req.postCount * 5}
                        ;`;
         let posts = await SqlService.executeQuery(query);
