@@ -224,5 +224,38 @@ export class PostService {
                            postId = ${req.postId};`;
         return SqlService.executeQuery(query);
     }
+
+    async getTrustOnPostVoteUp(req) {
+        console.log(req.postId);
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+                        from ${table.postReaction} pr
+                            left join user u on u.id = pr.reactedBy
+                        where 
+                           postId = ${req.postId}
+                           and type = 'vote_up';`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getTrustOnPostVoteDown(req) {
+        console.log(req.postId);
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+                        from ${table.postReaction} pr
+                            left join user u on u.id = pr.reactedBy
+                        where 
+                           postId = ${req.postId}
+                           and type = 'vote_down';`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getTrustOnPostNoVote(req) {
+        console.log(req.postId);
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+                        from ${table.postReaction} pr
+                            left join user u on u.id = pr.reactedBy
+                        where 
+                           postId = ${req.postId}
+                           and type = 'no_vote';`;
+        return SqlService.executeQuery(query);
+    }
 }
 

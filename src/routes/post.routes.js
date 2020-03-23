@@ -198,5 +198,43 @@ export class PostRoutes {
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/getTrustOnPostVoteUp', async (req, res) => {
+            try {
+                let result =  await this.postService.getTrustOnPostVoteUp(req.body);
+                return await res.json(result);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getTrustOnPostVoteDown', async (req, res) => {
+            try {
+                let result =  await this.postService.getTrustOnPostVoteDown(req.body);
+                return await res.json(result);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getTrustOnPostNoVote', async (req, res) => {
+            try {
+                let result =  await this.postService.getTrustOnPostNoVote(req.body);
+                return await res.json(result);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+
     }
 }
