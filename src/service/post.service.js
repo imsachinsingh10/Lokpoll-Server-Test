@@ -203,5 +203,16 @@ export class PostService {
         }
         console.log('end post service for video stream');
     }
+
+
+    async getTrustOnPost(req) {
+        console.log(req.postId);
+        const query = `select pr.id, pr.type as trustType, u.id as userId,u.name, u.imageUrl
+                        from ${table.postReaction} pr
+                            left join user u on u.id = pr.reactedBy
+                        where 
+                           postId = ${req.postId};`;
+        return SqlService.executeQuery(query);
+    }
 }
 

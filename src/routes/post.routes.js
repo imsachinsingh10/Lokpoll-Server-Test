@@ -183,5 +183,19 @@ export class PostRoutes {
                 return res.status(HttpCode.internal_server_error).send(e);
             }
         });
+
+
+
+        router.post('/getTrustOnPost', async (req, res) => {
+            try {
+                let result =  await this.postService.getTrustOnPost(req.body);
+                return await res.json(result);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }
