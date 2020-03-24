@@ -232,7 +232,6 @@ export class PostController {
                     name: obj.name,
                     imageUrl: obj.imageUrl,
                     bgImageUrl: obj.bgImageUrl,
-                    profileType: obj.profileType
                 }
             }
         })
