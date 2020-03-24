@@ -222,7 +222,7 @@ export class UserRoutes {
 
         router.post('/getWhoRespectingMe', async (req, res) => {
             try {
-                let result =  await this.userController.getFormattedWhoRespectingMe(req.body);
+                let result =  await this.userController.getFormattedWhoRespectingMe(req);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
