@@ -228,9 +228,11 @@ export class PostController {
                 id: obj.id,
                 trustType: obj.trustType,
                 user: {
-                    userId: obj.userId,
+                    id: obj.userId,
                     name: obj.name,
-                    imageUrl: obj.imageUrl
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                    profileType: obj.profileType
                 }
             }
         })
