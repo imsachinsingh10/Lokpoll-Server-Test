@@ -222,8 +222,7 @@ export class UserRoutes {
 
         router.post('/getWhoRespectingMe', async (req, res) => {
             try {
-
-                let result = await this.userService.getWhoRespectingMe(req);
+                let result =  await this.userController.getFormattedWhoRespectingMe(req.body);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -234,7 +233,7 @@ export class UserRoutes {
         router.post('/getWhoRespectedByMe', async (req, res) => {
             try {
 
-                let result = await this.userService.getWhoRespectedByMe(req);
+                let result = await this.userController.getFormattedWhoRespectedByMe(req);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

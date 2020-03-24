@@ -209,4 +209,34 @@ export class UserController {
     getAgeRanges() {
         return AgeRange;
     }
+
+    async getFormattedWhoRespectingMe(req) {
+        let rawArray =  await this.userService.getWhoRespectingMe(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
+
+    async getFormattedWhoRespectedByMe(req) {
+        let rawArray =  await this.userService.getWhoRespectedByMe(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
 }

@@ -291,7 +291,7 @@ export class UserService {
     }
 
     async getWhoRespectingMe(req) {
-        const query = `select r.id, u.id as userId,u.name, u.imageUrl
+        const query = `select r.id, u.id as userId,u.name, u.imageUrl,  u.bgImageUrl
                         from ${table.respect} r
                             left join user u on u.id = r.respectBy
                         where 
@@ -300,7 +300,7 @@ export class UserService {
     }
 
     async getWhoRespectedByMe(req) {
-        const query = `select r.id, u.id as userId,u.name, u.imageUrl
+        const query = `select r.id, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
                         from ${table.respect} r
                             left join user u on u.id = r.respectFor
                         where 
