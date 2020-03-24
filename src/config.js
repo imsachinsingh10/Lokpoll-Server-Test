@@ -6,8 +6,8 @@ export class Config {
 
     static version = {
         majorRevision: 12,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 25,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 34,  // (Only bug fixes not new feature)
+        minorRevision: 32,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 36,  // (Only bug fixes not new feature)
     };
 
     static dbProd = {
