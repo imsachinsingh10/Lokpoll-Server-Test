@@ -220,4 +220,20 @@ export class PostController {
         }
         return FirebaseService.sendMessage([result.deviceToken], FirebaseMessage.PostCreated)
     };
+
+    async getFormattedTrustData(req) {
+        let rawArray =  await this.postService.getTrustOnPost(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                trustType: obj.trustType,
+                user: {
+                    userId: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl
+                }
+            }
+        })
+    };
+
 }

@@ -11,6 +11,8 @@ import {Environment, PostType} from "../enum/common.enum";
 import path from "path";
 import childProcess from 'child_process';
 import {Config} from "../config";
+import Utils from "../service/common/utils";
+import * as _ from "lodash";
 
 const router = express();
 
@@ -189,7 +191,9 @@ export class PostRoutes {
 
         router.post('/getTrustOnPost', async (req, res) => {
             try {
-                let result =  await this.postService.getTrustOnPost(req.body);
+
+                let result =  await this.postController.getFormattedTrustData(req.body);
+
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
