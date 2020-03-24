@@ -205,7 +205,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostVoteUp', async (req, res) => {
             try {
-                let result =  await this.postService.getTrustOnPostVoteUp(req.body);
+                let result =  await this.postController.getFormattedTrustDataVoteUp(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
@@ -217,7 +217,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostVoteDown', async (req, res) => {
             try {
-                let result =  await this.postService.getTrustOnPostVoteDown(req.body);
+                let result =  await this.postController.getFormattedTrustDataVoteDown(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
@@ -229,7 +229,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostNoVote', async (req, res) => {
             try {
-                let result =  await this.postService.getTrustOnPostNoVote(req.body);
+                let result =  await this.postController.getFormattedTrustDataNoVote(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {

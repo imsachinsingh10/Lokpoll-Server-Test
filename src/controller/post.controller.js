@@ -237,4 +237,49 @@ export class PostController {
         })
     };
 
+    async getFormattedTrustDataVoteUp(req) {
+        let rawArray =  await this.postService.getTrustOnPostVoteUp(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
+
+    async getFormattedTrustDataVoteDown(req) {
+        let rawArray =  await this.postService.getTrustOnPostVoteDown(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
+
+    async getFormattedTrustDataNoVote(req) {
+        let rawArray =  await this.postService.getTrustOnPostNoVote(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
+
 }

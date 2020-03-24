@@ -227,7 +227,7 @@ export class PostService {
 
     async getTrustOnPostVoteUp(req) {
         console.log(req.postId);
-        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
                         from ${table.postReaction} pr
                             left join user u on u.id = pr.reactedBy
                         where 
@@ -238,7 +238,7 @@ export class PostService {
 
     async getTrustOnPostVoteDown(req) {
         console.log(req.postId);
-        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl ,u.bgImageUrl
                         from ${table.postReaction} pr
                             left join user u on u.id = pr.reactedBy
                         where 
@@ -249,7 +249,7 @@ export class PostService {
 
     async getTrustOnPostNoVote(req) {
         console.log(req.postId);
-        const query = `select pr.id, u.id as userId,u.name, u.imageUrl
+        const query = `select pr.id, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
                         from ${table.postReaction} pr
                             left join user u on u.id = pr.reactedBy
                         where 
