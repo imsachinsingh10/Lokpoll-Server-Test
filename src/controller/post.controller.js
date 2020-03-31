@@ -49,17 +49,18 @@ export class PostController {
         const respects = await this.postService.getRespects();
         const reactions = await this.postService.getPostReactions();
         const grouped = _.groupBy(respects, 'respectFor');
+        const groupRespectBy = _.groupBy(respects, 'respectBy');
         const posts = [];
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, reactions))
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions))
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, reactions) {
+    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
-        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, reactions);
+        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
         const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
             .map(p => ({
@@ -110,7 +111,7 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(req, post, respects, grouped, reactions) {
+    getBasicPostDetails(req, post, respects, grouped, groupRespectBy, reactions) {
         const respectedByMe = _.find(respects, (r) => {
             return req.user.id === r.respectBy && post.userId === r.respectFor;
         });
@@ -127,6 +128,7 @@ export class PostController {
             return r.postId === post.id && r.type === PostReaction.noVote;
         }).length;
         const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
+        const respectingCount = groupRespectBy[post.userId] ? groupRespectBy[post.userId].length : 0;
         return {
             id: post.id,
             createdAt: Utils.getNumericDate(post.createdAt),
@@ -143,6 +145,7 @@ export class PostController {
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
                 respectCount,
+                respectingCount,
                 respectedByMe: !_.isEmpty(respectedByMe),
             },
             location: {

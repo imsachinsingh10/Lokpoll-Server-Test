@@ -195,8 +195,19 @@ export class UserController {
         const user = await this.userService.getUserById(userId);
         const hobbies = await this.userService.getHobbiesByUserId(userId);
         const basicDetails = _.omit(user, ['latitude', 'longitude', 'address']);
+        const respects = await this.userService.getRespects();
+        const grouped = _.groupBy(respects, 'respectFor');
+        const groupRespectBy = _.groupBy(respects, 'respectBy');
+        const respectedByMe = _.find(respects, (r) => {
+            return userId === r.respectBy && userId === r.respectFor;
+        });
+        const respectCount = grouped[userId] ? grouped[userId].length : 0;
+        const respectingCount = groupRespectBy[userId] ? groupRespectBy[userId].length : 0;
         return {
             ...basicDetails,
+            respectCount,
+            respectingCount,
+            respectedByMe: !_.isEmpty(respectedByMe),
             hobbies,
             location: {
                 latitude: user.latitude ? +user.latitude : null,

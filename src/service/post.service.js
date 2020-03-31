@@ -90,7 +90,7 @@ export class PostService {
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
-                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl,
+                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             pm.type, pm.url, pm.thumbnailUrl, pm.commentId,
                             m.name 'mood'
                         from post p 

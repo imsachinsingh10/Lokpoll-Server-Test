@@ -188,6 +188,7 @@ export class UserRoutes {
                 if (req.files.bgImage && req.files.bgImage[0]) {
                     promises.push(this.minioService.uploadProfilePicture(req.files.bgImage[0], 'bgImage'))
                 }
+
                 if (req.files.audio && req.files.audio[0]) {
                     promises.push(this.minioService.uploadProfilePicture(req.files.audio[0], 'audio'))
                 }

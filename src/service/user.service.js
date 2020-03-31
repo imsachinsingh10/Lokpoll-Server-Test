@@ -111,7 +111,7 @@ export class UserService {
 
     async getUserById(id) {
         const query = `select u.id, u.name, u.email, u.phone, 
-                                u.gender, u.imageUrl, u.bgImageUrl, u.address, u.ageRangeId, 
+                                u.gender, u.imageUrl, u.bgImageUrl, u.audioUrl, u.address, u.ageRangeId, 
                                 u.profession, u.company, u.latitude, u.longitude,
                         ur.name role 
 						from ${table.user} u
