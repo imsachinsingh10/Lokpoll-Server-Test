@@ -188,12 +188,14 @@ export class UserRoutes {
                 if (req.files.bgImage && req.files.bgImage[0]) {
                     promises.push(this.minioService.uploadProfilePicture(req.files.bgImage[0], 'bgImage'))
                 }
-
+                if (req.files.audio && req.files.audio[0]) {
+                    promises.push(this.minioService.uploadProfilePicture(req.files.audio[0], 'audio'))
+                }
                 if (promises.length === 0) {
                     throw new ErrorModel(AppCode.invalid_request, 'Please select files, no files to upload');
                 }
                 const result = await Promise.all(promises);
-                const user = Object.assign({id: req.user.id}, result[0], result[1]);
+                const user = Object.assign({id: req.user.id}, result[0], result[1] ,result[2]);
                 await this.userService.updateUser(user);
                 return await res.json(_.omit(user, ['id']));
             } catch (e) {

@@ -111,7 +111,8 @@ export class MinIOService {
                 return resolve({imageUrl: url});
             } else if (type === 'bgImage') {
                 return resolve({bgImageUrl: url});
-
+            } else if (type === 'audio') {
+                return resolve({audioUrl: url});
             }
         })
     }
