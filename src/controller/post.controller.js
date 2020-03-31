@@ -167,6 +167,7 @@ export class PostController {
                 promises.push(filePromise);
             });
         }
+
         if (files.audio && files.audio.length > 0) {
             _.forEach(files.audio, file => {
                 const filePromise = this.minioService.uploadPostMedia(file, 'audio');

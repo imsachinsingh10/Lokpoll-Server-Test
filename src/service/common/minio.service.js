@@ -51,6 +51,7 @@ export const uploadProfilePictures = multer({storage})
     .fields([
         {name: 'image', maxCount: 1},
         {name: 'bgImage', maxCount: 1},
+        {name: 'audio', maxCount: 1},
     ]);
 
 export class MinIOService {
@@ -110,6 +111,8 @@ export class MinIOService {
                 return resolve({imageUrl: url});
             } else if (type === 'bgImage') {
                 return resolve({bgImageUrl: url});
+            } else if (type === 'audio') {
+                return resolve({audioUrl: url});
             }
         })
     }
