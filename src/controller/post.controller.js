@@ -136,6 +136,7 @@ export class PostController {
             description: post.description,
             type: post.postType,
             mood: post.mood,
+            source: post.source,
             trust: _.isEmpty(trust) ? null : trust.type,
             linkToShare: "https://www.socialmediatoday.com",
             voteUpCount, voteDownCount, noVoteCount,
