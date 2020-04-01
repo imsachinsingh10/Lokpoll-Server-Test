@@ -244,6 +244,19 @@ export class UserRoutes {
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/getProfileByUserId', async (req, res) => {
+            try {
+                const user = await this.userController.getUserDetails(req.body.id);
+                return await res.json(user);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }
 

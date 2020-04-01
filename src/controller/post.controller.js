@@ -30,6 +30,7 @@ export class PostController {
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
             address: reqBody.address,
+            source: reqBody.source,
         };
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
         Validator.validateRequiredFields(post);
