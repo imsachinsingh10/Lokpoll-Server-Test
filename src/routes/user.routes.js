@@ -247,7 +247,7 @@ export class UserRoutes {
 
         router.post('/getProfileByUserId', async (req, res) => {
             try {
-                const user = await this.userController.getUserDetails(req.body.id);
+                const user = await this.userController.getUserDetails(req.body.userId);
                 return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
