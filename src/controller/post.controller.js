@@ -145,6 +145,7 @@ export class PostController {
                 profileType: post.profileType || "Personal",
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
+                audioUrl: post.audioUrl,
                 respectCount,
                 respectingCount,
                 respectedByMe: !_.isEmpty(respectedByMe),

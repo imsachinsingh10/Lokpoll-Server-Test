@@ -307,4 +307,9 @@ export class UserService {
                             r.respectBy = ${req.user.id};`;
         return SqlService.executeQuery(query);
     }
+
+    async getRespects() {
+        const query = `select * from ${table.respect}`;
+        return SqlService.executeQuery(query);
+    }
 }

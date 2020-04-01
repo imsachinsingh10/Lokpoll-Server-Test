@@ -210,7 +210,7 @@ export class UserRoutes {
 
         router.post('/respect', async (req, res) => {
             try {
-                const model = {
+                const mobgImageUrldel = {
                     createdAt: 'utc_timestamp()',
                     respectFor: req.body.respectFor,
                     respectBy: req.user.id
@@ -247,6 +247,7 @@ export class UserRoutes {
 
         router.post('/getProfileByUserId', async (req, res) => {
             try {
+                console.log(req.body);
                 const user = await this.userController.getUserDetails(req.body.userId);
                 return await res.json(user);
             } catch (e) {
