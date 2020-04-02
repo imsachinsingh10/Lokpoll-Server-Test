@@ -210,7 +210,7 @@ export class UserRoutes {
 
         router.post('/respect', async (req, res) => {
             try {
-                const mobgImageUrldel = {
+                const model = {
                     createdAt: 'utc_timestamp()',
                     respectFor: req.body.respectFor,
                     respectBy: req.user.id
