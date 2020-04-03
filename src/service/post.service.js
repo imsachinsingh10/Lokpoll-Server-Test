@@ -98,7 +98,8 @@ export class PostService {
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
-                        where p.id in ${Utils.getRange(postIds)}    
+                        where p.id in ${Utils.getRange(postIds)}   
+                        and isDeleted = 0 
                         order by p.id desc
                         ;`;
         return SqlService.executeQuery(query);
@@ -122,6 +123,13 @@ export class PostService {
     async deletePost(model) {
         const query = `update ${table.post} 
                         set isDeleted = 1 
+                        where id = ${model.postId};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async updatePostDescription(model) {
+        const query = `update ${table.post} 
+                        set description = ${model.description}
                         where id = ${model.postId};`;
         return SqlService.executeQuery(query);
     }

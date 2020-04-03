@@ -122,9 +122,21 @@ export class PostRoutes {
             }
         });
 
-        router.post('/delete', async (req, res) => {
+        router.post('/deletePost', async (req, res) => {
             try {
                 await this.postService.deletePost(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/updatePostDescription', async (req, res) => {
+            try {
+                await this.postService.updatePostDescription(req.body);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
