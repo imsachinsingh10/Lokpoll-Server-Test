@@ -128,8 +128,9 @@ export class PostService {
     }
 
     async updatePostDescription(model) {
+        console.log(model);
         const query = `update ${table.post} 
-                        set description = ${model.description}
+                        set description = '${model.description}'
                         where id = ${model.postId};`;
         return SqlService.executeQuery(query);
     }

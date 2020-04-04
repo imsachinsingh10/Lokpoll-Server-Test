@@ -199,7 +199,7 @@ export class UserController {
         const grouped = _.groupBy(respects, 'respectFor');
         const groupRespectBy = _.groupBy(respects, 'respectBy');
         const respectedByMe = _.find(respects, (r) => {
-            return userId === r.respectBy && userId === r.respectFor;
+            return userId === r.respectBy;
         });
         const respectCount = grouped[userId] ? grouped[userId].length : 0;
         const respectingCount = groupRespectBy[userId] ? groupRespectBy[userId].length : 0;
