@@ -53,7 +53,8 @@ export class PostService {
                             id, latitude, longitude 
                        from post
                        where 
-                        latitude is not null and longitude is not null
+                       isDeleted = 0 
+                        and latitude is not null and longitude is not null
                         ${condition1} ${condition2} ${condition3}
                        -- limit ${req.postCount * 5}
                        ;`;
