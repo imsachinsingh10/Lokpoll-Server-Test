@@ -33,7 +33,7 @@ export class MoodService {
 
 
     async getSubMoodsByMoodId(data) {
-        const query = `select m.name,m.id,m.moodId
+        const query = `select m.name ,m.id ,m.moodId
 	    				from ${table.subMood} m
 	    				where moodId = ${data.moodId}
 	    				order by id desc`;
