@@ -20,6 +20,7 @@ export class PostController {
 
     async createPost(req) {
         const reqBody = req.body;
+        console.log("reqBody",reqBody);
         const post = {
             description: reqBody.description,
             userId: reqBody.userId || req.user.id,
@@ -36,6 +37,13 @@ export class PostController {
         Validator.validateRequiredFields(post);
 
         const result = await this.postService.createPost(post);
+        const subMoodData = reqBody.subMoodData
+            .map(p => ({
+                name: p,
+                moodId: reqBody.moodId,
+                postId: result.insertId,
+            }));
+        await this.postService.createSubMoods(subMoodData);
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }

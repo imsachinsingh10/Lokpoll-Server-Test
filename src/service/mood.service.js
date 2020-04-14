@@ -17,11 +17,25 @@ export class MoodService {
         return SqlService.executeQuery(query);
     }
 
+    async createSubMoods(subMoodsData) {
+        const query = QueryBuilderService.getMultiInsertQuery(table.subMood, subMoodsData);
+        return SqlService.executeQuery(query);
+    }
+
     async getAllMoods(data) {
 
         const condition2 = ` where u.name LIKE '%${data.searchText}%'`;
         const query = `select u.*
 	    				from ${table.mood} u
+	    				order by id desc`;
+        return SqlService.executeQuery(query);
+    }
+
+
+    async getSubMoodsByMoodId(data) {
+        const query = `select m.name,m.id,m.moodId
+	    				from ${table.subMood} m
+	    				where moodId = ${data.moodId}
 	    				order by id desc`;
         return SqlService.executeQuery(query);
     }

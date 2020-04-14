@@ -21,6 +21,7 @@ export const table = {
     postReaction: "post_reaction",
     hobby: "hobby",
     respect: "respect",
+    subMood: "sub_mood",
 };
 
 export const dbview = {

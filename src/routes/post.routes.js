@@ -33,6 +33,7 @@ export class PostRoutes {
 
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
                 try {
+                    console.log("rtyuiop");
                     const {id, userId} = await this.postController.createPost(req);
                     const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
@@ -48,7 +49,7 @@ export class PostRoutes {
                     }));
                     return res.status(HttpCode.ok).json({postId: id});
                 } catch (e) {
-                    console.error(`${req.method}: ${req.url}`, e);
+                    console.error("test Data",`${req.method}: ${req.url}`, e);
                     if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                         return res.status(HttpCode.bad_request).send(e);
                     }

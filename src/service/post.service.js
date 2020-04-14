@@ -267,5 +267,10 @@ export class PostService {
                            and type = 'no_vote';`;
         return SqlService.executeQuery(query);
     }
+
+    async createSubMoods(subMoodsData) {
+        const query = QueryBuilderService.getMultiInsertQuery(table.subMood, subMoodsData);
+        return SqlService.executeQuery(query);
+    }
 }
 

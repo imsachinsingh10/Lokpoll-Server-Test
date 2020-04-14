@@ -25,10 +25,23 @@ export class MoodRoutes {
 
         router.post('/add', async (req, res) => {
             try {
-                const mood = req.body;
-                mood.createdBy = req.user.id;
+                const mood = {
+                    name: req.body.name,
+                    color: req.body.color,
+                    createdBy : req.user.id
+                };
+                //const mood = req.body;
+                //mood.createdBy = req.user.id;
+                const subMoods = req.body.subMood.split(',');
                 await this.moodController.checkIfMoodRegistered(mood);
-                await this.moodService.createMood(mood);
+                const result = await this.moodService.createMood(mood);
+                const subMoodsData = subMoods
+                    .map(p => ({
+                        name: p,
+                        moodId: result.insertId,
+                    }));
+                await this.moodService.createSubMoods(subMoodsData);
+                console.log("subMoods",result);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -43,6 +56,19 @@ export class MoodRoutes {
             try {
                 let moods = await this.moodService.getAllMoods(req.body);
                 return await res.json(moods);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getSubMoodsByMoodId', async (req, res) => {
+            try {
+                let subMoods = await this.moodService.getSubMoodsByMoodId(req.body);
+                return await res.json(subMoods);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
