@@ -92,10 +92,11 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            pm.type, pm.url, pm.thumbnailUrl, pm.commentId,
+                            pm.type, pm.url, pm.thumbnailUrl, pm.commentId, sm.name subMoodName
                             m.name 'mood'
                         from post p 
                             left join post_media pm on pm.postId = p.id
+                            left join sub_mood sm on sm.postId = p.id
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
@@ -273,4 +274,3 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 }
-
