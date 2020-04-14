@@ -273,4 +273,9 @@ export class PostService {
         const query = QueryBuilderService.getMultiInsertQuery(table.subMood, subMoodsData);
         return SqlService.executeQuery(query);
     }
+
+    async getSubMoodByName(name) {
+        const query = `select * from ${table.subMood} where name = '${name}';`;
+        return await SqlService.getSingle(query);
+    }
 }

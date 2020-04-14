@@ -37,12 +37,24 @@ export class PostController {
         Validator.validateRequiredFields(post);
 
         const result = await this.postService.createPost(post);
-        const subMoodData = reqBody.subMoodData
+        const subMoodData= [];
+
+        for (const obj of reqBody.subMoodData) {
+            const _submoods = await this.postService.getSubMoodByName(obj);
+            console.log("obj",_submoods);
+            if (_.isEmpty(_submoods)) {
+                subMoodData.push({
+                    name: obj,
+                    moodId: reqBody.moodId,
+                    postId: result.insertId})
+            }
+        }
+        /*const subMoodData = reqBody.subMoodData
             .map(p => ({
                 name: p,
                 moodId: reqBody.moodId,
                 postId: result.insertId,
-            }));
+            }));*/
         await this.postService.createSubMoods(subMoodData);
         delete post.createdAt;
         return {id: result.insertId, ...post};
