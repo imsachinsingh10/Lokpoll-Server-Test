@@ -38,11 +38,10 @@ export class PostController {
 
         const result = await this.postService.createPost(post);
         const subMoodData= [];
-
-        for (const obj of reqBody.subMoodData) {
-            const _submoods = await this.postService.getSubMoodByName(obj);
-            console.log("obj",_submoods);
-            if (_.isEmpty(_submoods)) {
+        for (const obj of JSON.parse(reqBody.subMoodData)) {
+            const submoods = await this.postService.getSubMoodByName(obj);
+            console.log("obj",submoods);
+            if (_.isEmpty(submoods)) {
                 subMoodData.push({
                     name: obj,
                     moodId: reqBody.moodId,

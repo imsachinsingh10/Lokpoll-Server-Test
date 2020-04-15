@@ -67,10 +67,10 @@ export class MoodRoutes {
 
         router.post('/getSubMoodsByMoodId', async (req, res) => {
             try {
+                console.log(req.body);
                 let subMoods = await this.moodService.getSubMoodsByMoodId(req.body);
                 return await res.json(subMoods);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
