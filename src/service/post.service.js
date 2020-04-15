@@ -246,6 +246,14 @@ export class PostService {
                            and type = 'vote_up';`;
         return SqlService.executeQuery(query);
     }
+    async getSubMoodByPostId(req) {
+        console.log(req);
+        const query = `select sm.id, sm.moodId ,sm.postId, sm.name
+                        from ${table.subMood} sm
+                        where 
+                           postId = ${req};`;
+        return SqlService.executeQuery(query);
+    }
 
     async getTrustOnPostVoteDown(req) {
         console.log(req.postId);

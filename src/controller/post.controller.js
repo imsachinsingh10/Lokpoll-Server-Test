@@ -81,6 +81,8 @@ export class PostController {
     getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
+        const subMood = this.getSubMoodDetails(req, filteredPosts[0]);
+
         const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
             .map(p => ({
@@ -89,8 +91,10 @@ export class PostController {
                 thumbnailUrl: p.thumbnailUrl
             }));
         const comments = this.getFormattedComments(postComments);
+
         return {
             ...basicDetails,
+            subMood,
             media,
             comments,
             commentCount: comments.length
@@ -130,7 +134,17 @@ export class PostController {
             return this.getFormattedComment(c, allComments, consumedCommentIds)
         })
     }
-
+    async getSubMoodDetails(req, post) {
+        let rawArray = await this.postService.getSubMoodByPostId(post.id);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                moodId :obj.moodId,
+                postId :obj.postId,
+                name :obj.name,
+            }
+        })
+    }
     getBasicPostDetails(req, post, respects, grouped, groupRespectBy, reactions) {
         const respectedByMe = _.find(respects, (r) => {
             return req.user.id === r.respectBy && post.userId === r.respectFor;
