@@ -136,7 +136,13 @@ export class PostController {
     }
     async getSubMoodDetails(req, post) {
         let rawArray = await this.postService.getSubMoodByPostId(post.id);
-        await res.json(rawArray);
+        return rawArray
+            .map(obj => ({
+                id: obj.id,
+                moodId :obj.moodId,
+                postId :obj.postId,
+                name :obj.name,
+            }));
     }
     getBasicPostDetails(req, post, respects, grouped, groupRespectBy, reactions) {
         const respectedByMe = _.find(respects, (r) => {
