@@ -251,7 +251,7 @@ export class PostService {
         const query = `select sm.id, sm.moodId ,sm.postId, sm.name
                         from ${table.subMood} sm
                         where 
-                           postId = ${req};`;
+                           postId = ${req.id};`;
         return SqlService.executeQuery(query);
     }
 

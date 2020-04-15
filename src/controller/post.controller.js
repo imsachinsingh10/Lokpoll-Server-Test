@@ -135,7 +135,7 @@ export class PostController {
         })
     }
     async getSubMoodDetails(req, post) {
-        let rawArray = await this.postService.getSubMoodByPostId(post.id);
+        let rawArray = await this.postService.getSubMoodByPostId(post);
         return rawArray
             .map(obj => ({
                 id: obj.id,
