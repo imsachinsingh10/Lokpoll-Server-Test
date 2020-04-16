@@ -66,6 +66,7 @@ export class PostController {
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
+        const subMoods = await this.postService.getSubMoodByPostId(postIds);
         const respects = await this.postService.getRespects();
         const reactions = await this.postService.getPostReactions();
         const grouped = _.groupBy(respects, 'respectFor');
@@ -73,15 +74,16 @@ export class PostController {
         const posts = [];
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions))
+            const subMoodData = subMoods.filter(subMood => subMood.postId === id);
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData))
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions) {
+    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood) {
+
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
-        const subMood = this.getSubMoodDetails(req, filteredPosts[0]);
 
         const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)

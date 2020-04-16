@@ -122,6 +122,14 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getSubMoodByPostId(postIds) {
+        const query = `select sm.id, sm.moodId ,sm.postId, sm.name
+                        from ${table.subMood} sm
+                        where 
+                           sm.postId in ${Utils.getRange(postIds)} `;
+        return SqlService.executeQuery(query);
+    }
+
     async deletePost(model) {
         const query = `update ${table.post} 
                         set isDeleted = 1 
@@ -246,14 +254,7 @@ export class PostService {
                            and type = 'vote_up';`;
         return SqlService.executeQuery(query);
     }
-    async getSubMoodByPostId(req) {
-        console.log(req);
-        const query = `select sm.id, sm.moodId ,sm.postId, sm.name
-                        from ${table.subMood} sm
-                        where 
-                           postId = ${req.id};`;
-        return SqlService.executeQuery(query);
-    }
+
 
     async getTrustOnPostVoteDown(req) {
         console.log(req.postId);
