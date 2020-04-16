@@ -123,7 +123,7 @@ export class PostService {
     }
 
     async getSubMoodByPostId(postIds) {
-        const query = `select sm.id, sm.moodId ,sm.postId, sm.name
+        const query = `select sm.id, sm.moodId, sm.name
                         from ${table.subMood} sm
                         where 
                            sm.postId in ${Utils.getRange(postIds)} `;
