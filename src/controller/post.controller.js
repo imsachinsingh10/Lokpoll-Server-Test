@@ -41,12 +41,12 @@ export class PostController {
         for (const obj of JSON.parse(reqBody.subMoodData)) {
             const submoods = await this.postService.getSubMoodByName(obj);
             console.log("obj",submoods);
-            if (_.isEmpty(submoods)) {
+            //if (_.isEmpty(submoods)) {
                 subMoodData.push({
                     name: obj,
                     moodId: reqBody.moodId,
                     postId: result.insertId})
-            }
+            //}
         }
         /*const subMoodData = reqBody.subMoodData
             .map(p => ({
