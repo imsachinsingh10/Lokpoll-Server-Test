@@ -38,28 +38,33 @@ export class PostController {
 
         const result = await this.postService.createPost(post);
         const subMoodData= [];
-        for (const obj of JSON.parse(reqBody.subMoodData)) {
-            const submoods = await this.postService.getSubMoodByName(obj);
-            console.log("obj",submoods);
-            if (_.isEmpty(submoods)) {
-                subMoodData.push({
-                    name: obj,
-                    moodId: reqBody.moodId,
-                    createdAt: 'utc_timestamp()',
-                })
+        if(!_.isEmpty(reqBody.subMoodData)) {
+            for (const obj of JSON.parse(reqBody.subMoodData)) {
+                const submoods = await this.postService.getSubMoodByName(obj);
+                console.log("obj", submoods);
+                if (_.isEmpty(submoods)) {
+                    subMoodData.push({
+                        name: obj,
+                        moodId: reqBody.moodId,
+                        createdAt: 'utc_timestamp()',
+                    })
+                }
             }
         }
         if(!_.isEmpty(subMoodData)){
             await this.postService.createSubMoods(subMoodData);
         }
         const postSubMoodData= [];
-        for (const obj of JSON.parse(reqBody.subMoodData)) {
-            const submoods = await this.postService.getSubMoodByName(obj);
-            postSubMoodData.push({
+        if(!_.isEmpty(reqBody.subMoodData)) {
+            for (const obj of JSON.parse(reqBody.subMoodData)) {
+                const submoods = await this.postService.getSubMoodByName(obj);
+                postSubMoodData.push({
                     subMoodId: submoods.id,
-                    postId: result.insertId})
+                    postId: result.insertId
+                })
+            }
         }
-        if(!_.isEmpty(subMoodData)) {
+        if(!_.isEmpty(postSubMoodData)) {
             await this.postService.createPostSubMoods(postSubMoodData);
         }
         delete post.createdAt;
