@@ -45,7 +45,8 @@ export class PostController {
                 subMoodData.push({
                     name: obj,
                     moodId: reqBody.moodId,
-                    postId: result.insertId})
+                    createdAt: 'utc_timestamp()',
+                })
             }
         }
         if(!_.isEmpty(subMoodData)){
