@@ -59,7 +59,9 @@ export class PostController {
                     subMoodId: submoods.id,
                     postId: result.insertId})
         }
-        await this.postService.createPostSubMoods(postSubMoodData);
+        if(!_.isEmpty(subMoodData)) {
+            await this.postService.createPostSubMoods(postSubMoodData);
+        }
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }
