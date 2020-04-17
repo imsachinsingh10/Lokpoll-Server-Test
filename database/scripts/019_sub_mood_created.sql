@@ -10,3 +10,12 @@ CREATE TABLE `sub_mood` (
   `createdBy` bigint(20) DEFAULT 0,
   PRIMARY KEY (`id`)
 );
+
+DROP TABLE IF EXISTS `post_sub_mood`;
+CREATE TABLE `post_sub_mood` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subMoodId` bigint(20) DEFAULT 0,
+  `postId` bigint(20) DEFAULT 0,
+  `createdBy` bigint(20) DEFAULT 0,
+  PRIMARY KEY (`id`)
+);

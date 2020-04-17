@@ -41,20 +41,24 @@ export class PostController {
         for (const obj of JSON.parse(reqBody.subMoodData)) {
             const submoods = await this.postService.getSubMoodByName(obj);
             console.log("obj",submoods);
-            //if (_.isEmpty(submoods)) {
+            if (_.isEmpty(submoods)) {
                 subMoodData.push({
                     name: obj,
                     moodId: reqBody.moodId,
                     postId: result.insertId})
-            //}
+            }
         }
-        /*const subMoodData = reqBody.subMoodData
-            .map(p => ({
-                name: p,
-                moodId: reqBody.moodId,
-                postId: result.insertId,
-            }));*/
-        await this.postService.createSubMoods(subMoodData);
+        if(!_.isEmpty(subMoodData)){
+            await this.postService.createSubMoods(subMoodData);
+        }
+        const postSubMoodData= [];
+        for (const obj of JSON.parse(reqBody.subMoodData)) {
+            const submoods = await this.postService.getSubMoodByName(obj);
+            postSubMoodData.push({
+                    subMoodId: submoods.id,
+                    postId: result.insertId})
+        }
+        await this.postService.createPostSubMoods(postSubMoodData);
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }
@@ -92,6 +96,7 @@ export class PostController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
+
         const comments = this.getFormattedComments(postComments);
 
         return {
@@ -136,16 +141,7 @@ export class PostController {
             return this.getFormattedComment(c, allComments, consumedCommentIds)
         })
     }
-    async getSubMoodDetails(req, post) {
-        const rawArray = await this.postService.getSubMoodByPostId(post);
-        return rawArray
-            .map(obj => ({
-                id: obj.id,
-                moodId :obj.moodId,
-                postId :obj.postId,
-                name :obj.name,
-            }));
-    }
+
     getBasicPostDetails(req, post, respects, grouped, groupRespectBy, reactions) {
         const respectedByMe = _.find(respects, (r) => {
             return req.user.id === r.respectBy && post.userId === r.respectFor;

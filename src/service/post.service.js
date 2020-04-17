@@ -92,11 +92,10 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            pm.type, pm.url, pm.thumbnailUrl, pm.commentId, sm.name subMoodName,
+                            pm.type, pm.url, pm.thumbnailUrl, pm.commentId, 
                             m.name 'mood'
                         from post p 
                             left join post_media pm on pm.postId = p.id
-                            left join sub_mood sm on sm.postId = p.id
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
@@ -123,10 +122,11 @@ export class PostService {
     }
 
     async getSubMoodByPostId(postIds) {
-        const query = `select sm.id, sm.moodId ,sm.postId, sm.name
-                        from ${table.subMood} sm
+        const query = `select psm.id, sm.moodId ,psm.postId, sm.name
+                        from ${table.postSubMood} psm
+                        left join ${table.subMood} sm on psm.subMoodId = sm.id
                         where 
-                           sm.postId in ${Utils.getRange(postIds)} `;
+                           psm.postId in ${Utils.getRange(postIds)} `;
         return SqlService.executeQuery(query);
     }
 
@@ -280,6 +280,11 @@ export class PostService {
 
     async createSubMoods(subMoodsData) {
         const query = QueryBuilderService.getMultiInsertQuery(table.subMood, subMoodsData);
+        return SqlService.executeQuery(query);
+    }
+
+    async createPostSubMoods(postSubMoodData) {
+        const query = QueryBuilderService.getMultiInsertQuery(table.postSubMood, postSubMoodData);
         return SqlService.executeQuery(query);
     }
 
