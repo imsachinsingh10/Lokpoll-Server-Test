@@ -130,6 +130,14 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getPostMediaByPostId(postIds) {
+        const query = `select pm.type, pm.url, pm.thumbnailUrl, pm.commentId ,pm.id ,pm.postId
+                        from ${table.postMedia} pm
+                        where 
+                           pm.postId in ${Utils.getRange(postIds)} `;
+        return SqlService.executeQuery(query);
+    }
+
     async deletePost(model) {
         const query = `update ${table.post} 
                         set isDeleted = 1 

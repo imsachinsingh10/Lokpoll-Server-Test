@@ -41,7 +41,6 @@ export class PostController {
         if(!_.isEmpty(reqBody.subMoodData)) {
             for (const obj of JSON.parse(reqBody.subMoodData)) {
                 const submoods = await this.postService.getSubMoodByName(obj);
-                console.log("obj", submoods);
                 if (_.isEmpty(submoods)) {
                     subMoodData.push({
                         name: obj,
@@ -79,6 +78,7 @@ export class PostController {
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
         const subMoods = await this.postService.getSubMoodByPostId(postIds);
+        const postMedia = await this.postService.getPostMediaByPostId(postIds);
         const respects = await this.postService.getRespects();
         const reactions = await this.postService.getPostReactions();
         const grouped = _.groupBy(respects, 'respectFor');
@@ -87,23 +87,30 @@ export class PostController {
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
             const subMoodData = subMoods.filter(subMood => subMood.postId === id);
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData))
+            const postMediaData = postMedia
+                .filter(post => post.postId === id && post.url !== null && post.commentId === 0)
+                .map(p => ({
+                    type: p.type,
+                    url: p.url,
+                    thumbnailUrl: p.thumbnailUrl
+                }));
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData, postMediaData))
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood) {
+    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood ,media) {
 
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
 
-        const media = posts
+        /*const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
             .map(p => ({
                 type: p.type,
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
-            }));
+            }));*/
 
         const comments = this.getFormattedComments(postComments);
 
