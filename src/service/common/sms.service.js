@@ -13,16 +13,12 @@ export class SMSService {
 				code: AppCode.invalid_phone
 			}
 		}
-		if (Config.env === Environment.dev || Config.env === Environment.prod) {
-			return true;
-		}
-		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 mins.`;
-		const userId = '2000187956';
-		const password = 'Y3JXJpz0w';
-		const url = `https://enterprise.smsgupshup.com/GatewayAPI/rest?method=SendMessage&send_to=${phone}&msg=${msg}&msg_type=TEXT&userid=${userId}&auth_scheme=plain&password=${password}&v=1.1&format=text`;
+		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 Mins`;
+		const apiKey = '9hcbNtCJ79c-Ystk844Ss6ApaLSUJZ7cPqvEQOvVgE';
+		const url = `https://api.textlocal.in/send/?apiKey=${apiKey}&sender=LOCLBL&numbers=${phone}&message=${msg}.`;
 		try {
 			const result = await axios.get(url);
-			console.log(' +++++++ sms result +++++++++ ', result);
+			console.log(' +++++++ sms result +++++++++ ', result.data);
 			return true;
 		} catch (e) {
 			console.log('error while sending message', e);

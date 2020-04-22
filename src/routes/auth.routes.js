@@ -37,7 +37,6 @@ export class AuthRoutes {
             try {
                 const {phone} = req.body;
                 let otp = Config.env === Environment.prod ? Utils.getRandomNumber(1000, 9999) : 8888;
-                otp = 8888;  //TODO: remove it after development
                 const isOTPSent = await SMSService.sendSMS(phone, otp);
                 if (isOTPSent) {
                     await this.userService.saveOTP(otp, phone);
