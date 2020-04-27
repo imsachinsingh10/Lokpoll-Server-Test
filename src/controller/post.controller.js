@@ -32,6 +32,8 @@ export class PostController {
             longitude: reqBody.longitude,
             address: reqBody.address,
             source: reqBody.source,
+            language: reqBody.language,
+            isPostUpload: '0',
         };
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
         Validator.validateRequiredFields(post);
@@ -78,7 +80,6 @@ export class PostController {
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
         const subMoods = await this.postService.getSubMoodByPostId(postIds);
-        const postMedia = await this.postService.getPostMediaByPostId(postIds);
         const respects = await this.postService.getRespects();
         const reactions = await this.postService.getPostReactions();
         const grouped = _.groupBy(respects, 'respectFor');
@@ -87,30 +88,23 @@ export class PostController {
         _.forEach(uniqPostIds, id => {
             const postComments = comments.filter(comment => comment.postId === id);
             const subMoodData = subMoods.filter(subMood => subMood.postId === id);
-            const postMediaData = postMedia
-                .filter(post => post.postId === id && post.url !== null && post.commentId === 0)
-                .map(p => ({
-                    type: p.type,
-                    url: p.url,
-                    thumbnailUrl: p.thumbnailUrl
-                }));
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData, postMediaData))
+            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData))
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood ,media) {
+    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood ) {
 
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
 
-        /*const media = posts
+        const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
             .map(p => ({
                 type: p.type,
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
-            }));*/
+            }));
 
         const comments = this.getFormattedComments(postComments);
 
@@ -182,6 +176,7 @@ export class PostController {
             type: post.postType,
             mood: post.mood,
             source: post.source,
+            language: post.language,
             trust: _.isEmpty(trust) ? null : trust.type,
             linkToShare: "https://www.socialmediatoday.com",
             voteUpCount, voteDownCount, noVoteCount,
@@ -235,6 +230,7 @@ export class PostController {
                 thumbnailUrl: file.thumbnailUrl || null
             }));
             const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
+            await this.postService.updatePostUpload(postId);
             return SqlService.executeQuery(query);
         }
     }

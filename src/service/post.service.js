@@ -87,7 +87,7 @@ export class PostService {
     }
 
     async getAllPosts(postIds) {
-        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, 
+        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
@@ -101,6 +101,7 @@ export class PostService {
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                         where p.id in ${Utils.getRange(postIds)}   
                         and isDeleted = 0 
+                        and isPostUpload = 1 
                         order by p.id desc
                         ;`;
         return SqlService.executeQuery(query);
@@ -130,18 +131,17 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async getPostMediaByPostId(postIds) {
-        const query = `select pm.type, pm.url, pm.thumbnailUrl, pm.commentId ,pm.id ,pm.postId
-                        from ${table.postMedia} pm
-                        where 
-                           pm.postId in ${Utils.getRange(postIds)} `;
-        return SqlService.executeQuery(query);
-    }
-
     async deletePost(model) {
         const query = `update ${table.post} 
                         set isDeleted = 1 
                         where id = ${model.postId};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async updatePostUpload(postId) {
+        const query = `update ${table.post} 
+                        set isPostUpload = 1 
+                        where id = ${postId};`;
         return SqlService.executeQuery(query);
     }
 
