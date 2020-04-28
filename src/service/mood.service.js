@@ -25,7 +25,7 @@ export class MoodService {
     async getAllMoods(body) {
         let columns = 'm.*';
         if (body.languageCode) {
-             columns += `m.id, m.imageUrl, m.${body.languageCode}`;
+             columns = `m.id, m.imageUrl, m.${body.languageCode} name, m.color`;
         }
         const query = `select ${columns}
 	    				from ${table.mood} m

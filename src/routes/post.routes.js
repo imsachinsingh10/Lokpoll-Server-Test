@@ -33,7 +33,6 @@ export class PostRoutes {
 
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
                 try {
-                    console.log("rtyuiop");
                     const {id, userId} = await this.postController.createPost(req);
                     const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});

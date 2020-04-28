@@ -59,7 +59,7 @@ export class PostService {
                        -- limit ${req.postCount * 5}
                        ;`;
         let posts = await SqlService.executeQuery(query);
-        // console.log('posts', posts);
+        console.log('posts', posts);
         const postCoordinates = posts.map(p => {
             return {
                 latitude: p.latitude,

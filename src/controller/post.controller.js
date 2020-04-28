@@ -20,7 +20,6 @@ export class PostController {
 
     async createPost(req) {
         const reqBody = req.body;
-        console.log("reqBody",reqBody);
         const post = {
             description: reqBody.description,
             userId: reqBody.userId || req.user.id,
@@ -39,8 +38,8 @@ export class PostController {
         Validator.validateRequiredFields(post);
 
         const result = await this.postService.createPost(post);
-        const subMoodData= [];
-        if(!_.isEmpty(reqBody.subMoodData)) {
+        const subMoodData = [];
+        if (!_.isEmpty(reqBody.subMoodData)) {
             for (const obj of JSON.parse(reqBody.subMoodData)) {
                 const submoods = await this.postService.getSubMoodByName(obj);
                 if (_.isEmpty(submoods)) {
@@ -52,11 +51,11 @@ export class PostController {
                 }
             }
         }
-        if(!_.isEmpty(subMoodData)){
+        if (!_.isEmpty(subMoodData)) {
             await this.postService.createSubMoods(subMoodData);
         }
-        const postSubMoodData= [];
-        if(!_.isEmpty(reqBody.subMoodData)) {
+        const postSubMoodData = [];
+        if (!_.isEmpty(reqBody.subMoodData)) {
             for (const obj of JSON.parse(reqBody.subMoodData)) {
                 const submoods = await this.postService.getSubMoodByName(obj);
                 postSubMoodData.push({
@@ -65,7 +64,7 @@ export class PostController {
                 })
             }
         }
-        if(!_.isEmpty(postSubMoodData)) {
+        if (!_.isEmpty(postSubMoodData)) {
             await this.postService.createPostSubMoods(postSubMoodData);
         }
         delete post.createdAt;
@@ -93,7 +92,7 @@ export class PostController {
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions ,subMood ) {
+    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions, subMood) {
 
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
@@ -159,10 +158,10 @@ export class PostController {
             return req.user.id === r.reactedBy && post.id === r.postId;
         });
         const voteUpCount = _.filter(reactions, (r) => {
-           return r.postId === post.id && r.type === PostReaction.voteUp;
+            return r.postId === post.id && r.type === PostReaction.voteUp;
         }).length;
         const voteDownCount = _.filter(reactions, (r) => {
-           return r.postId === post.id && r.type === PostReaction.voteDown;
+            return r.postId === post.id && r.type === PostReaction.voteDown;
         }).length;
         const noVoteCount = _.filter(reactions, (r) => {
             return r.postId === post.id && r.type === PostReaction.noVote;
@@ -270,7 +269,7 @@ export class PostController {
     };
 
     async getFormattedTrustData(req) {
-        let rawArray =  await this.postService.getTrustOnPost(req);
+        let rawArray = await this.postService.getTrustOnPost(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,
@@ -286,7 +285,7 @@ export class PostController {
     };
 
     async getFormattedTrustDataVoteUp(req) {
-        let rawArray =  await this.postService.getTrustOnPostVoteUp(req);
+        let rawArray = await this.postService.getTrustOnPostVoteUp(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,
@@ -301,7 +300,7 @@ export class PostController {
     };
 
     async getFormattedTrustDataVoteDown(req) {
-        let rawArray =  await this.postService.getTrustOnPostVoteDown(req);
+        let rawArray = await this.postService.getTrustOnPostVoteDown(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,
@@ -316,7 +315,7 @@ export class PostController {
     };
 
     async getFormattedTrustDataNoVote(req) {
-        let rawArray =  await this.postService.getTrustOnPostNoVote(req);
+        let rawArray = await this.postService.getTrustOnPostNoVote(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,
