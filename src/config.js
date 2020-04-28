@@ -5,7 +5,7 @@ export class Config {
     static env = Environment.prod;
 
     static version = {
-        majorRevision: 13,  // (new UI, lots of new features, conceptual change, etc.)
+        majorRevision: 14,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 36,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 57,  // (Only bug fixes not new feature)
     };
@@ -51,7 +51,8 @@ export class Config {
             postVideos: 'post/videos/',
             postThumbnails: 'post/thumbnails/',
             user: 'user/images/',
-            other: 'post/others/'
+            other: 'post/others/',
+            moodIcons: 'mood_icons'
         }
     };
 

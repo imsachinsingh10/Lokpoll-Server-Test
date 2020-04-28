@@ -11,7 +11,7 @@ export class MoodController {
         const _moods = await this.MoodService.getMoodByName(mood);
         if (!_.isEmpty(_moods)) {
             throw {
-                message: `mood already registered with name ${mood.name}`,
+                message: `mood already registered with name ${mood.en}`,
                 code: AppCode.duplicate_entity
             }
         }

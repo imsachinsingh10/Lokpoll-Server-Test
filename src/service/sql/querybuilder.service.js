@@ -7,7 +7,7 @@ export class QueryBuilderService {
         for (const prop in model) {
             const value = model[prop];
             if (value !== undefined) {
-                query += prop + ', '
+                query += `\`${prop}\`, `
             }
         }
         query = query.slice(0, -2);
@@ -36,11 +36,11 @@ export class QueryBuilderService {
                 continue;
             }
             if (value === '') {
-                query += `${prop} = '', `
+                query += `\`${prop}\` = '', `
             } else if (typeof value === 'number' || value === null || value.endsWith('()')) {
-                query += `${prop} = ${value}, `;
+                query += `\`${prop}\` = ${value}, `;
             } else {
-                query += `${prop} = '${value}', `;
+                query += `\`${prop}\` = '${value}', `;
             }
         }
         query = query.slice(0, -2);

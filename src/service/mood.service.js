@@ -8,7 +8,7 @@ export class MoodService {
     }
 
     async getMoodByName(mood) {
-        const query = `select * from ${table.mood} where name = '${mood.name}';`;
+        const query = `select * from ${table.mood} where en = '${mood.en}';`;
         return await SqlService.getSingle(query);
     }
 
@@ -22,15 +22,16 @@ export class MoodService {
         return SqlService.executeQuery(query);
     }
 
-    async getAllMoods(data) {
-
-        const condition2 = ` where u.name LIKE '%${data.searchText}%'`;
-        const query = `select u.*
-	    				from ${table.mood} u
+    async getAllMoods(body) {
+        let columns = 'm.*';
+        if (body.languageCode) {
+             columns += `m.id, m.imageUrl, m.${body.languageCode}`;
+        }
+        const query = `select ${columns}
+	    				from ${table.mood} m
 	    				order by id desc`;
         return SqlService.executeQuery(query);
     }
-
 
     async getSubMoodsByMoodId(data) {
         console.log(data);
@@ -42,6 +43,7 @@ export class MoodService {
     }
 
     async updateMood(mood) {
+        console.log('mood', mood);
         const condition = `where id = ${mood.id}`;
 
         const query = QueryBuilderService.getUpdateQuery(table.mood, mood, condition);

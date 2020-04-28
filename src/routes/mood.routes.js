@@ -7,6 +7,7 @@ import {MoodController} from "../controller/mood.controller";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
+import {MinIOService, uploadFile} from "../service/common/minio.service";
 
 const router = express();
 
@@ -16,6 +17,7 @@ export class MoodRoutes {
         app.use('/mood', router);
 
         this.moodService = new MoodService();
+        this.minioService = new MinIOService();
         this.moodController = new MoodController();
         this.initRoutes();
     }
@@ -23,25 +25,32 @@ export class MoodRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/add', async (req, res) => {
+        router.post('/add', uploadFile, async (req, res) => {
             try {
                 const mood = {
-                    name: req.body.name,
                     color: req.body.color,
-                    createdBy : req.user.id
+                    createdBy: req.user.id,
+                    en: req.body.en,
+                    hi: req.body.hi,
+                    or: req.body.or,
+                    ta: req.body.ta,
+                    createdAt: 'utc_timestamp()',
                 };
-                //const mood = req.body;
-                //mood.createdBy = req.user.id;
-                const subMoods = req.body.subMood.split(',');
+                if (req.file) {
+                    const file = await this.minioService.uploadFile(req.file);
+                    mood.imageUrl = file.url;
+                }
                 await this.moodController.checkIfMoodRegistered(mood);
                 const result = await this.moodService.createMood(mood);
-                const subMoodsData = subMoods
-                    .map(p => ({
-                        name: p,
-                        moodId: result.insertId,
-                    }));
-                await this.moodService.createSubMoods(subMoodsData);
-                console.log("subMoods",result);
+                if (req.body.subMood) {
+                    const subMoods = req.body.subMood.split(',');
+                    const subMoodsData = subMoods
+                        .map(p => ({
+                            name: p,
+                            moodId: result.insertId,
+                        }));
+                    await this.moodService.createSubMoods(subMoodsData);
+                }
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -78,11 +87,12 @@ export class MoodRoutes {
             }
         });
 
-        router.post('/update', async (req, res) => {
+        router.post('/update', uploadFile, async (req, res) => {
             try {
                 const mood = req.body;
-                if (_.isEmpty(mood.id)) {
-                    mood.id = mood.id;
+                if (req.file) {
+                    const file = await this.minioService.uploadFile(req.file);
+                    mood.imageUrl = file.url;
                 }
                 await this.moodService.updateMood(mood);
                 return res.sendStatus(HttpCode.ok);

@@ -37,8 +37,8 @@ const storage = multer.diskStorage({
     filename: getFileName
 });
 
-const uploadSingleFileMiddleware = multer({storage: storage}).single('file');
-const uploadMultipleFilesMiddleware = multer({storage: storage}).array('file', 50);
+export const uploadFile = multer({storage: storage}).single('file');
+const uploadFiles = multer({storage: storage}).array('file', 50);
 
 export const uploadPostMediaMiddleware = multer({storage: storage})
     .fields([
@@ -54,6 +54,11 @@ export const uploadProfilePictures = multer({storage})
         {name: 'audio', maxCount: 1},
     ]);
 
+// export const uploadFile = multer({storage})
+//     .fields([
+//         {name: 'file', maxCount: 1}
+//     ]);
+
 export class MinIOService {
     constructor() {
         this.minioClient = new Minio.Client({
@@ -63,7 +68,28 @@ export class MinIOService {
     }
 
     uploadMiddleware(type) {
-        return type === 'single' ? uploadSingleFileMiddleware : uploadMultipleFilesMiddleware;
+        return type === 'single' ? uploadFile : uploadFiles;
+    }
+
+    async uploadFile(file) {
+        console.log('uploading file', file);
+        return new Promise(async (resolve) => {
+            if (!file) {
+                return resolve({
+                    url: null,
+                })
+            }
+
+            await this.createBucket(minioConfig.bucket.root);
+            let bucketPath = minioConfig.bucket.moodIcons;
+            const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
+            unlink(file.path);
+
+            return resolve({
+                url: fileUrl,
+                originalName: file.originalName,
+            });
+        })
     }
 
     async uploadPostMedia(file, mediaType) {

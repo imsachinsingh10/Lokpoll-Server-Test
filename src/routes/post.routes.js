@@ -200,8 +200,6 @@ export class PostRoutes {
             }
         });
 
-
-
         router.post('/getTrustOnPost', async (req, res) => {
             try {
 
@@ -251,7 +249,5 @@ export class PostRoutes {
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
-
-
     }
 }
