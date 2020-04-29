@@ -184,6 +184,19 @@ export class PostRoutes {
             }
         });
 
+        router.post('/react', async (req, res) => {
+            try {
+                await this.postController.reactOnPost(req);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
         router.get('/videoStream', async (req, res) => {
             try {
                 console.log("In Video Stream");

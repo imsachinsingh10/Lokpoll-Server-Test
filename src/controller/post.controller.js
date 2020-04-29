@@ -4,7 +4,7 @@ import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
-import {PostReaction} from "../enum/common.enum";
+import {PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
@@ -79,23 +79,25 @@ export class PostController {
         const uniqPostIds = _.uniq(postIds);
         const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
         const subMoods = await this.postService.getSubMoodByPostId(postIds);
-        const respects = await this.postService.getRespects();
-        const reactions = await this.postService.getPostReactions();
-        const grouped = _.groupBy(respects, 'respectFor');
-        const groupRespectBy = _.groupBy(respects, 'respectBy');
+        const respects = await this.postService.getRespects(uniqPostIds);
+        const reactions = await this.postService.getPostReactions(uniqPostIds);
+        const trusts = await this.postService.getPostTrust(uniqPostIds);
+        const respectForGrouped = _.groupBy(respects, 'respectFor');
+        console.log('+++++++++ respectForGrouped', respectForGrouped);
+        const respectByGrouped = _.groupBy(respects, 'respectBy');
         const posts = [];
-        _.forEach(uniqPostIds, id => {
-            const postComments = comments.filter(comment => comment.postId === id);
-            const subMoodData = subMoods.filter(subMood => subMood.postId === id);
-            posts.push(this.getPost(req, id, rawPosts, postComments, respects, grouped, groupRespectBy, reactions, subMoodData))
+        _.forEach(uniqPostIds, (postId) => {
+            const postComments = comments.filter(comment => comment.postId === postId);
+            const subMoodData = subMoods.filter(subMood => subMood.postId === postId);
+            const _post = this.getPost(req, postId, rawPosts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMoodData, trusts);
+            posts.push(_post);
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, grouped, groupRespectBy, reactions, subMood) {
-
+    getPost(req, postId, posts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMood, trusts) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
-        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, grouped, groupRespectBy, reactions);
+        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, respectForGrouped, respectByGrouped, reactions, trusts);
 
         const media = posts
             .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
@@ -150,24 +152,14 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(req, post, respects, grouped, groupRespectBy, reactions) {
-        const respectedByMe = _.find(respects, (r) => {
-            return req.user.id === r.respectBy && post.userId === r.respectFor;
-        });
-        const trust = _.find(reactions, (r) => {
-            return req.user.id === r.reactedBy && post.id === r.postId;
-        });
-        const voteUpCount = _.filter(reactions, (r) => {
-            return r.postId === post.id && r.type === PostReaction.voteUp;
-        }).length;
-        const voteDownCount = _.filter(reactions, (r) => {
-            return r.postId === post.id && r.type === PostReaction.voteDown;
-        }).length;
-        const noVoteCount = _.filter(reactions, (r) => {
-            return r.postId === post.id && r.type === PostReaction.noVote;
-        }).length;
-        const respectCount = grouped[post.userId] ? grouped[post.userId].length : 0;
-        const respectingCount = groupRespectBy[post.userId] ? groupRespectBy[post.userId].length : 0;
+    getBasicPostDetails(req, post, respects, respectForGrouped, respectByGrouped, reactions, trusts) {
+        const {
+            respectedByMe,
+            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+            trust, voteUpCount, voteDownCount, noVoteCount,
+            respectCountOnPostUserProfile,
+            respectCountGivenByPostUserToOthers
+        } = this.getReactionsWithCount(req, post, respects, reactions, trusts, respectForGrouped, respectByGrouped)
         return {
             id: post.id,
             createdAt: Utils.getNumericDate(post.createdAt),
@@ -176,18 +168,24 @@ export class PostController {
             mood: post.mood,
             source: post.source,
             language: post.language,
-            trust: _.isEmpty(trust) ? null : trust.type,
             linkToShare: "https://www.socialmediatoday.com",
-            voteUpCount, voteDownCount, noVoteCount,
+            trustMeter: {
+                voteUpCount, voteDownCount, noVoteCount,
+                trustByMe: _.isEmpty(trust) ? null : trust.type,
+            },
+            reactions: {
+                loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+                reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
+            },
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
-                profileType: post.profileType || "Personal",
+                profileType: post.profileType || ProfileType.personal,
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
                 audioUrl: post.audioUrl,
-                respectCount,
-                respectingCount,
+                respectCountOnPostUserProfile,
+                respectCountGivenByPostUserToOthers,
                 respectedByMe: !_.isEmpty(respectedByMe),
             },
             location: {
@@ -196,6 +194,55 @@ export class PostController {
                 address: post.address
             }
         }
+    }
+
+    getReactionsWithCount(req, post, respects, reactions, trusts, respectForGrouped, respectByGrouped) {
+        const respectedByMe = _.find(respects, (r) => {
+            return req.user.id === r.respectBy && post.userId === r.respectFor;
+        });
+        const trust = _.find(trusts, (r) => {
+            return req.user.id === r.reactedBy && post.id === r.postId;
+        });
+        const voteUpCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.voteUp;
+        }).length;
+        const voteDownCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.voteDown;
+        }).length;
+        const noVoteCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.noVote;
+        }).length;
+
+        const reaction = _.find(reactions, (r) => {
+            return req.user.id === r.reactedBy && post.id === r.postId;
+        });
+        const loveCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.love;
+        }).length;
+        const angryCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.angry;
+        }).length;
+        const enjoyCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.enjoy;
+        }).length;
+        const lolCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.lol;
+        }).length;
+        const wowCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.wow;
+        }).length;
+        const sadCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.sad;
+        }).length;
+        const respectCountOnPostUserProfile = respectForGrouped[post.userId] ? respectForGrouped[post.userId].length : 0;
+        const respectCountGivenByPostUserToOthers = respectByGrouped[post.userId] ? respectByGrouped[post.userId].length : 0;
+        return {
+            respectedByMe,
+            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+            trust, voteUpCount, voteDownCount, noVoteCount,
+            respectCountOnPostUserProfile,
+            respectCountGivenByPostUserToOthers
+        };
     }
 
     async uploadPostMedia(files, postId, commentId) {
@@ -253,10 +300,17 @@ export class PostController {
     }
 
     async votePost(req) {
+        if (!Validator.isValidPostVoteType(req.body.type)) {
+            throw new ErrorModel(AppCode.invalid_request, `Invalid trust type ${req.body.type}`);
+        }
+        return this.postService.votePost(req);
+    }
+
+    async reactOnPost(req) {
         if (!Validator.isValidPostReactionType(req.body.type)) {
             throw new ErrorModel(AppCode.invalid_request, `Invalid post react type ${req.body.type}`);
         }
-        return this.postService.votePost(req);
+        return this.postService.reactOnPost(req);
     }
 
     async notifyUser(userId, postId) {

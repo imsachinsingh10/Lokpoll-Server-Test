@@ -236,7 +236,6 @@ export class UserRoutes {
 
         router.post('/getWhoRespectedByMe', async (req, res) => {
             try {
-
                 let result = await this.userController.getFormattedWhoRespectedByMe(req);
                 return await res.json(result);
             } catch (e) {

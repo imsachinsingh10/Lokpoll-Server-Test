@@ -161,7 +161,7 @@ export class PostService {
 
     async votePost(req) {
         const reqBody = req.body;
-        let query = `select id, type from ${table.postReaction} 
+        let query = `select id, type from ${table.postTrust} 
                         where reactedBy = ${req.user.id} 
                             and postId = ${reqBody.postId} 
                         limit 1;`;
@@ -169,6 +169,32 @@ export class PostService {
         if (!_.isEmpty(result)) {
             if (result.type === reqBody.type) {
                 return this.deleteVote(req);
+            }
+            query = `update ${table.postTrust} 
+                        set type = '${reqBody.type}'
+                        where id = ${result.id};`;
+            return SqlService.executeQuery(query);
+        }
+        const postReaction = {
+            postId: reqBody.postId,
+            reactedBy: req.user.id,
+            reactedAt: 'utc_timestamp()',
+            type: reqBody.type,
+        };
+        query = QueryBuilderService.getInsertQuery(table.postTrust, postReaction);
+        return SqlService.executeQuery(query);
+    }
+
+    async reactOnPost(req) {
+        const reqBody = req.body;
+        let query = `select id, type from ${table.postReaction} 
+                        where reactedBy = ${req.user.id} 
+                            and postId = ${reqBody.postId} 
+                        limit 1;`;
+        let result = await SqlService.getSingle(query);
+        if (!_.isEmpty(result)) {
+            if (result.type === reqBody.type) {
+                return this.deleteReaction(req);
             }
             query = `update ${table.postReaction} 
                         set type = '${reqBody.type}'
@@ -186,6 +212,13 @@ export class PostService {
     }
 
     async deleteVote(req) {
+        const query = `delete from ${table.postTrust}
+                            where reactedBy = ${req.user.id} 
+                            and postId = ${req.body.postId};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async deleteReaction(req) {
         const query = `delete from ${table.postReaction}
                             where reactedBy = ${req.user.id} 
                             and postId = ${req.body.postId};`;
@@ -197,8 +230,16 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async getPostReactions() {
-        const query = `select * from ${table.postReaction} where type in ('vote_up', 'no_vote', 'vote_down');`;
+    async getPostReactions(postIds) {
+        const query = `select * from ${table.postReaction} 
+                        where postId in ${Utils.getRange(postIds)}`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostTrust(postIds) {
+        const query = `select * from ${table.postTrust} 
+                        where type in ('vote_up', 'no_vote', 'vote_down')
+                        and postId in ${Utils.getRange(postIds)}`;
         return SqlService.executeQuery(query);
     }
 
@@ -245,7 +286,7 @@ export class PostService {
     async getTrustOnPost(req) {
         console.log(req.postId);
         const query = `select pr.id, pr.type as trustType, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
-                        from ${table.postReaction} pr
+                        from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy
                         where 
                            postId = ${req.postId};`;
@@ -253,9 +294,8 @@ export class PostService {
     }
 
     async getTrustOnPostVoteUp(req) {
-        console.log(req.postId);
         const query = `select pr.id, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
-                        from ${table.postReaction} pr
+                        from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy
                         where 
                            postId = ${req.postId}
@@ -263,11 +303,9 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-
     async getTrustOnPostVoteDown(req) {
-        console.log(req.postId);
         const query = `select pr.id, u.id as userId,u.name, u.imageUrl ,u.bgImageUrl
-                        from ${table.postReaction} pr
+                        from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy
                         where 
                            postId = ${req.postId}
@@ -276,9 +314,8 @@ export class PostService {
     }
 
     async getTrustOnPostNoVote(req) {
-        console.log(req.postId);
         const query = `select pr.id, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
-                        from ${table.postReaction} pr
+                        from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy
                         where 
                            postId = ${req.postId}

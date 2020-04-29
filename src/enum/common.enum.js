@@ -16,11 +16,18 @@ export const WorkingStatus = {
 };
 
 export const PostReaction = {
-    respect: 'respect',
+    love: 'love',
+    angry: 'angry',
+    enjoy: 'enjoy',
+    lol: 'lol',
+    wow: 'wow',
+    sad: 'sad',
+};
+
+export const PostVoteOption = {
     voteUp: 'vote_up',
     voteDown: 'vote_down',
     noVote: 'no_vote',
-    share: 'share'
 };
 
 export const AgeRange = {
