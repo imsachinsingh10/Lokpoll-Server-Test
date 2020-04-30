@@ -32,14 +32,17 @@ export class PostService {
             longitude: req.longitude,
         };
         let condition1 = ``;
+        let condition2 = ``;
+        let condition3 = ``;
+        let condition4 = ``;
+
+
         if (req.lastPostId > 0) {
             condition1 = `and id < ${req.lastPostId}`;
         }
-        let condition2 = ``;
         if (req.postByUserId > 0) {
             condition2 = `and userId = ${req.postByUserId}`;
         }
-        let condition3 = ``;
         try {
             const moodIds = JSON.parse(req.moodIds);
             if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
@@ -49,60 +52,83 @@ export class PostService {
 
         }
 
+        if (req.radiusInMeter) {
+            condition4 = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
+        }
+
         const query = `select 
-                            id, latitude, longitude 
+                            id, latitude, longitude, SQRT(
+                            POW(69.1 * (latitude - ${reqCoordinate.latitude}), 2) +
+                            POW(69.1 * (${reqCoordinate.longitude} - longitude) * COS(latitude / 57.3), 2)) AS distance
                        from post
                        where 
                        isDeleted = 0 
                         and latitude is not null and longitude is not null
-                        ${condition1} ${condition2} ${condition3}
-                       -- limit ${req.postCount * 5}
+                        ${condition1} ${condition2} ${condition3} ${condition4}
+                        -- order by id desc
+                        order by distance desc, id desc
+                       limit ${req.postCount}
                        ;`;
         let posts = await SqlService.executeQuery(query);
-        console.log('posts', posts);
-        const postCoordinates = posts.map(p => {
-            return {
-                latitude: p.latitude,
-                longitude: p.longitude
-            }
-        });
-        let distance = geolib.orderByDistance(reqCoordinate, postCoordinates);
-        // console.log('distance', distance);
-        distance = distance.filter((d) => d.distance <= req.radiusInMeter);
-        // console.log('filtered distance', distance);
+        console.log('qualified posts', posts.length);
         let qualifiedPostIds = [];
-        _.each(distance, d => {
-            qualifiedPostIds.push(posts[d['key']].id)
-        });
-        if (qualifiedPostIds.length > 0) {
-            qualifiedPostIds.sort((a, b) => {
-                return a > b ? 1 : -1;
-            });
-            qualifiedPostIds.reverse();
-            if (req.postCount > 0) {
-                qualifiedPostIds = qualifiedPostIds.slice(0, req.postCount);
-            }
-        }
+        qualifiedPostIds = posts.map(p => p.id);
+        qualifiedPostIds.sort((a, b) => b - a);
+        console.log('qualifiedPostIds', qualifiedPostIds.length, qualifiedPostIds);
         return qualifiedPostIds;
     }
 
-    async getAllPosts(postIds) {
+    async getAllPosts(req) {
+        const reqCoordinate = {
+            latitude: req.latitude,
+            longitude: req.longitude,
+        };
+        let condition1 = ``;
+        let condition2 = ``;
+        let condition3 = ``;
+        let condition4 = ``;
+
+
+        if (req.lastPostId > 0) {
+            condition1 = `and id < ${req.lastPostId}`;
+        }
+        if (req.postByUserId > 0) {
+            condition2 = `and userId = ${req.postByUserId}`;
+        }
+        try {
+            const moodIds = JSON.parse(req.moodIds);
+            if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
+                condition3 = `and moodId in ${Utils.getRange(moodIds)}`
+            }
+        } catch (e) {
+
+        }
+
+        if (req.radiusInMeter) {
+            condition4 = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
+        }
         const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             pm.type, pm.url, pm.thumbnailUrl, pm.commentId, 
-                            m.name 'mood'
+                            m.name 'mood',
+                            SQRT(
+                            POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
+                            POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance
                         from post p 
                             left join post_media pm on pm.postId = p.id
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
-                        where p.id in ${Utils.getRange(postIds)}   
-                        and isDeleted = 0 
-                        and isPostUpload = 1 
-                        order by p.id desc
+                        where 
+                            p.isDeleted = 0 
+                            and p.latitude is not null and p.longitude is not null
+                            and p.isPostUpload = 1 
+                            ${condition1} ${condition2} ${condition3} ${condition4}
+                        order by distance desc, p.id desc
+                        limit ${req.postCount} offset ${req.offset}
                         ;`;
         return SqlService.executeQuery(query);
     }
@@ -111,14 +137,13 @@ export class PostService {
         return SqlService.getTable(table.postType, 0);
     }
 
-    async getComments(postIds, levels = [0, 1]) {
+    async getComments(postIds) {
         const query = `select pc.*, u.name, u.imageUrl, pm.url, pm.type
                         from ${table.postComment} pc
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id
                         where 
-                            pc.postId in ${Utils.getRange(postIds)} 
-                            and level in ${Utils.getRange(levels)};`;
+                            pc.postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }
 
@@ -152,7 +177,6 @@ export class PostService {
                         where id = ${model.postId};`;
         return SqlService.executeQuery(query);
     }
-
 
     async createPostComment(comment) {
         const query = QueryBuilderService.getInsertQuery(table.postComment, comment);

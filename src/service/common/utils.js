@@ -50,6 +50,10 @@ export default class Utils {
         return JSON.stringify(arr).replace('[', '(').replace(']', ')');
     }
 
+    static getDistanceInMiles(distanceInMeters) {
+        return +distanceInMeters * 0.000621371;
+    }
+
     static getRandomColor() {
         const letters = '0123456789ABCDEF';
         let color = '#';

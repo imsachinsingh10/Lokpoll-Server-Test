@@ -27,7 +27,7 @@ export default class Validator {
 
     static isValidPostVoteType(type) {
         for (let key in PostVoteOption) {
-            if (PostReaction[key] === type) {
+            if (PostVoteOption[key] === type) {
                 return true;
             }
         }

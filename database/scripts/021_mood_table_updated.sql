@@ -23,3 +23,7 @@ CREATE TABLE `post_reaction` (
     `reactedAt` datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+ALTER TABLE post CONVERT TO CHARACTER SET utf8mb4;
+
+SET NAMES utf8mb4;

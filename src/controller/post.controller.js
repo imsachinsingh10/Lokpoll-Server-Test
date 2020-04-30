@@ -77,13 +77,15 @@ export class PostController {
         }
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
-        const comments = await this.postService.getComments(postIds, [0, 1, 2, 3, 4]);
-        const subMoods = await this.postService.getSubMoodByPostId(postIds);
-        const respects = await this.postService.getRespects(uniqPostIds);
-        const reactions = await this.postService.getPostReactions(uniqPostIds);
-        const trusts = await this.postService.getPostTrust(uniqPostIds);
+        const [comments, subMoods, respects, reactions, trusts] = await Promise.all([
+            this.postService.getComments(postIds),
+            this.postService.getSubMoodByPostId(postIds),
+            this.postService.getRespects(uniqPostIds),
+            this.postService.getPostReactions(uniqPostIds),
+            this.postService.getPostTrust(uniqPostIds)
+        ])
+
         const respectForGrouped = _.groupBy(respects, 'respectFor');
-        console.log('+++++++++ respectForGrouped', respectForGrouped);
         const respectByGrouped = _.groupBy(respects, 'respectBy');
         const posts = [];
         _.forEach(uniqPostIds, (postId) => {

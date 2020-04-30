@@ -77,16 +77,17 @@ export class PostRoutes {
                     "type": req.body.type || 'normal',
                     "radiusInMeter": req.body.radiusInMeter || 10000000000,
                     "lastPostId": req.body.lastPostId,
-                    "postCount": req.body.postCount,
+                    "postCount": req.body.postCount || 20,
                     "postByUserId": req.body.postByUserId,
                     "moodIds": req.body.moodIds,
+                    "offset": req.body.offset || 0,
                 };
-                let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
-                let result = [];
-                if (qualifiedPostIds.length > 0) {
-                    result = await this.postService.getAllPosts(qualifiedPostIds);
-                    result = await this.postController.formatPosts(req, result);
-                }
+                // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
+                const start = new Date();
+                let result = await this.postService.getAllPosts(request);
+                result = await this.postController.formatPosts(req, result);
+                const end = new Date() - start;
+                console.log('get all post response', {processingTime: end / 1000 + ' seconds'})
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
