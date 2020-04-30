@@ -212,6 +212,9 @@ export class PostController {
         const respectedByMe = _.find(respects, (r) => {
             return req.user.id === r.respectBy && post.userId === r.respectFor;
         });
+        // console.log('respects', respects.filter(r => r.respectFor === post.userId));
+        // console.log('respectedByMe', respectedByMe);
+        // console.log(`myId: %d, postUserId: %d`, req.user.id, post.userId);
         const trust = _.find(trusts, (r) => {
             return req.user.id === r.reactedBy && post.id === r.postId;
         });

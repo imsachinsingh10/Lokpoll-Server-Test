@@ -86,7 +86,7 @@ export class PostRoutes {
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
                 result = await this.postController.formatPosts(req, result);
-                result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
+                // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
                 console.log('get all post response', {processingTime: end / 1000 + ' seconds'})

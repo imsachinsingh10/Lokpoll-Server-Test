@@ -127,7 +127,7 @@ export class PostService {
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1 
                             ${condition1} ${condition2} ${condition3} ${condition4}
-                        order by distance desc, p.id desc
+                        order by distance asc, p.id desc
                         limit ${req.postCount} offset ${req.offset}
                         ;`;
         return SqlService.executeQuery(query);
