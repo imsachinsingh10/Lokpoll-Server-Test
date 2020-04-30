@@ -20,6 +20,7 @@ export class PostController {
 
     async createPost(req) {
         const reqBody = req.body;
+        const files = req.files;
         const post = {
             description: reqBody.description,
             userId: reqBody.userId || req.user.id,
@@ -32,8 +33,10 @@ export class PostController {
             address: reqBody.address,
             source: reqBody.source,
             language: reqBody.language,
-            isPostUpload: '0',
         };
+        if (files.image || files.video || files.audio) {
+            post.isPostUpload = '0';
+        }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
         Validator.validateRequiredFields(post);
 

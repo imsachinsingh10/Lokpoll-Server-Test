@@ -12,6 +12,7 @@ import path from 'path';
 export class PostService {
     constructor() {
         this.queryBuilderService = new QueryBuilderService();
+        this.sqlService = new SqlService();
     }
 
     async createPost(post) {
@@ -79,6 +80,7 @@ export class PostService {
     }
 
     async getAllPosts(req) {
+        new SqlService();
         const reqCoordinate = {
             latitude: req.latitude,
             longitude: req.longitude,
@@ -88,10 +90,6 @@ export class PostService {
         let condition3 = ``;
         let condition4 = ``;
 
-
-        // if (req.lastPostId > 0) {
-        //     condition1 = `and p.id < ${req.lastPostId}`;
-        // }
         if (req.postByUserId > 0) {
             condition2 = `and p.userId = ${req.postByUserId}`;
         }

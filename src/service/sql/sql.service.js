@@ -9,6 +9,11 @@ const pool = mysql.createPool(db);
 
 export class SqlService {
 
+    constructor() {
+        const query = 'SET NAMES utf8mb4';
+        SqlService.executeQuery(query);
+    }
+
     static executeQuery(query) {
         console.log('query', query);
         return new Promise((resolve, reject) => {

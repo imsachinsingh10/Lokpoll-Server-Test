@@ -13,13 +13,14 @@ export class QueryBuilderService {
         query = query.slice(0, -2);
         query += ') values (';
         for (const prop in model) {
-            const value = model[prop];
+            let value = model[prop];
             if (value === undefined) {
                 continue;
             }
             if (typeof value === 'number' || value === null || value.endsWith('()')) {
                 query += `${value}, `;
             } else {
+                value = value.replace('"', "\\\"").replace("'", "\\\'");
                 query += `'${value}', `;
             }
         }
