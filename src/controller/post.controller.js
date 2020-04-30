@@ -75,14 +75,24 @@ export class PostController {
         if (_.isEmpty(rawPosts)) {
             return [];
         }
+        // if (!_.isEmpty(rawPosts)) {
+        //     return rawPosts;
+        // }
+        // console.log('rawPosts', rawPosts);
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
-        const [comments, subMoods, respects, reactions, trusts] = await Promise.all([
-            this.postService.getComments(postIds),
-            this.postService.getSubMoodByPostId(postIds),
+        if (postIds.length !== uniqPostIds.length) {
+            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+        }
+        // uniqPostIds.sort((a, b) => b - a);
+        console.log('postIds', uniqPostIds);
+        const [comments, subMoods, respects, reactions, trusts, mediaList] = await Promise.all([
+            this.postService.getComments(uniqPostIds),
+            this.postService.getSubMoodByPostId(uniqPostIds),
             this.postService.getRespects(uniqPostIds),
             this.postService.getPostReactions(uniqPostIds),
-            this.postService.getPostTrust(uniqPostIds)
+            this.postService.getPostTrust(uniqPostIds),
+            this.postService.getPostMedia(uniqPostIds),
         ])
 
         const respectForGrouped = _.groupBy(respects, 'respectFor');
@@ -91,18 +101,17 @@ export class PostController {
         _.forEach(uniqPostIds, (postId) => {
             const postComments = comments.filter(comment => comment.postId === postId);
             const subMoodData = subMoods.filter(subMood => subMood.postId === postId);
-            const _post = this.getPost(req, postId, rawPosts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMoodData, trusts);
+            const _post = this.getPost(req, postId, rawPosts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMoodData, trusts, mediaList);
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMood, trusts) {
+    getPost(req, postId, posts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMood, trusts, mediaList) {
         const filteredPosts = _.filter(posts, post => post.id === postId);
         const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, respectForGrouped, respectByGrouped, reactions, trusts);
-
-        const media = posts
-            .filter(post => post.id === postId && post.url !== null && post.commentId === 0)
+        const media = mediaList
+            .filter(m => m.postId === postId && m.url !== null && m.commentId === 0)
             .map(p => ({
                 type: p.type,
                 url: p.url,
@@ -164,6 +173,7 @@ export class PostController {
         } = this.getReactionsWithCount(req, post, respects, reactions, trusts, respectForGrouped, respectByGrouped)
         return {
             id: post.id,
+            distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,
             type: post.postType,

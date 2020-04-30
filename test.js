@@ -1,3 +1,14 @@
-import {SMSService} from "./src/service/common/sms.service";
+import _ from 'lodash';
 
-SMSService.sendSMS("8630694779", "1234").then(console.log).catch(console.log);
+const array = [317, 182, 181, 165, 162, 170, 156, 155, 154, 153, 177, 176, 159, 158, 157,
+    175, 137,  136, 135, 133, 431, 171, 169, 168,
+    152, 433, 292, 173, 142, 84]
+
+const arr3 = [
+    433, 431, 317, 292, 182, 181, 177, 176, 175, 173, 171, 170,
+    169, 168, 165, 162, 159, 158, 157, 156, 155, 154, 153, 152, 142, 137, 136, 135, 133, 84
+]
+
+const unqi = _.uniq(array);
+
+console.log(array.length === unqi.length, unqi.length);

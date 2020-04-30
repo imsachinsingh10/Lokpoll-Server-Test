@@ -54,6 +54,10 @@ export default class Utils {
         return +distanceInMeters * 0.000621371;
     }
 
+    static getDistanceInMeters(distanceInMiles) {
+        return +distanceInMiles / 0.000621371;
+    }
+
     static getRandomColor() {
         const letters = '0123456789ABCDEF';
         let color = '#';

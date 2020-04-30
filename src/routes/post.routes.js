@@ -70,6 +70,7 @@ export class PostRoutes {
         });
 
         router.post('/getAll', async (req, res) => {
+            const start = new Date();
             try {
                 const request = {
                     "latitude": req.body.latitude || 21.251385,
@@ -83,11 +84,13 @@ export class PostRoutes {
                     "offset": req.body.offset || 0,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
-                const start = new Date();
                 let result = await this.postService.getAllPosts(request);
                 result = await this.postController.formatPosts(req, result);
+                result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
+                // result = result.map(r => r.id);
                 const end = new Date() - start;
                 console.log('get all post response', {processingTime: end / 1000 + ' seconds'})
+                // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

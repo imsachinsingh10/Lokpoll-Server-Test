@@ -89,16 +89,16 @@ export class PostService {
         let condition4 = ``;
 
 
-        if (req.lastPostId > 0) {
-            condition1 = `and id < ${req.lastPostId}`;
-        }
+        // if (req.lastPostId > 0) {
+        //     condition1 = `and p.id < ${req.lastPostId}`;
+        // }
         if (req.postByUserId > 0) {
-            condition2 = `and userId = ${req.postByUserId}`;
+            condition2 = `and p.userId = ${req.postByUserId}`;
         }
         try {
             const moodIds = JSON.parse(req.moodIds);
             if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
-                condition3 = `and moodId in ${Utils.getRange(moodIds)}`
+                condition3 = `and p.moodId in ${Utils.getRange(moodIds)}`
             }
         } catch (e) {
 
@@ -112,13 +112,13 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            pm.type, pm.url, pm.thumbnailUrl, pm.commentId, 
+                            -- pm.type, pm.url, pm.thumbnailUrl, pm.commentId, 
                             m.name 'mood',
                             SQRT(
                             POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                             POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance
                         from post p 
-                            left join post_media pm on pm.postId = p.id
+                            -- left join post_media pm on pm.postId = p.id
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
@@ -264,6 +264,12 @@ export class PostService {
         const query = `select * from ${table.postTrust} 
                         where type in ('vote_up', 'no_vote', 'vote_down')
                         and postId in ${Utils.getRange(postIds)}`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostMedia(postIds) {
+        const query = `select pm.postId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.postMedia}  pm
+                        where postId in ${Utils.getRange(postIds)}`;
         return SqlService.executeQuery(query);
     }
 
