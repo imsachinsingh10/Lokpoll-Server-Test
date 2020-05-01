@@ -89,7 +89,7 @@ export class PostRoutes {
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
-                console.log('get all post response', {processingTime: end / 1000 + ' seconds'})
+                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {

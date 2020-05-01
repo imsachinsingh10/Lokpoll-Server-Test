@@ -37,7 +37,6 @@ export class PostService {
         let condition3 = ``;
         let condition4 = ``;
 
-
         if (req.lastPostId > 0) {
             condition1 = `and id < ${req.lastPostId}`;
         }
@@ -88,7 +87,7 @@ export class PostService {
         let condition1 = ``;
         let condition2 = ``;
         let condition3 = ``;
-        let condition4 = ``;
+        let havingCondition = ``;
 
         if (req.postByUserId > 0) {
             condition2 = `and p.userId = ${req.postByUserId}`;
@@ -103,29 +102,28 @@ export class PostService {
         }
 
         if (req.radiusInMeter) {
-            condition4 = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
         }
         const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            -- pm.type, pm.url, pm.thumbnailUrl, pm.commentId, 
                             m.name 'mood',
                             SQRT(
                             POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                             POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance
                         from post p 
-                            -- left join post_media pm on pm.postId = p.id
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                         where 
-                            p.isDeleted = 0 
+                            p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1 
-                            ${condition1} ${condition2} ${condition3} ${condition4}
-                        order by distance asc, p.id desc
+                            ${condition1} ${condition2} ${condition3} 
+                            ${havingCondition}
+                        order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
                         ;`;
         return SqlService.executeQuery(query);
@@ -363,6 +361,11 @@ export class PostService {
 
     async getSubMoodByName(name) {
         const query = `select * from ${table.subMood} where name = '${name}';`;
+        return await SqlService.getSingle(query);
+    }
+    async getSubMoodByNames(names) {
+        const query = `select * from ${table.subMood} 
+                        where trim(lower(name)) name in ${Utils.getRange(names)};`;
         return await SqlService.getSingle(query);
     }
 }

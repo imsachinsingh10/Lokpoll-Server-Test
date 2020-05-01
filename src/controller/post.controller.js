@@ -36,59 +36,61 @@ export class PostController {
         };
         if (files.image || files.video || files.audio) {
             post.isPostUpload = '0';
+        } else {
+            post.isPostUpload = '1';
         }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
         Validator.validateRequiredFields(post);
 
         const result = await this.postService.createPost(post);
-        const subMoodData = [];
-        if (!_.isEmpty(reqBody.subMoodData)) {
-            for (const obj of JSON.parse(reqBody.subMoodData)) {
-                const submoods = await this.postService.getSubMoodByName(obj);
-                if (_.isEmpty(submoods)) {
-                    subMoodData.push({
-                        name: obj,
-                        moodId: reqBody.moodId,
-                        createdAt: 'utc_timestamp()',
-                    })
-                }
-            }
-        }
-        if (!_.isEmpty(subMoodData)) {
-            await this.postService.createSubMoods(subMoodData);
-        }
-        const postSubMoodData = [];
-        if (!_.isEmpty(reqBody.subMoodData)) {
-            for (const obj of JSON.parse(reqBody.subMoodData)) {
-                const submoods = await this.postService.getSubMoodByName(obj);
-                postSubMoodData.push({
-                    subMoodId: submoods.id,
-                    postId: result.insertId
-                })
-            }
-        }
-        if (!_.isEmpty(postSubMoodData)) {
-            await this.postService.createPostSubMoods(postSubMoodData);
-        }
+        await this.insertSubMoods(reqBody, result.insertId);
         delete post.createdAt;
         return {id: result.insertId, ...post};
+    }
+
+    async insertSubMoods(reqBody, postId) {
+        let subMoodNames = [];
+        try {
+            subMoodNames = JSON.parse(reqBody.subMoodData);
+        } catch (e) {
+        }
+        if (_.isEmpty(subMoodNames)) {
+            return;
+        }
+        let subMoodNamesLower = subMoodNames.map(n => n.toLowerCase());
+        const subMoods = await this.postService.getSubMoodByNames(subMoodNamesLower);
+        if (!_.isEmpty(subMoods)) {
+            const _subMoodNames = subMoods.map(subMood => subMood.name);
+            subMoodNames = subMoodNames.filter((name) => {
+                return _subMoodNames.indexOf(name) === -1;
+            })
+        }
+        let newSubMoods = subMoodNames.map((name) => ({
+            name,
+            moodId: reqBody.moodId,
+            createdAt: 'utc_timestamp()',
+        }))
+        if (!_.isEmpty(newSubMoods)) {
+            await this.postService.createSubMoods(newSubMoods);
+            const subMoods = await this.postService.getSubMoodByNames(subMoodNames);
+            newSubMoods = subMoods.map(subMood => ({
+                subMoodId: subMood.id,
+                postId
+            }))
+            await this.postService.createPostSubMoods(newSubMoods);
+        }
+        return subMoodNames;
     }
 
     async formatPosts(req, rawPosts) {
         if (_.isEmpty(rawPosts)) {
             return [];
         }
-        // if (!_.isEmpty(rawPosts)) {
-        //     return rawPosts;
-        // }
-        // console.log('rawPosts', rawPosts);
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         if (postIds.length !== uniqPostIds.length) {
             console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        // uniqPostIds.sort((a, b) => b - a);
-        console.log('postIds', uniqPostIds);
         const [comments, subMoods, respects, reactions, trusts, mediaList] = await Promise.all([
             this.postService.getComments(uniqPostIds),
             this.postService.getSubMoodByPostId(uniqPostIds),
@@ -98,37 +100,49 @@ export class PostController {
             this.postService.getPostMedia(uniqPostIds),
         ])
 
-        const respectForGrouped = _.groupBy(respects, 'respectFor');
-        const respectByGrouped = _.groupBy(respects, 'respectBy');
         const posts = [];
-        _.forEach(uniqPostIds, (postId) => {
-            const postComments = comments.filter(comment => comment.postId === postId);
-            const subMoodData = subMoods.filter(subMood => subMood.postId === postId);
-            const _post = this.getPost(req, postId, rawPosts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMoodData, trusts, mediaList);
+        _.forEach(rawPosts, (post) => {
+            const _post = this.getPost(
+                {userId: req.user.id, post, comments, subMoods, respects, reactions, trusts, mediaList}
+            );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost(req, postId, posts, postComments, respects, respectForGrouped, respectByGrouped, reactions, subMood, trusts, mediaList) {
-        const filteredPosts = _.filter(posts, post => post.id === postId);
-        const basicDetails = this.getBasicPostDetails(req, filteredPosts[0], respects, respectForGrouped, respectByGrouped, reactions, trusts);
+    getPost({userId, post, comments, subMoods, respects, reactions, trusts, mediaList}) {
+        const postComments = comments.filter(comment => comment.postId === post.id);
+        const subMoodData = subMoods.filter(subMood => subMood.postId === post.id);
+        const basicDetails = this.getBasicPostDetails(userId, post, respects);
         const media = mediaList
-            .filter(m => m.postId === postId && m.url !== null && m.commentId === 0)
+            .filter(m => m.postId === post.id && m.url !== null && m.commentId === 0)
             .map(p => ({
                 type: p.type,
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
 
-        const comments = this.getFormattedComments(postComments);
+        const formattedComments = this.getFormattedComments(postComments);
+
+        const {
+            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+            trust, voteUpCount, voteDownCount, noVoteCount,
+        } = this.getReactionsWithCount(userId, post, reactions, trusts);
 
         return {
             ...basicDetails,
-            subMood,
+            subMood: subMoodData,
             media,
-            comments,
-            commentCount: comments.length
+            trustMeter: {
+                voteUpCount, voteDownCount, noVoteCount,
+                trustByMe: _.isEmpty(trust) ? null : trust.type,
+            },
+            reactions: {
+                loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+                reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
+            },
+            comments: formattedComments,
+            commentCount: formattedComments.length
         }
     }
 
@@ -166,14 +180,10 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(req, post, respects, respectForGrouped, respectByGrouped, reactions, trusts) {
-        const {
-            respectedByMe,
-            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
-            trust, voteUpCount, voteDownCount, noVoteCount,
-            respectCountOnPostUserProfile,
-            respectCountGivenByPostUserToOthers
-        } = this.getReactionsWithCount(req, post, respects, reactions, trusts, respectForGrouped, respectByGrouped)
+    getBasicPostDetails(userId, post, respects) {
+        const respectedByMe = _.find(respects, (r) => {
+            return userId === r.respectBy && post.userId === r.respectFor;
+        });
         return {
             id: post.id,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
@@ -184,14 +194,6 @@ export class PostController {
             source: post.source,
             language: post.language,
             linkToShare: "https://www.socialmediatoday.com",
-            trustMeter: {
-                voteUpCount, voteDownCount, noVoteCount,
-                trustByMe: _.isEmpty(trust) ? null : trust.type,
-            },
-            reactions: {
-                loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
-                reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
-            },
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,
@@ -199,8 +201,6 @@ export class PostController {
                 imageUrl: post.imageUrl,
                 bgImageUrl: post.bgImageUrl,
                 audioUrl: post.audioUrl,
-                respectCountOnPostUserProfile,
-                respectCountGivenByPostUserToOthers,
                 respectedByMe: !_.isEmpty(respectedByMe),
             },
             location: {
@@ -211,15 +211,9 @@ export class PostController {
         }
     }
 
-    getReactionsWithCount(req, post, respects, reactions, trusts, respectForGrouped, respectByGrouped) {
-        const respectedByMe = _.find(respects, (r) => {
-            return req.user.id === r.respectBy && post.userId === r.respectFor;
-        });
-        // console.log('respects', respects.filter(r => r.respectFor === post.userId));
-        // console.log('respectedByMe', respectedByMe);
-        // console.log(`myId: %d, postUserId: %d`, req.user.id, post.userId);
+    getReactionsWithCount(userId, post, reactions, trusts) {
         const trust = _.find(trusts, (r) => {
-            return req.user.id === r.reactedBy && post.id === r.postId;
+            return userId === r.reactedBy && post.id === r.postId;
         });
         const voteUpCount = _.filter(trusts, (r) => {
             return r.postId === post.id && r.type === PostVoteOption.voteUp;
@@ -232,7 +226,7 @@ export class PostController {
         }).length;
 
         const reaction = _.find(reactions, (r) => {
-            return req.user.id === r.reactedBy && post.id === r.postId;
+            return userId === r.reactedBy && post.id === r.postId;
         });
         const loveCount = _.filter(reactions, (r) => {
             return r.postId === post.id && r.type === PostReaction.love;
@@ -252,14 +246,9 @@ export class PostController {
         const sadCount = _.filter(reactions, (r) => {
             return r.postId === post.id && r.type === PostReaction.sad;
         }).length;
-        const respectCountOnPostUserProfile = respectForGrouped[post.userId] ? respectForGrouped[post.userId].length : 0;
-        const respectCountGivenByPostUserToOthers = respectByGrouped[post.userId] ? respectByGrouped[post.userId].length : 0;
         return {
-            respectedByMe,
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
-            respectCountOnPostUserProfile,
-            respectCountGivenByPostUserToOthers
         };
     }
 
