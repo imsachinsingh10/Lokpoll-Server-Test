@@ -191,22 +191,22 @@ export class UserController {
         }
     }
 
-    async getUserDetails(userId) {
+    async getUserDetails(userId, callerId = 0) {
+        // const userId = req.body.userId;
+        // const callerId = req.user.id;
         const user = await this.userService.getUserById(userId);
         const hobbies = await this.userService.getHobbiesByUserId(userId);
         const basicDetails = _.omit(user, ['latitude', 'longitude', 'address']);
         const respects = await this.userService.getRespects();
-        const grouped = _.groupBy(respects, 'respectFor');
-        const groupRespectBy = _.groupBy(respects, 'respectBy');
-        const respectedByMe = _.find(respects, (r) => {
-            return userId === r.respectBy;
-        });
-        const respectCount = grouped[userId] ? grouped[userId].length : 0;
-        const respectingCount = groupRespectBy[userId] ? groupRespectBy[userId].length : 0;
+        const groupedRespectFor = _.groupBy(respects, 'respectFor');
+        const groupedRespectBy = _.groupBy(respects, 'respectBy');
+        const respectedByMe = await this.userService.getRespectByUserId(callerId, userId);
+        const respectCountForUser = groupedRespectFor[userId] ? groupedRespectFor[userId].length : 0;
+        const respectCountByUser = groupedRespectBy[userId] ? groupedRespectBy[userId].length : 0;
         return {
             ...basicDetails,
-            respectCount,
-            respectingCount,
+            respectCountForUser,
+            respectCountByUser,
             respectedByMe: !_.isEmpty(respectedByMe),
             hobbies,
             location: {

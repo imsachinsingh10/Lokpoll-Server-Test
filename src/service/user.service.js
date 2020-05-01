@@ -312,4 +312,10 @@ export class UserService {
         const query = `select * from ${table.respect}`;
         return SqlService.executeQuery(query);
     }
+
+    async getRespectByUserId(respectBy, respectFor) {
+        const query = `select 1 from ${table.respect} 
+                        where respectBy = ${respectBy} and respectFor = ${respectFor}`;
+        return SqlService.executeQuery(query);
+    }
 }
