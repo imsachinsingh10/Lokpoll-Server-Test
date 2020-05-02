@@ -87,6 +87,7 @@ export class PostService {
         let condition1 = ``;
         let condition2 = ``;
         let condition3 = ``;
+        let condition4 = `and trim(lower(p.language)) = '${req.language.toLowerCase().trim()}'`;
         let havingCondition = ``;
 
         if (req.postByUserId > 0) {
@@ -121,7 +122,7 @@ export class PostService {
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1 
-                            ${condition1} ${condition2} ${condition3} 
+                            ${condition1} ${condition2} ${condition3} ${condition4}
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
