@@ -47,7 +47,10 @@ export default class Utils {
     }
 
     static getRange(arr) {
-        return JSON.stringify(arr).replace('[', '(').replace(']', ')');
+        return JSON.stringify(arr)
+            .replace('[', '(')
+            .replace(']', ')')
+            .replace(/"/g, '\'');
     }
 
     static getDistanceInMiles(distanceInMeters) {

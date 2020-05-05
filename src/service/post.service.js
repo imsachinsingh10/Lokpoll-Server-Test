@@ -366,7 +366,7 @@ export class PostService {
     }
     async getSubMoodByNames(names) {
         const query = `select * from ${table.subMood} 
-                        where trim(lower(name)) name in ${Utils.getRange(names)};`;
-        return await SqlService.getSingle(query);
+                        where trim(lower(name)) in ${Utils.getRange(names)};`;
+        return await SqlService.executeQuery(query);
     }
 }

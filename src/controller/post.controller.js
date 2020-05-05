@@ -50,9 +50,12 @@ export class PostController {
 
     async insertSubMoods(reqBody, postId) {
         let subMoodNames = [];
+        let subMoodNamesOriginal = [];
         try {
             subMoodNames = JSON.parse(reqBody.subMoodData);
+            subMoodNamesOriginal = JSON.parse(reqBody.subMoodData);
         } catch (e) {
+            console.log('e', e);
         }
         if (_.isEmpty(subMoodNames)) {
             return;
@@ -65,21 +68,25 @@ export class PostController {
                 return _subMoodNames.indexOf(name) === -1;
             })
         }
-        let newSubMoods = subMoodNames.map((name) => ({
+        let newSubMoodsToInsert = subMoodNames.map((name) => ({
             name,
             moodId: reqBody.moodId,
             createdAt: 'utc_timestamp()',
         }))
-        if (!_.isEmpty(newSubMoods)) {
-            await this.postService.createSubMoods(newSubMoods);
-            const subMoods = await this.postService.getSubMoodByNames(subMoodNames);
-            newSubMoods = subMoods.map(subMood => ({
-                subMoodId: subMood.id,
-                postId
-            }))
-            await this.postService.createPostSubMoods(newSubMoods);
+        if (!_.isEmpty(newSubMoodsToInsert)) {
+            await this.postService.createSubMoods(newSubMoodsToInsert);
         }
+        await this.insertPostSubMoodMapping(postId, subMoodNamesOriginal);
         return subMoodNames;
+    }
+
+    async insertPostSubMoodMapping(postId, subMoodNames) {
+        const subMoods = await this.postService.getSubMoodByNames(subMoodNames);
+        const newSubMoods = subMoods.map(subMood => ({
+            subMoodId: subMood.id,
+            postId
+        }))
+        await this.postService.createPostSubMoods(newSubMoods);
     }
 
     async formatPosts(req, rawPosts) {
