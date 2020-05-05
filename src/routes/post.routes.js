@@ -34,7 +34,7 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
                 try {
                     const {id, userId} = await this.postController.createPost(req);
-                    const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : 'src', 'service', 'media-queue-processor.js');
+                    const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                     taskProcessor.on('disconnect', function (msg) {
                         this.kill();
