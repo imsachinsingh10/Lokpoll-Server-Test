@@ -8,6 +8,7 @@ import _ from 'lodash';
 import {AppCode} from "../enum/app-code";
 import fs from "fs";
 import path from 'path';
+import {LanguageCode} from "../enum/common.enum";
 
 export class PostService {
     constructor() {
@@ -110,7 +111,7 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            m.name 'mood',
+                            m.${LanguageCode[req.language] || 'en'} 'mood',
                             SQRT(
                             POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                             POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance

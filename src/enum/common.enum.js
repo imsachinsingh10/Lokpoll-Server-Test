@@ -48,3 +48,10 @@ export const PostType = {
     sellingAroundMe: 'selling_around_me',
     offersAroundMe: 'offers_around_me',
 };
+
+export const LanguageCode = {
+    English: 'en',
+    Hindi: 'hi',
+    Sambalpuri: 'ta',
+    Odiya: 'or',
+}
