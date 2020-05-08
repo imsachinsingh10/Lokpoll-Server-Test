@@ -24,12 +24,15 @@ export class MoodService {
 
     async getAllMoods(body) {
         let columns = 'm.*';
+        let condition = '';
         if (body.languageCode) {
-             columns = `m.id, m.imageUrl, m.${body.languageCode} name, m.color`;
+            columns = `m.id, m.imageUrl, m.${body.languageCode} name, m.color`;
+            condition = 'where isActive = 1';
         }
         const query = `select ${columns}
 	    				from ${table.mood} m
-	    				order by id desc`;
+	    				${condition}
+	    				order by m.isActive desc, m.position asc`;
         return SqlService.executeQuery(query);
     }
 

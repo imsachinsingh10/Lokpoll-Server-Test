@@ -35,6 +35,8 @@ export class MoodRoutes {
                     or: req.body.or,
                     ta: req.body.ta,
                     createdAt: 'utc_timestamp()',
+                    position: req.body.position,
+                    isActive: req.body.isActive,
                 };
                 if (req.file) {
                     const file = await this.minioService.uploadFile(req.file);

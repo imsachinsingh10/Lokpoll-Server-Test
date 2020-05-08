@@ -27,3 +27,7 @@ CREATE TABLE `post_reaction` (
 ALTER TABLE post CONVERT TO CHARACTER SET utf8mb4;
 
 SET NAMES utf8mb4;
+
+alter table mood add column isActive tinyint(4) default 1;
+
+alter table mood add column position int default 0;
