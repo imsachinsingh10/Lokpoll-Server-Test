@@ -88,11 +88,15 @@ export class PostService {
         let condition1 = ``;
         let condition2 = ``;
         let condition3 = ``;
-        let condition4 = `and trim(lower(p.language)) = '${req.language.toLowerCase().trim()}'`;
+        let condition4 = '';
         let havingCondition = ``;
 
+        if (req.language) {
+            condition4 = `and trim(lower(p.language)) = '${req.language.toLowerCase().trim()}'`;
+        }
         if (req.postByUserId > 0) {
             condition2 = `and p.userId = ${req.postByUserId}`;
+            condition4 = '';
         }
         try {
             const moodIds = JSON.parse(req.moodIds);
