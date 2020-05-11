@@ -5,12 +5,21 @@ export class Config {
     static env = Environment.prod;
 
     static version = {
-        majorRevision: 14,  // (new UI, lots of new features, conceptual change, etc.)
-        minorRevision: 36,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
-        bugFixes: 57,  // (Only bug fixes not new feature)
+        majorRevision: 1,  // (new UI, lots of new features, conceptual change, etc.)
+        minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
+        bugFixes: 1,  // (Only bug fixes not new feature)
     };
 
     static dbProd = {
+        host: `node39278-localbol-prod.cloudjiffy.net`,
+        user: `root`,
+        password: `ZDGhxq62647`,
+        database: `lokpoll`,
+        port: 3306,
+        multipleStatements: true
+    };
+
+    static dbTest = {
         host: `node23483-asa-server.cloudjiffy.net`,
         user: `root`,
         password: `16hstpssZz`,
@@ -28,22 +37,22 @@ export class Config {
     };
 
     static clientApp = {
-        baseUrlProd: 'http://test-asa.cloudjiffy.net/#',
-        baseUrlDev: 'http://localhost:3000/#',
-    };
-
-    static server = {
-        baseUrlProd: 'http://asa-server.cloudjiffy.net',
-        baseUrlDev: 'http://localhost:9000',
+        baseUrlProd: 'https://localbol-admin-web.cloudjiffy.net/#',
+        baseUrlDev: 'http://test-asa.cloudjiffy.net/#',
+        baseUrlLocal: 'http://localhost:3000/#',
     };
 
     static minio = {
-        baseUrl: 'https://common-storage.cloudjiffy.net',
+        baseUrl: 'https://localbol.cloudjiffy.net',
+        // baseUrl: 'https://common-storage.cloudjiffy.net',
         config: {
             port: 80,
-            endPoint: 'common-storage.cloudjiffy.net',
-            accessKey: 'I7hkcdR8S8',
-            secretKey: 'ijrvX7CWe0'
+            endPoint: 'localbol.cloudjiffy.net',
+            // endPoint: 'common-storage.cloudjiffy.net',
+            accessKey: 'gIHGMfk4z5',
+            // accessKey: 'I7hkcdR8S8',
+            secretKey: 'zesYt5ZVE0'
+            // secretKey: 'ijrvX7CWe0'
         },
         bucket: {
             root: 'lokpoll',
