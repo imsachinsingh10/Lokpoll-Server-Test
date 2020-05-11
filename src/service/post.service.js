@@ -28,57 +28,6 @@ export class PostService {
         return SqlService.getSingle(query);
     }
 
-    async getQualifiedPostIdsByLocation(req) {
-        const reqCoordinate = {
-            latitude: req.latitude,
-            longitude: req.longitude,
-        };
-        let condition1 = ``;
-        let condition2 = ``;
-        let condition3 = ``;
-        let condition4 = ``;
-
-        if (req.lastPostId > 0) {
-            condition1 = `and id < ${req.lastPostId}`;
-        }
-        if (req.postByUserId > 0) {
-            condition2 = `and userId = ${req.postByUserId}`;
-        }
-        try {
-            const moodIds = JSON.parse(req.moodIds);
-            if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
-                condition3 = `and moodId in ${Utils.getRange(moodIds)}`
-            }
-        } catch (e) {
-
-        }
-
-        if (req.radiusInMeter) {
-            condition4 = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
-        }
-
-        const query = `select 
-                            id, latitude, longitude, SQRT(
-                            POW(69.1 * (latitude - ${reqCoordinate.latitude}), 2) +
-                            POW(69.1 * (${reqCoordinate.longitude} - longitude) * COS(latitude / 57.3), 2)) AS distance
-                       from post
-                       where 
-                       isDeleted = 0 
-                        and latitude is not null and longitude is not null
-                        ${condition1} ${condition2} ${condition3} ${condition4}
-                        -- order by id desc
-                        order by distance desc, id desc
-                       limit ${req.postCount}
-                       ;`;
-        let posts = await SqlService.executeQuery(query);
-        console.log('qualified posts', posts.length);
-        let qualifiedPostIds = [];
-        qualifiedPostIds = posts.map(p => p.id);
-        qualifiedPostIds.sort((a, b) => b - a);
-        console.log('qualifiedPostIds', qualifiedPostIds.length, qualifiedPostIds);
-        return qualifiedPostIds;
-    }
-
     async getAllPosts(req) {
         new SqlService();
         const reqCoordinate = {

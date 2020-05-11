@@ -84,7 +84,7 @@ export class UserController {
             profession: user.profession,
             company: user.company,
             ageRangeId: user.ageRangeId,
-            phone: user.phone
+            // phone: user.phone
         };
         return this.userService.updateUser(_user);
     }
