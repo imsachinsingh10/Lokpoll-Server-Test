@@ -24,6 +24,7 @@ export const table = {
     respect: "respect",
     subMood: "sub_mood",
     postSubMood: "post_sub_mood",
+    location: "location",
 };
 
 export const dbview = {

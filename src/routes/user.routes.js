@@ -89,7 +89,7 @@ export class UserRoutes {
 
         router.get('/getFormattedUsers', async (req, res) => {
             try {
-                let user = await this.userService.getFormattedUsers();
+                let user = await this.userService.getFormattedUsers(req.query);
                 return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

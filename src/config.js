@@ -10,16 +10,16 @@ export class Config {
         bugFixes: 1,  // (Only bug fixes not new feature)
     };
 
-    static dbProd = {
-        host: `node39278-localbol-prod.cloudjiffy.net`,
-        user: `root`,
-        password: `ZDGhxq62647`,
-        database: `lokpoll`,
-        port: 3306,
-        multipleStatements: true
-    };
+    // static dbProd = {
+    //     host: `node39278-localbol-prod.cloudjiffy.net`,
+    //     user: `root`,
+    //     password: `ZDGhxq62647`,
+    //     database: `lokpoll`,
+    //     port: 3306,
+    //     multipleStatements: true
+    // };
 
-    static dbTest = {
+    static dbProd = {
         host: `node23483-asa-server.cloudjiffy.net`,
         user: `root`,
         password: `16hstpssZz`,
@@ -43,16 +43,16 @@ export class Config {
     };
 
     static minio = {
-        baseUrl: 'https://localbol.cloudjiffy.net',
-        // baseUrl: 'https://common-storage.cloudjiffy.net',
+        // baseUrl: 'https://localbol.cloudjiffy.net',
+        baseUrl: 'https://common-storage.cloudjiffy.net',
         config: {
             port: 80,
-            endPoint: 'localbol.cloudjiffy.net',
-            // endPoint: 'common-storage.cloudjiffy.net',
-            accessKey: 'gIHGMfk4z5',
-            // accessKey: 'I7hkcdR8S8',
-            secretKey: 'zesYt5ZVE0'
-            // secretKey: 'ijrvX7CWe0'
+            // endPoint: 'localbol.cloudjiffy.net',
+            endPoint: 'common-storage.cloudjiffy.net',
+            // accessKey: 'gIHGMfk4z5',
+            accessKey: 'I7hkcdR8S8',
+            // secretKey: 'zesYt5ZVE0'
+            secretKey: 'ijrvX7CWe0'
         },
         bucket: {
             root: 'lokpoll',
