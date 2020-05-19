@@ -27,4 +27,9 @@ export class LocationService {
         const query = `delete from ${table.location} where id = ${locationId};`;
         return SqlService.executeQuery(query);
     }
+
+    async getLocationCount() {
+        const query = `select count(1) count from ${table.location};`;
+        return SqlService.getSingle(query);
+    }
 }

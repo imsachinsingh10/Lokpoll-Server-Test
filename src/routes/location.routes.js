@@ -67,5 +67,15 @@ export class LocationRoutes {
             }
         });
 
+        router.post('/totalLocations', async (req, res) => {
+            try {
+                const result = await this.locationService.getLocationCount();
+                return res.json(result.count);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
     }
 }

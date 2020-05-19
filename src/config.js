@@ -5,28 +5,28 @@ export class Config {
     static env = Environment.prod;
 
     static version = {
-        majorRevision: 1,  // (new UI, lots of new features, conceptual change, etc.)
+        majorRevision: 3,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 1,  // (Only bug fixes not new feature)
     };
 
-    // static dbProd = {
-    //     host: `node39278-localbol-prod.cloudjiffy.net`,
-    //     user: `root`,
-    //     password: `ZDGhxq62647`,
-    //     database: `lokpoll`,
-    //     port: 3306,
-    //     multipleStatements: true
-    // };
-
     static dbProd = {
-        host: `node23483-asa-server.cloudjiffy.net`,
+        host: `node39278-localbol-prod.cloudjiffy.net`,
         user: `root`,
-        password: `16hstpssZz`,
+        password: `ZDGhxq62647`,
         database: `lokpoll`,
         port: 3306,
         multipleStatements: true
     };
+
+    // static dbProd = {
+    //     host: `node23483-asa-server.cloudjiffy.net`,
+    //     user: `root`,
+    //     password: `16hstpssZz`,
+    //     database: `lokpoll`,
+    //     port: 3306,
+    //     multipleStatements: true
+    // };
 
     static dbDev = {
         host: `127.0.0.1`,
@@ -42,17 +42,32 @@ export class Config {
         baseUrlLocal: 'http://localhost:3000/#',
     };
 
-    static minio = {
-        // baseUrl: 'https://localbol.cloudjiffy.net',
+    static _minio = {
         baseUrl: 'https://common-storage.cloudjiffy.net',
         config: {
             port: 80,
-            // endPoint: 'localbol.cloudjiffy.net',
             endPoint: 'common-storage.cloudjiffy.net',
-            // accessKey: 'gIHGMfk4z5',
             accessKey: 'I7hkcdR8S8',
-            // secretKey: 'zesYt5ZVE0'
             secretKey: 'ijrvX7CWe0'
+        },
+        bucket: {
+            root: 'lokpoll',
+            postImages: 'post/images/',
+            postVideos: 'post/videos/',
+            postThumbnails: 'post/thumbnails/',
+            user: 'user/images/',
+            other: 'post/others/',
+            moodIcons: 'mood_icons'
+        }
+    };
+
+    static minio = {
+        baseUrl: 'https://localbol.cloudjiffy.net',
+        config: {
+            port: 80,
+            endPoint: 'localbol.cloudjiffy.net',
+            accessKey: 'gIHGMfk4z5',
+            secretKey: 'zesYt5ZVE0'
         },
         bucket: {
             root: 'lokpoll',
