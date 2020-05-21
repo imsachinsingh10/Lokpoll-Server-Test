@@ -123,7 +123,7 @@ export class UserService {
     async getUserById(id) {
         const query = `select u.id, u.name, u.email, u.phone, 
                                 u.gender, u.imageUrl, u.bgImageUrl, u.audioUrl, u.address, u.ageRangeId, 
-                                u.profession, u.company, u.latitude, u.longitude,
+                                u.profession, u.company, u.latitude, u.longitude, u.appLanguage, u.contentLanguage,
                         ur.name role 
 						from ${table.user} u
 		 					left join ${table.userRole} ur on u.roleId = ur.id
