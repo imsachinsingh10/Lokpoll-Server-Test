@@ -42,32 +42,20 @@ export class Config {
         baseUrlLocal: 'http://localhost:3000/#',
     };
 
-    static minioTest = {
-        baseUrl: 'https://common-storage.cloudjiffy.net',
-        config: {
-            port: 80,
-            endPoint: 'common-storage.cloudjiffy.net',
-            accessKey: 'I7hkcdR8S8',
-            secretKey: 'ijrvX7CWe0'
-        },
-        bucket: {
-            root: 'lokpoll',
-            postImages: 'post/images/',
-            postVideos: 'post/videos/',
-            postThumbnails: 'post/thumbnails/',
-            user: 'user/images/',
-            other: 'post/others/',
-            moodIcons: 'mood_icons'
-        }
-    };
-
     static minio = {
-        baseUrl: 'https://localbol.cloudjiffy.net',
-        config: {
+        baseUrlProd: 'https://localbol.cloudjiffy.net',
+        baseUrlTest: 'https://common-storage.cloudjiffy.net',
+        configProd: {
             port: 80,
             endPoint: 'localbol.cloudjiffy.net',
             accessKey: 'gIHGMfk4z5',
             secretKey: 'zesYt5ZVE0'
+        },
+        configTest: {
+            port: 80,
+            endPoint: 'common-storage.cloudjiffy.net',
+            accessKey: 'I7hkcdR8S8',
+            secretKey: 'ijrvX7CWe0'
         },
         bucket: {
             root: 'lokpoll',

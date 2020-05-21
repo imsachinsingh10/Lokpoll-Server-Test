@@ -4,12 +4,19 @@ import Utils from "./utils";
 import {ErrorModel} from "../../model/common.model";
 import {AppCode} from "../../enum/app-code";
 import {promisify} from 'util';
+import {Environment} from "../../enum/common.enum";
 
 const Minio = require('minio');
 const fs = require('fs');
 const unlink = promisify(fs.unlink);
 
-const minioConfig = Config.minio;
+const bucket = Config.minio.bucket;
+let minioConfig = Config.minio.configTest;
+let minioBaseUrl = Config.minio.baseUrlTest;
+if (Config.env === Environment.prod) {
+    minioConfig = Config.minio.configProd;
+    minioBaseUrl = Config.minio.baseUrlProd;
+}
 const policy = JSON.stringify({
     "Version": "2012-10-17",
     "Statement": [
@@ -18,7 +25,7 @@ const policy = JSON.stringify({
             "Effect": "Allow",
             "Principal": "*",
             "Action": ["s3:GetObject"],
-            "Resource": [`arn:aws:s3:::${minioConfig.bucket.root}/*`]
+            "Resource": [`arn:aws:s3:::${bucket.root}/*`]
         }
     ]
 });
@@ -62,7 +69,7 @@ export const uploadProfilePictures = multer({storage})
 export class MinIOService {
     constructor() {
         this.minioClient = new Minio.Client({
-            ...Config.minio.config,
+            ...minioConfig,
             useSSL: false,
         });
     }
@@ -80,8 +87,8 @@ export class MinIOService {
                 })
             }
 
-            await this.createBucket(minioConfig.bucket.root);
-            let bucketPath = minioConfig.bucket.moodIcons;
+            await this.createBucket(bucket.root);
+            let bucketPath = bucket.moodIcons;
             const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
             unlink(file.path);
 
@@ -101,7 +108,7 @@ export class MinIOService {
                 })
             }
 
-            await this.createBucket(minioConfig.bucket.root);
+            await this.createBucket(bucket.root);
             let bucketPath = this.getBucketPath(mediaType);
             const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
             unlink(file.path);
@@ -129,8 +136,8 @@ export class MinIOService {
                 return resolve({url: null, type})
             }
 
-            await this.createBucket(minioConfig.bucket.root);
-            const url = await this.uploadFileToMinio(minioConfig.bucket.user, file.filename, file.path);
+            await this.createBucket(bucket.root);
+            const url = await this.uploadFileToMinio(bucket.user, file.filename, file.path);
 
             unlink(file.path);
             if (type === 'image') {
@@ -144,14 +151,14 @@ export class MinIOService {
     }
 
     async uploadFileToMinio(bucketPath, fileName, filePath) {
-        const bucketName = minioConfig.bucket.root;
+        const bucketName = bucket.root;
         return new Promise((resolve, reject) => {
             this.minioClient.fPutObject(bucketName, bucketPath + fileName, filePath, function (error, etag) {
                 if (error) {
                     console.log('+++++++ s3 error ++++++', error);
                     return reject(new ErrorModel(AppCode.s3_error, error.S3Error));
                 }
-                const fileUrl = `${minioConfig.baseUrl}/${bucketName}/${bucketPath + fileName}`;
+                const fileUrl = `${minioBaseUrl}/${bucketName}/${bucketPath + fileName}`;
                 return resolve(fileUrl)
             });
         })
@@ -186,13 +193,13 @@ export class MinIOService {
 
     getBucketPath(mediaType) {
         if (mediaType === 'image') {
-            return minioConfig.bucket.postImages;
+            return bucket.postImages;
         } else if (mediaType === 'video') {
-            return minioConfig.bucket.postVideos;
+            return bucket.postVideos;
         } else if (mediaType === 'thumbnail') {
-            return minioConfig.bucket.postThumbnails
+            return bucket.postThumbnails
         } else {
-            return minioConfig.bucket.other
+            return bucket.other
         }
     }
 
