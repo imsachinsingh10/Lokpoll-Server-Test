@@ -19,14 +19,14 @@ export class Config {
         multipleStatements: true
     };
 
-    // static dbProd = {
-    //     host: `node23483-asa-server.cloudjiffy.net`,
-    //     user: `root`,
-    //     password: `16hstpssZz`,
-    //     database: `lokpoll`,
-    //     port: 3306,
-    //     multipleStatements: true
-    // };
+    static dbTest = {
+        host: `node23483-asa-server.cloudjiffy.net`,
+        user: `root`,
+        password: `16hstpssZz`,
+        database: `lokpoll`,
+        port: 3306,
+        multipleStatements: true
+    };
 
     static dbDev = {
         host: `127.0.0.1`,
@@ -42,7 +42,7 @@ export class Config {
         baseUrlLocal: 'http://localhost:3000/#',
     };
 
-    static _minio = {
+    static minioTest = {
         baseUrl: 'https://common-storage.cloudjiffy.net',
         config: {
             port: 80,

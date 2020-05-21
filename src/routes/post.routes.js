@@ -34,7 +34,11 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
                 try {
                     const {id, userId} = await this.postController.createPost(req);
-                    const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                    let root = '';
+                    if (Config.env === Environment.dev || Config.env === Environment.test) {
+                        root = 'src';
+                    }
+                    const processorPath = path.resolve(root, 'service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                     taskProcessor.on('disconnect', function (msg) {
                         this.kill();
@@ -154,7 +158,11 @@ export class PostRoutes {
         router.post('/comment', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const {id, postId, userId} = await this.postController.commentOnPost(req);
-                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                let root = '';
+                if (Config.env === Environment.dev || Config.env === Environment.test) {
+                    root = 'src';
+                }
+                const processorPath = path.resolve(root, 'service', 'media-queue-processor.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
                     this.kill();

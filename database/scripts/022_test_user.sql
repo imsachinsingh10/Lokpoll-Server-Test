@@ -9,3 +9,6 @@ CREATE TABLE `location` (
   `address` varchar(500),
   PRIMARY KEY (`id`)
 );
+
+alter table user add column appLanguage varchar(100) null;
+alter table user add column contentLanguage varchar(100) null;

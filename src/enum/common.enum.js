@@ -1,6 +1,7 @@
 export const Environment = {
     dev: 'development',
-    prod: 'production'
+    prod: 'production',
+    test: 'test',
 };
 
 export const Message = {

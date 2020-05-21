@@ -84,6 +84,8 @@ export class UserController {
             profession: user.profession,
             company: user.company,
             ageRangeId: user.ageRangeId,
+            appLanguage: user.appLanguage,
+            contentLanguage: user.contentLanguage,
             // phone: user.phone
         };
         return this.userService.updateUser(_user);
