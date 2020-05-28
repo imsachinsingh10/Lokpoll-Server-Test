@@ -89,7 +89,7 @@ export class PostService {
     }
 
     async getComments(postIds) {
-        const query = `select pc.*, u.name, u.imageUrl, pm.url, pm.type
+        const query = `select pc.*, u.name, u.imageUrl, u.id userId, pm.url, pm.type
                         from ${table.postComment} pc
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id

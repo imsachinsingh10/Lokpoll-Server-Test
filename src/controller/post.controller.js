@@ -174,7 +174,8 @@ export class PostController {
             },
             user: {
                 name: comment.name,
-                imageUrl: comment.imageUrl
+                imageUrl: comment.imageUrl,
+                id: comment.userId
             },
             replies: this.getCommentReplies(comment.id, allComments, consumedCommentIds)
         };
