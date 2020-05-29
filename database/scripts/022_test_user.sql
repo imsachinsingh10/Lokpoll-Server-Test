@@ -12,3 +12,11 @@ CREATE TABLE `location` (
 
 alter table user add column appLanguage varchar(100) null;
 alter table user add column contentLanguage varchar(100) null;
+
+drop table if exists post_view;
+create table post_view (
+	id bigint primary key auto_increment,
+    userId bigint,
+    postId bigint,
+    seenDate datetime
+)

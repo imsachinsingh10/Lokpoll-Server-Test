@@ -193,6 +193,25 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async addPostView(req) {
+        const model = {
+            userId: req.user.id,
+            postId: req.body.postId,
+            seenDate: 'utc_timestamp()'
+        }
+        let query = `select 1 from ${table.postView} 
+                        where userId = ${model.userId} 
+                            and postId = ${model.postId} 
+                        limit 1`;
+        const view = await SqlService.getSingle(query);
+        if (!_.isEmpty(view)) {
+            return "User view can't be added again! its already added for this post.";
+        }
+        query = QueryBuilderService.getInsertQuery(table.postView, model);
+        await SqlService.executeQuery(query);
+        return "User view added for this post";
+    }
+
     async deleteReaction(req) {
         const query = `delete from ${table.postReaction}
                             where reactedBy = ${req.user.id} 
@@ -221,6 +240,14 @@ export class PostService {
     async getPostMedia(postIds) {
         const query = `select pm.postId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.postMedia}  pm
                         where postId in ${Utils.getRange(postIds)}`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostViews(postIds) {
+        const query = `select count(userId) count, postId from 
+                        ${table.postView}
+                        where postId in ${Utils.getRange(postIds)}
+                        group by postId;`;
         return SqlService.executeQuery(query);
     }
 

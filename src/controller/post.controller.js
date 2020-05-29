@@ -98,26 +98,34 @@ export class PostController {
         if (postIds.length !== uniqPostIds.length) {
             console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        const [comments, subMoods, respects, reactions, trusts, mediaList] = await Promise.all([
+        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews] = await Promise.all([
             this.postService.getComments(uniqPostIds),
             this.postService.getSubMoodByPostId(uniqPostIds),
             this.postService.getRespects(uniqPostIds),
             this.postService.getPostReactions(uniqPostIds),
             this.postService.getPostTrust(uniqPostIds),
             this.postService.getPostMedia(uniqPostIds),
+            this.postService.getPostViews(uniqPostIds),
         ])
 
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {userId: req.user.id, post, comments, subMoods, respects, reactions, trusts, mediaList}
+                {userId: req.user.id, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
             );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost({userId, post, comments, subMoods, respects, reactions, trusts, mediaList}) {
+    getPost({userId, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+        const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
+
+        let viewCount = 0;
+        if (postViewFiltered.length > 0) {
+            viewCount = postViewFiltered[0].count;
+        }
+
         const postComments = comments.filter(comment => comment.postId === post.id);
         const subMoodData = subMoods.filter(subMood => subMood.postId === post.id);
         const basicDetails = this.getBasicPostDetails(userId, post, respects);
@@ -128,16 +136,15 @@ export class PostController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
-
         const formattedComments = this.getFormattedComments(postComments);
 
         const {
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
         } = this.getReactionsWithCount(userId, post, reactions, trusts);
-
         return {
             ...basicDetails,
+            viewCount,
             subMood: subMoodData,
             media,
             trustMeter: {

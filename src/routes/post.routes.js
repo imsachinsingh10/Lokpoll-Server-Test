@@ -202,6 +202,19 @@ export class PostRoutes {
             }
         });
 
+        router.post('/addView', async (req, res) => {
+            try {
+                const result = await this.postService.addPostView(req);
+                return res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
         router.get('/videoStream', async (req, res) => {
             try {
                 console.log("In Video Stream");
