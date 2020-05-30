@@ -246,7 +246,7 @@ export class PostService {
     async getPostViews(postIds) {
         const query = `select pv.*, u.name userName, u.imageUrl userImageUrl, u.id userId from 
                         ${table.postView} pv 
-                            left join user u on u.id = pv.userId 
+                            inner join user u on u.id = pv.userId 
                         where postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }
