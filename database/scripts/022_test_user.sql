@@ -20,3 +20,5 @@ create table post_view (
     postId bigint,
     seenDate datetime
 )
+
+alter table user add column subscribed tinyint(4) default 0;

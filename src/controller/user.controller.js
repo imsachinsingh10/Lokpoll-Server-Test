@@ -86,6 +86,7 @@ export class UserController {
             ageRangeId: user.ageRangeId,
             appLanguage: user.appLanguage,
             contentLanguage: user.contentLanguage,
+            subscribed: user.subscribed,
             // phone: user.phone
         };
         return this.userService.updateUser(_user);
