@@ -122,8 +122,16 @@ export class PostController {
         const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
 
         let viewCount = 0;
+        let viewedByUsers = [];
         if (postViewFiltered.length > 0) {
-            viewCount = postViewFiltered[0].count;
+            viewCount = postViewFiltered.length;
+            viewedByUsers = postViewFiltered.map(p => {
+                return {
+                    id: p.userId,
+                    name: p.userName,
+                    imageUrl: p.userImageUrl,
+                }
+            })
         }
 
         const postComments = comments.filter(comment => comment.postId === post.id);
@@ -145,6 +153,7 @@ export class PostController {
         return {
             ...basicDetails,
             viewCount,
+            viewedByUsers,
             subMood: subMoodData,
             media,
             trustMeter: {
