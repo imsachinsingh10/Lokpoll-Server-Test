@@ -24,12 +24,15 @@ export class PostService {
     async getTotalPostCount(data) {
         const query = `select count("id") count
 	    				from ${table.post} p
-	    				join user u on u.id = p.userId;`;
+	    				join user u on u.id = p.userId
+	    				where p.isDeleted = 0
+                            and p.latitude is not null and p.longitude is not null
+                            and p.isPostUpload = 1;`;
         return SqlService.getSingle(query);
     }
 
     async getAllPosts(req) {
-        new SqlService();
+        // new SqlService();
         const reqCoordinate = {
             latitude: req.latitude,
             longitude: req.longitude,
@@ -38,6 +41,7 @@ export class PostService {
         let condition2 = ``;
         let condition3 = ``;
         let condition4 = '';
+        let distanceQuery = ``;
         let havingCondition = ``;
 
         if (req.language) {
@@ -56,18 +60,20 @@ export class PostService {
 
         }
 
-        if (req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
+        if (req.latitude && req.longitude && req.radiusInMeter) {
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            distanceQuery = `, SQRT(
+                                POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
+                                POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
+                            ) AS distance`
         }
         const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            m.${LanguageCode[req.language] || 'en'} 'mood',
-                            SQRT(
-                            POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
-                            POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance
+                            m.${LanguageCode[req.language] || 'en'} 'mood'
+                            ${distanceQuery}
                         from post p 
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId

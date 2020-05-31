@@ -73,10 +73,10 @@ export class PostRoutes {
             const start = new Date();
             try {
                 const request = {
-                    "latitude": req.body.latitude || 21.251385,
-                    "longitude": req.body.longitude || 81.629639,
+                    "latitude": req.body.latitude,
+                    "longitude": req.body.longitude,
                     "type": req.body.type || 'normal',
-                    "radiusInMeter": req.body.radiusInMeter || 10000000000,
+                    "radiusInMeter": req.body.radiusInMeter,
                     "lastPostId": req.body.lastPostId,
                     "postCount": req.body.postCount || 20,
                     "postByUserId": req.body.postByUserId,
@@ -95,8 +95,8 @@ export class PostRoutes {
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.invalid_creds) {
-                    return res.status(HttpCode.unauthorized).send(e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
                 res.sendStatus(HttpCode.internal_server_error);
             }
