@@ -86,9 +86,12 @@ export class UserController {
             ageRangeId: user.ageRangeId,
             appLanguage: user.appLanguage,
             contentLanguage: user.contentLanguage,
-            subscribed: user.subscribed,
+            subscribed: false,
             // phone: user.phone
         };
+        if (user.subscribed === 'true' || user.subscribed === true) {
+            _user.subscribed = 1;
+        }
         return this.userService.updateUser(_user);
     }
 

@@ -128,9 +128,9 @@ export class UserRoutes {
         router.post('/update', async (req, res) => {
             try {
                 let user = req.body;
-                if (_.isEmpty(user.id)) {
+                if (user.id === undefined || !(user.id > 0)) {
                     user.id = req.user.id;
-                    user.workingStatus = 'active'
+                    user.workingStatus = 'active';
                 }
                 await this.userController.updateUser(user);
                 await this.userController.updateHobbies(user.hobbies, user.id);
