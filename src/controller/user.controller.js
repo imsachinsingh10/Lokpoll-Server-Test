@@ -16,8 +16,11 @@ export class UserController {
     }
 
     async checkIfUserRegistered(user) {
-        const _users = await this.userService.getUserByEmail(user);
-        if (!_.isEmpty(_users)) {
+        const _user = await this.userService.getUserByEmail(user);
+        if (
+            (!user.id && !_.isEmpty(_user))
+            || (user.id && !_.isEmpty(_user) && user.id !== _user.id)
+        ) {
             throw {
                 message: `user already registered with email ${user.email}`,
                 code: AppCode.duplicate_entity
@@ -86,11 +89,12 @@ export class UserController {
             ageRangeId: user.ageRangeId,
             appLanguage: user.appLanguage,
             contentLanguage: user.contentLanguage,
-            subscribed: false,
             // phone: user.phone
         };
         if (user.subscribed === 'true' || user.subscribed === true) {
-            _user.subscribed = 1;
+            _user.subscribed = true;
+        } else if (user.subscribed === 'false' || user.subscribed === false) {
+            _user.subscribed = false;
         }
         return this.userService.updateUser(_user);
     }
@@ -228,7 +232,7 @@ export class UserController {
     }
 
     async getFormattedWhoRespectingMe(req) {
-        let rawArray =  await this.userService.getWhoRespectingMe(req);
+        let rawArray = await this.userService.getWhoRespectingMe(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,
@@ -243,7 +247,7 @@ export class UserController {
     };
 
     async getFormattedWhoRespectedByMe(req) {
-        let rawArray =  await this.userService.getWhoRespectedByMe(req);
+        let rawArray = await this.userService.getWhoRespectedByMe(req);
         return rawArray.map((obj) => {
             return {
                 id: obj.id,

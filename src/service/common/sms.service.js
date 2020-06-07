@@ -6,6 +6,10 @@ import {AppCode} from "../../enum/app-code";
 
 export class SMSService {
 
+	static sendTestSMS = () => {
+		this.sendSMS('8630694779', '1234')
+	}
+
 	static sendSMS = async (phone, otp) => {
 		if (_.isEmpty(phone) || phone.length !== 10) {
 			throw {
@@ -15,7 +19,8 @@ export class SMSService {
 		}
 		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 Mins. LICN Info: FwXZu6s1yHK`;
 		const apiKey = '9hcbNtCJ79c-Ystk844Ss6ApaLSUJZ7cPqvEQOvVgE';
-		const url = `https://api.textlocal.in/send/?apiKey=${apiKey}&sender=LOCLBL&numbers=${phone}&message=${msg}`;
+		const sender = 'LOKPAT';
+		const url = `https://api.textlocal.in/send/?apiKey=${apiKey}&sender=${sender}&numbers=${phone}&message=${msg}`;
 		try {
 			const result = await axios.get(url);
 			console.log(' +++++++ sms result +++++++++ ', result.data);
