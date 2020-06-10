@@ -323,4 +323,9 @@ export class PostService {
                         where trim(lower(name)) in ${Utils.getRange(names)};`;
         return await SqlService.executeQuery(query);
     }
+
+    async deletePostComment(model) {
+        const query = `delete from ${table.postComment} where id = ${model.commentId};`;
+        return SqlService.executeQuery(query);
+    }
 }
