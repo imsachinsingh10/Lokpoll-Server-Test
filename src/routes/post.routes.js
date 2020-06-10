@@ -56,6 +56,19 @@ export class PostRoutes {
                 }
             });
 
+        router.post('/update', uploadPostMediaMiddleware, async (req, res) => {
+                try {
+                    await this.postService.updatePost(req.body);
+                    return res.sendStatus(HttpCode.ok);
+                } catch (e) {
+                    console.error("test Data",`${req.method}: ${req.url}`, e);
+                    if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                        return res.status(HttpCode.bad_request).send(e);
+                    }
+                    return res.status(HttpCode.internal_server_error).send(e);
+                }
+            });
+
         router.post('/totalPosts', async (req, res) => {
             try {
                 let result = await this.postService.getTotalPostCount(req.body);

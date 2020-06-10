@@ -94,6 +94,18 @@ export class PostService {
         return SqlService.getTable(table.postType, 0);
     }
 
+    async updatePost(reqBody) {
+        const post = {
+            id: reqBody.id,
+            language:reqBody.language,
+            moodId: reqBody.moodId,
+            description: reqBody.description,
+        }
+        const condition = `where id = ${post.id}`;
+        const query = QueryBuilderService.getUpdateQuery(table.post, post, condition);
+        return SqlService.executeQuery(query);
+    }
+
     async getComments(postIds) {
         const query = `select pc.*, u.name, u.imageUrl, u.id userId, pm.url, pm.type
                         from ${table.postComment} pc
