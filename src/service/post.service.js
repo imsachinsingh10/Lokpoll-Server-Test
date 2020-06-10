@@ -94,7 +94,8 @@ export class PostService {
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id
                         where 
-                            pc.postId in ${Utils.getRange(postIds)};`;
+                            p.isDeleted = 0
+                            and pc.postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }
 
@@ -325,7 +326,9 @@ export class PostService {
     }
 
     async deletePostComment(model) {
-        const query = `delete from ${table.postComment} where id = ${model.commentId};`;
+        const query = `update ${table.postComment} 
+                        set isDeleted = 1 
+                        where id = ${model.commentId};`;
         return SqlService.executeQuery(query);
     }
 }
