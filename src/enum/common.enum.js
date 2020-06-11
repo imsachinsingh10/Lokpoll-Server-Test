@@ -53,5 +53,5 @@ export const LanguageCode = {
     English: 'en',
     Hindi: 'hi',
     Sambalpuri: 'ta',
-    Odiya: 'or',
+    Odia: 'or',
 }

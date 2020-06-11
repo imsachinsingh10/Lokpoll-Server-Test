@@ -1,53 +1,55 @@
-import {AppCode} from "../enum/app-code";
-import {ErrorModel, SuccessModel} from "../model/common.model";
-import {Config} from "../config";
-import gcm from 'node-gcm';
+import * as admin from "firebase-admin";
+import path from 'path';
 
-const sender = new gcm.Sender(Config.firebase.serverKey);
+const gcm = require('node-gcm');
+const credFilePath = path.resolve('localbol-c5fed-firebase-adminsdk-xe0k3-350fe21847.json');
+console.log('cred file path', credFilePath);
+const serviceAccount = require(credFilePath);
 
-const message = new gcm.Message({
-    data: {key1: 'msg1'},
-    notification: {
-        title: 'Post published',
-        body: 'Your post has been published',
-        icon: 'icon-gray.jpg'
-    }
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://localbol-c5fed.firebaseio.com/"
 });
 
+// Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
+const sender = new gcm.Sender('AAAAOwz4hOo:APA91bEsyXZCu5KYJY8a5A-EXwLbievInaRaZgzerOBCbp4Dv1yubTtYAUaLBXv7eHTmkf5QB2WObs3ptx-TAZpkSiecJHSR-Z_dKERBUsm15Scrb157mLmVRrlSqcPRqqAZiRUpIMS0');
+
+// Specify which registration IDs to deliver the message to
+const regTokens = [
+    'eOBn6-tP4SY2JPbP-RyL7R:APA91bHsZu6QCDz3qO1Kvg319Ne9IPuYisjznhPiglE8v5GlbH7K3hh_ooUjctBdJGUw2Ra4x2a01A1FZgC5efFUQZveHadDp4KNN9PInZzuT7138LsSXLNuk1MSk2ZMhvDPi17ClBvX',
+];
+// Prepare a message to be sent
+const message = {
+    data: {key1: 'msg1'},
+    notification: {
+        title: 'New fund created',
+        body: 'Himanshu just created new fund',
+    },
+    tokens: regTokens
+};
+
 export const sendTestMessage = () => {
-    const regTokens = ['e-yn1WAZX0TYmTcxT0IW5n:APA91bGAnxCly2bYF4F-9P5m9SGJBoisIEu9XAAcEez-m97bGls307P00JIKcKmI5d3567irfWh8be-9y7ewm1C_puH3hW3ounzvPDFPyYhwVndF0FRVg9cTIpnVQt8gNXy0ln6yx1Qb'];
-    sender.send(message, {registrationTokens: regTokens}, function (err, response) {
-        if (err) {
-            console.error('sending error', err);
-        } else {
-            console.log('response', response);
-        }
-    });
+    admin.messaging().sendMulticast(message)
+        .then((response) => {
+            console.log('Successfully sent firebase message:', response);
+        })
+        .catch((error) => {
+            console.log('Error sending firebase message:', error);
+        });
 };
 
 export default class FirebaseService {
-    static sendMessage = (tokens, message) => {
+    static sendMessage = (message) => {
         return new Promise((resolve, reject) => {
-            sender.send(message, {registrationTokens: tokens}, (err, response) => {
-                if (err) {
-                    console.error('sending error', err);
-                    reject(new SuccessModel(AppCode.sending_message_failed))
-                }
-                resolve(new ErrorModel(AppCode.message_sent, "", response));
-            });
+            admin.messaging().sendMulticast(message)
+                .then((response) => {
+                    console.log('Successfully sent firebase message:', message, response);
+                    resolve(new DataBagModel(AppCode.message_sent, "", response));
+                })
+                .catch((error) => {
+                    console.error('sending error', error);
+                    reject(new DataBagModel(AppCode.sending_message_failed))
+                });
         })
     };
-}
-
-export class FirebaseMessage {
-    static get PostCreated() {
-        return new gcm.Message({
-            data: {key1: 'msg1'},
-            notification: {
-                title: 'Post published',
-                body: 'Your post has been published',
-                icon: 'icon-gray.jpg'
-            }
-        })
-    }
 }
