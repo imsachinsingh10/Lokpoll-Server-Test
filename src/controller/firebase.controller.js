@@ -30,24 +30,48 @@ export class FirebaseController {
                         from ${table.postComment} pc
                         where pc.postId = ${comment.postId};`;
         const commentData = await SqlService.executeQuery(query);
-        let receiverIds = Object.values(commentData);
-        receiverIds = receiverIds.filter(r => r !== comment.senderId);
-        if (!(comment.senderId === 1 || receiverIds.indexOf(1) > -1)) {
-            receiverIds = receiverIds.concat(1);
+        const query1 = `select userId
+                        from ${table.post} 
+                        where id = ${comment.postId} limit 1;`;
+        const postCreated = await SqlService.getSingle(query1);
+        //let receiverIds = Object.values(commentData);
+        let receiverIds = commentData.map( (e) => { return e.userId });
+        receiverIds = receiverIds.filter(function(elem, index, self) {
+            return index === self.indexOf(elem);
+        })
+        receiverIds = receiverIds.filter(r => r !== comment.userId);
+        if (!(comment.userId === 1 || receiverIds.indexOf(1) > -1)) {
+            receiverIds = receiverIds.concat(postCreated.userId);
         }
 
         console.log("comment Data",receiverIds);
         const notification = notificationModel(
             {
-                ...Notification.NewFundMessage,
-                title: `${audit.fundName}`,
-                description: comment.message,
-                type: NotificationType.success,
+                title: `Comment Added`,
+                description: comment.comment,
+                type: 'success',
                 receiverIds
             }
         );
         // console.log('notification', notification);
         return this.sendNotifications(receiverIds, notification, comment);
+    }
+
+    async sendNotificationForReaction(reaction, reactionCount) {
+        const query = `select userId
+                        from ${table.post} 
+                        where id = ${reaction.postId} limit 1;`;
+        const user = await SqlService.getSingle(query);
+        const receiverIds = [user.userId];
+        const notification = notificationModel(
+            {
+                title: `Reaction on post`,
+                description: `${reactionCount} giving respect`,
+                type: 'success',
+                receiverIds
+            }
+        );
+        return this.sendAndLogNotification(receiverIds, notification);
     }
 
     async sendAndLogNotification(receiverIds, notification) {
@@ -85,7 +109,7 @@ export class FirebaseController {
                 ...message.data,
                 ...payload,
                 id: payload.id + '',
-                senderId: payload.senderId + '',
+                senderId: payload.userId + '',
             }
         }
         console.log('message obj', message);

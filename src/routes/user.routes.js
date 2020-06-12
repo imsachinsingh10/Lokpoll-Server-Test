@@ -215,7 +215,7 @@ export class UserRoutes {
                 const model = {
                     createdAt: 'utc_timestamp()',
                     respectFor: req.body.respectFor,
-                    respectBy: 34
+                    respectBy: req.user.id
                 };
 
                 let result = await this.userService.updateRespect(model);
