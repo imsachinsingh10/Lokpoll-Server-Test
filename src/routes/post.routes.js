@@ -13,6 +13,7 @@ import childProcess from 'child_process';
 import {Config} from "../config";
 import Utils from "../service/common/utils";
 import * as _ from "lodash";
+import {sendTestMessage} from "../service/firebase.service";
 
 const router = express();
 
@@ -103,9 +104,11 @@ export class PostRoutes {
         });
 
         router.get('/getAllTypes', async (req, res) => {
+            sendTestMessage();
             try {
                 return await res.json(PostType);
             } catch (e) {
+
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);

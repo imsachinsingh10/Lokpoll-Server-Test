@@ -11,11 +11,13 @@ import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 import fs from 'fs';
+import {FirebaseController} from "./firebase.controller";
 
 export class PostController {
     constructor() {
         this.postService = new PostService();
         this.minioService = new MinIOService();
+        this.firebaseController = new FirebaseController();
     }
 
     async createPost(req) {
@@ -303,13 +305,13 @@ export class PostController {
         const reqBody = req.body;
         const post = {
             postId: reqBody.postId,
-            userId: req.user.id,
+            userId: 34,
             createdAt: 'utc_timestamp()',
             comment: reqBody.comment,
             replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined
         };
         const result = await this.postService.createPostComment(post);
-
+        await this.firebaseController.sendMessageForNewCommentOnPost(post);
         return {id: result.insertId, ...post}
     }
 

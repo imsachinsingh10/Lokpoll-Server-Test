@@ -17,6 +17,7 @@ INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('engl
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('marathi', 'mr', '1', 'मराठी');
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('gujarati', 'gu', '1', 'गुजराती');
 INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('bengali', 'bn', '1', 'बंगाली');
+INSERT INTO `language` (`name`, `code`, `isActive`, `translation`) VALUES ('sambalpuri', 'spv', '1', 'संबलपुरी');
 
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (1,'Party',NULL,1,NULL,'#0000ff');
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`) VALUES (2,'Masti',NULL,1,NULL,'#ff00ff');
