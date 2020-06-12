@@ -332,8 +332,5 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async saveToken(model) {
-        const query = `update ${table.user} set deviceToken = '${model.deviceToken}' where id = ${model.userId};`;
-        return SqlService.executeQuery(query);
-    }
+
 }
