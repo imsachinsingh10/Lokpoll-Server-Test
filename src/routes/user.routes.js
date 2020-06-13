@@ -11,6 +11,7 @@ import {validateAuthToken} from "../middleware/auth.middleware";
 import _ from 'lodash';
 import {MinIOService, uploadProfilePictures} from "../service/common/minio.service";
 import {ProfileType} from "../enum/common.enum";
+import {FirebaseController} from "../controller/firebase.controller";
 
 const router = express();
 
@@ -23,6 +24,7 @@ export class UserRoutes {
         this.userService = new UserService();
         this.userController = new UserController();
         this.minioService = new MinIOService();
+        this.firebaseController = new FirebaseController();
         this.initRoutes();
     }
 
@@ -221,6 +223,7 @@ export class UserRoutes {
                 };
 
                 let result = await this.userService.updateRespect(model);
+                this.firebaseController.sendRespectUserMessage(model);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -258,6 +261,16 @@ export class UserRoutes {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
                 res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/saveToken', async (req, res) => {
+            try {
+                await this.userService.saveToken(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCode.internal_server_error);
             }
         });
     }

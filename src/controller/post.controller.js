@@ -9,13 +9,14 @@ import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
-import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 import fs from 'fs';
+import {FirebaseController} from "./firebase.controller";
 
 export class PostController {
     constructor() {
         this.postService = new PostService();
         this.minioService = new MinIOService();
+        this.firebaseController = new FirebaseController();
     }
 
     async createPost(req) {
@@ -326,7 +327,7 @@ export class PostController {
             replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined
         };
         const result = await this.postService.createPostComment(post);
-
+        await this.firebaseController.sendMessageForNewCommentOnPost(post);
         return {id: result.insertId, ...post}
     }
 

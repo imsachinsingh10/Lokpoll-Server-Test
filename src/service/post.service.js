@@ -9,11 +9,13 @@ import {AppCode} from "../enum/app-code";
 import fs from "fs";
 import path from 'path';
 import {LanguageCode} from "../enum/common.enum";
+import {FirebaseController} from "../controller/firebase.controller";
 
 export class PostService {
     constructor() {
         this.queryBuilderService = new QueryBuilderService();
         this.sqlService = new SqlService();
+        this.firebaseController = new FirebaseController();
     }
 
     async createPost(post) {
@@ -201,6 +203,13 @@ export class PostService {
             type: reqBody.type,
         };
         query = QueryBuilderService.getInsertQuery(table.postReaction, postReaction);
+
+        let query1 = `select count("id") totalReaction from ${table.postReaction} 
+                        where postId = ${reqBody.postId}`;
+        let postReactioncount = await SqlService.getSingle(query1);
+        if((postReactioncount.totalReaction % 10) === 0){
+            this.firebaseController.sendNotificationForReaction(reqBody, postReactioncount.totalReaction);
+        }
         return SqlService.executeQuery(query);
     }
 
