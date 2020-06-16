@@ -17,6 +17,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "ffmpeg": "0.0.4",
+    "firebase-admin": "^8.12.1",
     "geolib": "^2.0.23",
     "hs-node-ffmpeg": "^1.0.3",
     "jimp": "^0.9.3",
