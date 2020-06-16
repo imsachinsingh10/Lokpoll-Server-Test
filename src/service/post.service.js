@@ -46,7 +46,7 @@ export class PostService {
         let distanceQuery = ``;
         let havingCondition = ``;
 
-        if (req.language) {
+        if (req.languageCode) {
             condition4 = `and p.languageCode = '${req.languageCode}'`;
         }
         if (req.postByUserId > 0) {

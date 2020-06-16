@@ -95,7 +95,7 @@ export class PostRoutes {
                     "postByUserId": req.body.postByUserId,
                     "moodIds": req.body.moodIds,
                     "offset": req.body.offset || 0,
-                    "language": req.body.language,
+                    "languageCode": req.body.languageCode,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
