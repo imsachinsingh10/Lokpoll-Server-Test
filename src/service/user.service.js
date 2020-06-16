@@ -7,10 +7,12 @@ import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/common.model";
 import {Message, ProfileType} from "../enum/common.enum";
 import Validator from "./common/validator.service";
+import {FirebaseController} from "../controller/firebase.controller";
 
 export class UserService {
     constructor() {
         this.queryBuilderService = new QueryBuilderService();
+        this.firebaseController = new FirebaseController();
     }
 
     async getUserByEmail(user) {
@@ -297,6 +299,7 @@ export class UserService {
         if (_.isEmpty(respect)) {
             q = QueryBuilderService.getInsertQuery(table.respect, model);
             status = 'Respect added';
+            this.firebaseController.sendRespectUserMessage(model);
         } else {
             q = `delete from ${table.respect} where id = ${respect.id};`;
             status = 'Respect removed';

@@ -53,6 +53,6 @@ export const PostType = {
 export const LanguageCode = {
     English: 'en',
     Hindi: 'hi',
-    Sambalpuri: 'ta',
+    'Sambalpuri/': 'ta',
     Odiya: 'or',
 }

@@ -115,6 +115,25 @@ export class PostRoutes {
             }
         });
 
+
+        router.post('/getpostByPostId', async (req, res) => {
+            try {
+                const request = {
+                    "postId": req.body.postId
+                };
+                let result = await this.postService.getPostData(request);
+                console.log('post data', result);
+                result = await this.postController.formatPosts(req, result);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
         router.get('/getAllTypes', async (req, res) => {
             try {
                 return await res.json(PostType);
@@ -285,6 +304,18 @@ export class PostRoutes {
             try {
                 let result =  await this.postController.getFormattedTrustDataNoVote(req.body);
                 return await res.json(result);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/deletePostComment', async (req, res) => {
+            try {
+                await this.postService.deletePostComment(req.body);
+                return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);

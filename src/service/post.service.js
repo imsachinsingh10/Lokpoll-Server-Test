@@ -47,7 +47,7 @@ export class PostService {
         let havingCondition = ``;
 
         if (req.language) {
-            condition4 = `and trim(lower(p.language)) = '${req.language.toLowerCase().trim()}'`;
+            condition4 = `and p.languageCode = '${req.languageCode}'`;
         }
         if (req.postByUserId > 0) {
             condition2 = `and p.userId = ${req.postByUserId}`;
@@ -74,7 +74,7 @@ export class PostService {
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            m.${LanguageCode[req.language] || 'en'} 'mood'
+                            m.${req.languageCode || 'en'} 'mood'
                             ${distanceQuery}
                         from post p 
                             join user u on u.id = p.userId
@@ -88,6 +88,23 @@ export class PostService {
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
+                        ;`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostData(req) {
+        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
+                            0 'respects', 0 'comments',
+                            p.type 'postType',
+                            pro.name 'displayName', pro.type 'profileType',
+                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl
+                        from post p 
+                            join user u on u.id = p.userId
+                            left join mood m on m.id = p.moodId
+                            left join profile pro on pro.type = p.profileType and pro.userId = u.id
+                        where 
+                            p.isDeleted = 0
+                            and p.id = ${req.postId}
                         ;`;
         return SqlService.executeQuery(query);
     }
@@ -114,7 +131,8 @@ export class PostService {
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id
                         where 
-                            pc.postId in ${Utils.getRange(postIds)};`;
+                            pc.isDeleted = 0
+                            and pc.postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }
 
@@ -226,15 +244,15 @@ export class PostService {
             postId: req.body.postId,
             seenDate: 'utc_timestamp()'
         }
-        let query = `select 1 from ${table.postView} 
-                        where userId = ${model.userId} 
-                            and postId = ${model.postId} 
+      /*  let query = `select 1 from ${table.postView}
+                        where userId = ${model.userId}
+                            and postId = ${model.postId}
                         limit 1`;
         const view = await SqlService.getSingle(query);
         if (!_.isEmpty(view)) {
             return "User view can't be added again! its already added for this post.";
-        }
-        query = QueryBuilderService.getInsertQuery(table.postView, model);
+        }*/
+        let query = QueryBuilderService.getInsertQuery(table.postView, model);
         await SqlService.executeQuery(query);
         return "User view added for this post";
     }
@@ -376,5 +394,11 @@ export class PostService {
         const query = `select * from ${table.subMood} 
                         where trim(lower(name)) in ${Utils.getRange(names)};`;
         return await SqlService.executeQuery(query);
+    }
+    async deletePostComment(model) {
+        const query = `update ${table.postComment} 
+                        set isDeleted = 1 
+                        where id = ${model.commentId};`;
+        return SqlService.executeQuery(query);
     }
 }
