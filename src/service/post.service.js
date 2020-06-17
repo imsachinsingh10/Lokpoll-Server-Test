@@ -70,7 +70,7 @@ export class PostService {
                             ) AS distance`
         }
         const query = `select p.id, p.createdAt, p.description, p.source, 
-                            p.latitude, p.longitude, p.address, l.name language,
+                            p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
@@ -118,7 +118,7 @@ export class PostService {
     async updatePost(reqBody) {
         const post = {
             id: reqBody.id,
-            language:reqBody.language,
+            languageCode: reqBody.languageCode,
             moodId: reqBody.moodId,
             description: reqBody.description,
         }

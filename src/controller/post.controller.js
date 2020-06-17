@@ -218,6 +218,7 @@ export class PostController {
             mood: post.mood,
             source: post.source,
             language: post.language,
+            languageCode: post.languageCode,
             linkToShare: "https://www.socialmediatoday.com",
             user: {
                 id: post.userId,
