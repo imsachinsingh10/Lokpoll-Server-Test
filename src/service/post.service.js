@@ -69,7 +69,8 @@ export class PostService {
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
+        const query = `select p.id, p.createdAt, p.description, p.source, 
+                            p.latitude, p.longitude, p.address, l.name language,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
@@ -80,6 +81,7 @@ export class PostService {
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
+                            left join language l on l.code = p.languageCode
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
