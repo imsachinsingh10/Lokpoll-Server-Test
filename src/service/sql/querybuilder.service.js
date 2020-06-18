@@ -20,7 +20,7 @@ export class QueryBuilderService {
             if (typeof value === 'number' || typeof value === 'boolean' || value === null || value.endsWith('()')) {
                 query += `${value}, `;
             } else {
-                value = value.replace('"', "\\\"").replace("'", "\\\'");
+                value = value.replace(/"/g, "\\\"").replace(/'/g, "\\\'");
                 query += `'${value}', `;
             }
         }
