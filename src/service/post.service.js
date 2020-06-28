@@ -96,7 +96,7 @@ export class PostService {
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id
                         where 
-                            p.isDeleted = 0
+                            pc.isDeleted = 0
                             and pc.postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }

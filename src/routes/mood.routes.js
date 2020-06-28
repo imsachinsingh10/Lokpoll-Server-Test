@@ -23,7 +23,7 @@ export class MoodRoutes {
     }
 
     initRoutes() {
-        router.use(validateAuthToken);
+       router.use(validateAuthToken);
 
         router.post('/add', uploadFile, async (req, res) => {
             try {

@@ -24,6 +24,8 @@ export const table = {
     respect: "respect",
     subMood: "sub_mood",
     postSubMood: "post_sub_mood",
+    challenge: "challenge",
+    userChallenge: "user_challenge",
 };
 
 export const dbview = {
