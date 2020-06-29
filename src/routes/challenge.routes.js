@@ -27,7 +27,7 @@ export class ChallengeRoutes {
     }
 
     initRoutes() {
-       // router.use(validateAuthToken);
+        router.use(validateAuthToken);
 
         router.post('/addUserChallenge', async (req, res) => {
             try {

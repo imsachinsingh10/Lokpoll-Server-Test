@@ -44,7 +44,7 @@ export class ChallengeController {
             longitude: reqBody.longitude,
             address: reqBody.address,
             source: reqBody.source,
-            language: reqBody.language,
+            languageCode: reqBody.languageCode,
         };
         if (files.image || files.video || files.audio) {
             entries.isPostUpload = '0';

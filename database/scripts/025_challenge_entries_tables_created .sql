@@ -86,3 +86,5 @@ CREATE TABLE `challenge_entries_comment` (
 );
 
 alter table challenge_entries change latitude latitude double default null, change longitude longitude double default null;
+ALTER TABLE `challenge_entries`
+add COLUMN `languageCode` varchar(50) DEFAULT NULL;
