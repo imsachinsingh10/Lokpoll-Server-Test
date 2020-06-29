@@ -26,12 +26,15 @@ export class PostService {
     async getTotalPostCount(data) {
         const query = `select count("id") count
 	    				from ${table.post} p
-	    				join user u on u.id = p.userId;`;
+	    				join user u on u.id = p.userId
+	    				where p.isDeleted = 0
+                            and p.latitude is not null and p.longitude is not null
+                            and p.isPostUpload = 1;`;
         return SqlService.getSingle(query);
     }
 
     async getAllPosts(req) {
-        new SqlService();
+        // new SqlService();
         const reqCoordinate = {
             latitude: req.latitude,
             longitude: req.longitude,
@@ -40,10 +43,11 @@ export class PostService {
         let condition2 = ``;
         let condition3 = ``;
         let condition4 = '';
+        let distanceQuery = ``;
         let havingCondition = ``;
 
-        if (req.language) {
-            condition4 = `and trim(lower(p.language)) = '${req.language.toLowerCase().trim()}'`;
+        if (req.languageCode) {
+            condition4 = `and p.languageCode = '${req.languageCode}'`;
         }
         if (req.postByUserId > 0) {
             condition2 = `and p.userId = ${req.postByUserId}`;
@@ -58,22 +62,26 @@ export class PostService {
 
         }
 
-        if (req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`
+        if (req.latitude && req.longitude && req.radiusInMeter) {
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            distanceQuery = `, SQRT(
+                                POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
+                                POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
+                            ) AS distance`
         }
-        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
+        const query = `select p.id, p.createdAt, p.description, p.source, 
+                            p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
-                            m.${LanguageCode[req.language] || 'en'} 'mood',
-                            SQRT(
-                            POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
-                            POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)) AS distance
+                            m.${req.languageCode || 'en'} 'mood'
+                            ${distanceQuery}
                         from post p 
                             join user u on u.id = p.userId
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
+                            left join language l on l.code = p.languageCode
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
@@ -86,12 +94,41 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getPostData(req) {
+        const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
+                            0 'respects', 0 'comments',
+                            p.type 'postType',
+                            pro.name 'displayName', pro.type 'profileType',
+                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl
+                        from post p 
+                            join user u on u.id = p.userId
+                            left join mood m on m.id = p.moodId
+                            left join profile pro on pro.type = p.profileType and pro.userId = u.id
+                        where 
+                            p.isDeleted = 0
+                            and p.id = ${req.postId}
+                        ;`;
+        return SqlService.executeQuery(query);
+    }
+
     async getAllPostTypes() {
         return SqlService.getTable(table.postType, 0);
     }
 
+    async updatePost(reqBody) {
+        const post = {
+            id: reqBody.id,
+            languageCode: reqBody.languageCode,
+            moodId: reqBody.moodId,
+            description: reqBody.description,
+        }
+        const condition = `where id = ${post.id}`;
+        const query = QueryBuilderService.getUpdateQuery(table.post, post, condition);
+        return SqlService.executeQuery(query);
+    }
+
     async getComments(postIds) {
-        const query = `select pc.*, u.name, u.imageUrl, pm.url, pm.type
+        const query = `select pc.*, u.name, u.imageUrl, u.id userId, pm.url, pm.type
                         from ${table.postComment} pc
                             left join user u on u.id = pc.userId
                             left join ${table.postMedia} pm on pm.commentId = pc.id
@@ -203,6 +240,25 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async addPostView(req) {
+        const model = {
+            userId: req.user.id,
+            postId: req.body.postId,
+            seenDate: 'utc_timestamp()'
+        }
+      /*  let query = `select 1 from ${table.postView}
+                        where userId = ${model.userId}
+                            and postId = ${model.postId}
+                        limit 1`;
+        const view = await SqlService.getSingle(query);
+        if (!_.isEmpty(view)) {
+            return "User view can't be added again! its already added for this post.";
+        }*/
+        let query = QueryBuilderService.getInsertQuery(table.postView, model);
+        await SqlService.executeQuery(query);
+        return "User view added for this post";
+    }
+
     async deleteReaction(req) {
         const query = `delete from ${table.postReaction}
                             where reactedBy = ${req.user.id} 
@@ -231,6 +287,14 @@ export class PostService {
     async getPostMedia(postIds) {
         const query = `select pm.postId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.postMedia}  pm
                         where postId in ${Utils.getRange(postIds)}`;
+        return SqlService.executeQuery(query);
+    }
+
+    async getPostViews(postIds) {
+        const query = `select pv.*, u.name userName, u.imageUrl userImageUrl, u.id userId from 
+                        ${table.postView} pv 
+                            inner join user u on u.id = pv.userId 
+                        where postId in ${Utils.getRange(postIds)};`;
         return SqlService.executeQuery(query);
     }
 
@@ -333,13 +397,10 @@ export class PostService {
                         where trim(lower(name)) in ${Utils.getRange(names)};`;
         return await SqlService.executeQuery(query);
     }
-
     async deletePostComment(model) {
         const query = `update ${table.postComment} 
                         set isDeleted = 1 
                         where id = ${model.commentId};`;
         return SqlService.executeQuery(query);
     }
-
-
 }

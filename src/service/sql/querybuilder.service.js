@@ -17,10 +17,11 @@ export class QueryBuilderService {
             if (value === undefined) {
                 continue;
             }
-            if (typeof value === 'number' || value === null || value.endsWith('()')) {
+            if (typeof value === 'number' || typeof value === 'boolean' || value === null || value.endsWith('()')) {
                 query += `${value}, `;
             } else {
-                value = value.replace('"', "\\\"").replace("'", "\\\'");
+                value = value.replace(/"/g, "\\\"");
+                value = value.replace(/'/g, "\\\'");
                 query += `'${value}', `;
             }
         }
@@ -38,7 +39,7 @@ export class QueryBuilderService {
             }
             if (value === '') {
                 query += `\`${prop}\` = '', `
-            } else if (typeof value === 'number' || value === null || value.endsWith('()')) {
+            } else if (typeof value === 'number' || typeof value === 'boolean' || value === null || value.endsWith('()')) {
                 query += `\`${prop}\` = ${value}, `;
             } else {
                 query += `\`${prop}\` = '${value}', `;
@@ -77,7 +78,7 @@ export class QueryBuilderService {
             }
             if (value === '') {
                 rowString += ', ';
-            } else if (typeof value === 'number' || value === null || value.endsWith('()')) {
+            } else if (typeof value === 'number' || typeof value === 'boolean' || value === null || value.endsWith('()')) {
                 rowString += `${value}, `;
             } else {
                 rowString += `'${value}', `;

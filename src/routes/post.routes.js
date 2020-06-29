@@ -36,7 +36,7 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
                 try {
                     const {id, userId} = await this.postController.createPost(req);
-                    const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                    const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
                     const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                     taskProcessor.on('disconnect', function (msg) {
                         this.kill();
@@ -49,6 +49,19 @@ export class PostRoutes {
                         userId
                     }));
                     return res.status(HttpCode.ok).json({postId: id});
+                } catch (e) {
+                    console.error("test Data",`${req.method}: ${req.url}`, e);
+                    if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                        return res.status(HttpCode.bad_request).send(e);
+                    }
+                    return res.status(HttpCode.internal_server_error).send(e);
+                }
+            });
+
+        router.post('/update', uploadPostMediaMiddleware, async (req, res) => {
+                try {
+                    await this.postService.updatePost(req.body);
+                    return res.sendStatus(HttpCode.ok);
                 } catch (e) {
                     console.error("test Data",`${req.method}: ${req.url}`, e);
                     if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
@@ -75,16 +88,16 @@ export class PostRoutes {
             const start = new Date();
             try {
                 const request = {
-                    "latitude": req.body.latitude || 21.251385,
-                    "longitude": req.body.longitude || 81.629639,
+                    "latitude": req.body.latitude,
+                    "longitude": req.body.longitude,
                     "type": req.body.type || 'normal',
-                    "radiusInMeter": req.body.radiusInMeter || 10000000000,
+                    "radiusInMeter": req.body.radiusInMeter,
                     "lastPostId": req.body.lastPostId,
                     "postCount": req.body.postCount || 20,
                     "postByUserId": req.body.postByUserId,
                     "moodIds": req.body.moodIds,
                     "offset": req.body.offset || 0,
-                    "language": req.body.language,
+                    "languageCode": req.body.languageCode,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
@@ -97,8 +110,27 @@ export class PostRoutes {
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.invalid_creds) {
-                    return res.status(HttpCode.unauthorized).send(e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+
+        router.post('/getpostByPostId', async (req, res) => {
+            try {
+                const request = {
+                    "postId": req.body.postId
+                };
+                let result = await this.postService.getPostData(request);
+                console.log('post data', result);
+                result = await this.postController.formatPosts(req, result);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
                 res.sendStatus(HttpCode.internal_server_error);
             }
@@ -158,7 +190,7 @@ export class PostRoutes {
         router.post('/comment', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const {id, postId, userId} = await this.postController.commentOnPost(req);
-                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
                     this.kill();
@@ -197,6 +229,19 @@ export class PostRoutes {
             try {
                 await this.postController.reactOnPost(req);
                 return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+        router.post('/addView', async (req, res) => {
+            try {
+                const result = await this.postService.addPostView(req);
+                return res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {

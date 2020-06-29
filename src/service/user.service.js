@@ -7,10 +7,12 @@ import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/common.model";
 import {Message, ProfileType} from "../enum/common.enum";
 import Validator from "./common/validator.service";
+import {FirebaseController} from "../controller/firebase.controller";
 
 export class UserService {
     constructor() {
         this.queryBuilderService = new QueryBuilderService();
+        this.firebaseController = new FirebaseController();
     }
 
     async getUserByEmail(user) {
@@ -31,24 +33,35 @@ export class UserService {
     }
 
     async getAllUsers(data) {
-        const condition1 = ` and u.roleId = 3`;
-        const condition2 = ` and u.name LIKE '%${data.body.searchText}%'
+        let condition1 = ``;
+        let condition2 = ``;
+        if (data.body.isTestUser) {
+            condition1 = `and u.isTestUser = 1`;
+        }
+        if (!_.isEmpty(data.body.searchText)) {
+            condition2 = `and u.name LIKE '%${data.body.searchText}%'
                             or u.email LIKE '%${data.body.searchText}%'`;
+        }
+
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
-	    				where u.roleId <> 1
-	    				   ${(data.user.roleId == 2) ? condition1 : ''}
-	    				    ${!_.isEmpty(data.body.searchText) ? condition2 : ''}
+	    				where u.roleId = 3 ${condition1} ${condition2}
 	    				order by id desc
-	    				LIMIT ${data.body.limit} OFFSET ${data.body.offset}`;
+	    				LIMIT ${data.body.limit || 0} 
+	    				OFFSET ${data.body.offset || 0}`;
         return SqlService.executeQuery(query);
     }
 
-    async getFormattedUsers() {
+    async getFormattedUsers(params) {
+        let c1 = ''
+        if (params && params.isTestUser) {
+            c1 = `where isTestUser = 1`;
+        }
         const query = `select u.id, u.name, p.name anonymousName 
                         from ${table.user} u 
                         join profile p on p.userId = u.id and p.type = 'anonymous'
+                        ${c1}
                         order by u.id desc
                         ;`;
         const users = await SqlService.executeQuery(query);
@@ -112,7 +125,7 @@ export class UserService {
     async getUserById(id) {
         const query = `select u.id, u.name, u.email, u.phone, 
                                 u.gender, u.imageUrl, u.bgImageUrl, u.audioUrl, u.address, u.ageRangeId, 
-                                u.profession, u.company, u.latitude, u.longitude,
+                                u.profession, u.company, u.latitude, u.longitude, u.appLanguage, u.contentLanguage,
                         ur.name role 
 						from ${table.user} u
 		 					left join ${table.userRole} ur on u.roleId = ur.id
@@ -242,12 +255,16 @@ export class UserService {
     }
 
     async getTotalUsers(data) {
+        let condition1 = ``;
+        if (data.isTestUser) {
+            condition1 = `and u.isTestUser = 1`;
+        }
         const condition2 = ` and u.name LIKE '%${data.searchText}%'
                             or u.email LIKE '%${data.searchText}%'`;
         const query = `select count("id") totalUsers
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
-	    				where u.roleId <> 1
+	    				where u.roleId <> 1 ${condition1}
 	    				${!_.isEmpty(data.searchText) ? condition2 : ''}`;
         return SqlService.getSingle(query);
     }
@@ -273,15 +290,16 @@ export class UserService {
     }
 
     async updateRespect(model) {
-        let q =  `select * from ${table.respect} 
+        let q = `select * from ${table.respect} 
                         where respectFor = ${model.respectFor} 
                                 and respectBy = ${model.respectBy}
                         limit 1;`;
         const respect = await SqlService.getSingle(q);
         let status = '';
-        if(_.isEmpty(respect)) {
-           q = QueryBuilderService.getInsertQuery(table.respect, model);
-           status = 'Respect added';
+        if (_.isEmpty(respect)) {
+            q = QueryBuilderService.getInsertQuery(table.respect, model);
+            status = 'Respect added';
+            this.firebaseController.sendRespectUserMessage(model);
         } else {
             q = `delete from ${table.respect} where id = ${respect.id};`;
             status = 'Respect removed';
@@ -318,6 +336,7 @@ export class UserService {
                         where respectBy = ${respectBy} and respectFor = ${respectFor}`;
         return SqlService.executeQuery(query);
     }
+
     async saveToken(model) {
         const query = `update ${table.user} set deviceToken = '${model.deviceToken}' where id = ${model.userId};`;
         return SqlService.executeQuery(query);

@@ -91,7 +91,7 @@ export class UserRoutes {
 
         router.get('/getFormattedUsers', async (req, res) => {
             try {
-                let user = await this.userService.getFormattedUsers();
+                let user = await this.userService.getFormattedUsers(req.query);
                 return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -130,16 +130,20 @@ export class UserRoutes {
         router.post('/update', async (req, res) => {
             try {
                 let user = req.body;
-                if (_.isEmpty(user.id)) {
+                if (user.id === undefined || !(user.id > 0)) {
                     user.id = req.user.id;
-                    user.workingStatus = 'active'
+                    user.workingStatus = 'active';
                 }
+                await this.userController.checkIfUserRegistered(user);
                 await this.userController.updateUser(user);
                 await this.userController.updateHobbies(user.hobbies, user.id);
                 user = await this.userController.getUserDetails(user.id);
                 return await res.json(user);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.duplicate_entity) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });

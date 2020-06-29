@@ -9,7 +9,6 @@ import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
-import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 import fs from 'fs';
 import {FirebaseController} from "./firebase.controller";
 
@@ -100,26 +99,42 @@ export class PostController {
         if (postIds.length !== uniqPostIds.length) {
             console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        const [comments, subMoods, respects, reactions, trusts, mediaList] = await Promise.all([
+        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews] = await Promise.all([
             this.postService.getComments(uniqPostIds),
             this.postService.getSubMoodByPostId(uniqPostIds),
             this.postService.getRespects(uniqPostIds),
             this.postService.getPostReactions(uniqPostIds),
             this.postService.getPostTrust(uniqPostIds),
             this.postService.getPostMedia(uniqPostIds),
+            this.postService.getPostViews(uniqPostIds),
         ])
 
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {userId: req.user.id, post, comments, subMoods, respects, reactions, trusts, mediaList}
+                {userId: req.user.id, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
             );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost({userId, post, comments, subMoods, respects, reactions, trusts, mediaList}) {
+    getPost({userId, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+        const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
+
+        let viewCount = 0;
+        let viewedByUsers = [];
+        if (postViewFiltered.length > 0) {
+            viewCount = postViewFiltered.length;
+            viewedByUsers = postViewFiltered.map(p => {
+                return {
+                    id: p.userId,
+                    name: p.userName,
+                    imageUrl: p.userImageUrl,
+                }
+            })
+        }
+
         const postComments = comments.filter(comment => comment.postId === post.id);
         const subMoodData = subMoods.filter(subMood => subMood.postId === post.id);
         const basicDetails = this.getBasicPostDetails(userId, post, respects);
@@ -130,16 +145,16 @@ export class PostController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
-
         const formattedComments = this.getFormattedComments(postComments);
 
         const {
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
         } = this.getReactionsWithCount(userId, post, reactions, trusts);
-
         return {
             ...basicDetails,
+            viewCount,
+            viewedByUsers,
             subMood: subMoodData,
             media,
             trustMeter: {
@@ -176,7 +191,8 @@ export class PostController {
             },
             user: {
                 name: comment.name,
-                imageUrl: comment.imageUrl
+                imageUrl: comment.imageUrl,
+                id: comment.userId
             },
             replies: this.getCommentReplies(comment.id, allComments, consumedCommentIds)
         };
@@ -202,6 +218,7 @@ export class PostController {
             mood: post.mood,
             source: post.source,
             language: post.language,
+            languageCode: post.languageCode,
             linkToShare: "https://www.socialmediatoday.com",
             user: {
                 id: post.userId,

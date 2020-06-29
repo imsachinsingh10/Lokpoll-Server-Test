@@ -9,6 +9,7 @@ import {AuthRoutes} from "./auth.routes";
 import Utils from "../service/common/utils";
 import {ProfileTypeRoutes} from "./profile-type.routes";
 import {ProductRoutes} from "./product.routes";
+import {LocationRoutes} from "./location.routes";
 import {ChallengeRoutes} from "./challenge.routes";
 
 export class InitRoutes {
@@ -51,6 +52,7 @@ export class InitRoutes {
         new ProfileTypeRoutes(app);
         new ProductRoutes(app);
         new MediaRoutes(app);
+        new LocationRoutes(app);
         new ChallengeRoutes(app);
     }
 }

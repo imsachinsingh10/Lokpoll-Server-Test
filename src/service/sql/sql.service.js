@@ -3,7 +3,14 @@ import * as mysql from 'mysql';
 import {Environment} from "../../enum/common.enum";
 import _ from 'lodash';
 
-const db = Config.env === Environment.dev ? Config.dbDev : Config.dbProd;
+let db;
+if (Config.env === Environment.test) {
+    db = Config.dbTest
+} else if (Config.env === Environment.prod) {
+    db = Config.dbProd
+} else {
+    db = Config.dbDev;
+}
 const pool = mysql.createPool(db);
 // console.log('mysql pool created');
 

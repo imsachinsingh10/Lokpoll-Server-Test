@@ -18,10 +18,12 @@ export class FirebaseController {
             {
                 title: `Respect`,
                 description: `${user.name} giving respect`,
-                type: 'success',
+                type: 'respect',
+                id: `${model.respectBy}`,
                 receiverIds
             }
         );
+        console.log('notification', notification);
         return this.sendAndLogNotification(receiverIds, notification);
     }
 
@@ -49,12 +51,13 @@ export class FirebaseController {
             {
                 title: `Comment Added`,
                 description: comment.comment,
-                type: 'success',
+                type: 'comment',
+                id: `${comment.postId}`,
                 receiverIds
             }
         );
-        // console.log('notification', notification);
-        return this.sendNotifications(receiverIds, notification, comment);
+         console.log('notification', notification);
+        return this.sendNotifications(receiverIds, notification);
     }
 
     async sendNotificationForReaction(reaction, reactionCount) {
@@ -67,7 +70,8 @@ export class FirebaseController {
             {
                 title: `Reaction on post`,
                 description: `${reactionCount} giving respect`,
-                type: 'success',
+                type: 'reaction',
+                id: `${reaction.postId}`,
                 receiverIds
             }
         );
@@ -100,16 +104,15 @@ export class FirebaseController {
                 // icon: 'icon-gray.jpg'
             },
             data: {
-                id: n.title
+                id: n.id,
+                type: n.type,
+                click_action: 'FLUTTER_NOTIFICATION_CLICK'
             },
             tokens: _tokens
         };
         if (payload) {
             message.data = {
-                ...message.data,
-                ...payload,
-                id: payload.id + '',
-                senderId: payload.userId + '',
+                ...payload
             }
         }
         console.log('message obj', message);
@@ -118,14 +121,15 @@ export class FirebaseController {
     }
 }
 
-function notificationModel({title, description, type, receiverIds, name, ...rest}) {
+function notificationModel({title, description, type ,id, receiverIds, name, ...rest}) {
     const notification = {
         title: title,
         description: description,
         createdAt: 'utc_timestamp()',
         type: type,
         receiverIds: ',',
-        name: name
+        name: name,
+        id: id
     };
     receiverIds = receiverIds.filter(id => id > 0);
     receiverIds.forEach(receiverId => {
