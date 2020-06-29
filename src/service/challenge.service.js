@@ -20,6 +20,11 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async createChallengeEntries(challengeEntries) {
+        const query = QueryBuilderService.getInsertQuery(table.challengeEntries, challengeEntries);
+        return SqlService.executeQuery(query);
+    }
+
     async saveUserChallenge(userChallenge) {
         const query = QueryBuilderService.getInsertQuery(table.userChallenge, userChallenge);
         return SqlService.executeQuery(query);
@@ -63,6 +68,12 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async updateChallengeEntriesUpload(challengeEntryId) {
+        const query = `update ${table.challengeEntries} 
+                        set isPostUpload = 1 
+                        where id = ${challengeEntryId};`;
+        return SqlService.executeQuery(query);
+    }
 
 
 }

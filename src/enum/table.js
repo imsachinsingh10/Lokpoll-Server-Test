@@ -26,6 +26,11 @@ export const table = {
     postSubMood: "post_sub_mood",
     challenge: "challenge",
     userChallenge: "user_challenge",
+    challengeEntries: "challenge_entries",
+    challengeEntriesMedia: "challenge_entries_media",
+    challengeEntriesLocation: "challenge_entries_location",
+    challengeEntriesReaction: "challenge_entries_reaction",
+    challengeEntriesComment: "challenge_entries_comment",
 };
 
 export const dbview = {

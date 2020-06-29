@@ -47,6 +47,13 @@ export const uploadPostMediaMiddleware = multer({storage: storage})
         {name: 'audio', maxCount: 50},
     ]);
 
+export const uploadChallengeEntriesMediaMiddleware = multer({storage: storage})
+    .fields([
+        {name: 'image', maxCount: 50},
+        {name: 'video', maxCount: 50},
+        {name: 'audio', maxCount: 50},
+    ]);
+
 export const uploadProfilePictures = multer({storage})
     .fields([
         {name: 'image', maxCount: 1},
@@ -93,6 +100,37 @@ export class MinIOService {
     }
 
     async uploadPostMedia(file, mediaType) {
+        return new Promise(async (resolve) => {
+            if (!file) {
+                return resolve({
+                    url: null,
+                    type: mediaType,
+                })
+            }
+
+            await this.createBucket(minioConfig.bucket.root);
+            let bucketPath = this.getBucketPath(mediaType);
+            const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
+            unlink(file.path);
+
+            let thumbnailUrl;
+            if (file.thumbnail) {
+                const thumbnail = file.thumbnail;
+                bucketPath = this.getBucketPath('thumbnail');
+                thumbnailUrl = await this.uploadFileToMinio(bucketPath, thumbnail.filename, thumbnail.path);
+                unlink(thumbnail.path);
+            }
+
+            return resolve({
+                url: fileUrl,
+                type: mediaType,
+                originalName: file.originalName,
+                thumbnailUrl
+            });
+        })
+    }
+
+    async uploadChallengeEntriesMedia(file, mediaType) {
         return new Promise(async (resolve) => {
             if (!file) {
                 return resolve({

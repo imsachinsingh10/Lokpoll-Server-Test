@@ -305,7 +305,7 @@ export class PostController {
         const reqBody = req.body;
         const post = {
             postId: reqBody.postId,
-            userId: 34,
+            userId: req.user.id,
             createdAt: 'utc_timestamp()',
             comment: reqBody.comment,
             replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined

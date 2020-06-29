@@ -7,7 +7,10 @@ import {Environment, PostType} from "../enum/common.enum";
 import {sendTestMessage} from "../service/firebase.service";
 import {ChallengeService} from "../service/challenge.service";
 import {ChallengeController} from "../controller/challenge.controller";
-import {MinIOService, uploadFile} from "../service/common/minio.service";
+import {MinIOService, uploadFile, uploadChallengeEntriesMediaMiddleware} from "../service/common/minio.service";
+import path from "path";
+import {Config} from "../config";
+import childProcess from "child_process";
 
 const router = express();
 
@@ -24,7 +27,7 @@ export class ChallengeRoutes {
     }
 
     initRoutes() {
-        router.use(validateAuthToken);
+       // router.use(validateAuthToken);
 
         router.post('/addUserChallenge', async (req, res) => {
             try {
@@ -114,6 +117,31 @@ export class ChallengeRoutes {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
                 res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/createChallengeEntries', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
+            try {
+                const {id, userId} = await this.challengeController.createChallengeEntries(req);
+                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
+                taskProcessor.on('disconnect', function (msg) {
+                    this.kill();
+                });
+
+                taskProcessor.send(JSON.stringify({
+                    files: req.files,
+                    challengeEntryId: id,
+                    productTags: req.body.productTags,
+                    userId
+                }));
+                return res.status(HttpCode.ok).json({challengeEntryId: id});
+            } catch (e) {
+                console.error("test Data",`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
             }
         });
 
