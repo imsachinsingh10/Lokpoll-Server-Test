@@ -9,11 +9,13 @@ import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import {ChallengeService} from "../service/challenge.service";
+import {MinIOService} from "../service/common/minio.service";
 
 export class ChallengeController {
     constructor() {
         this.challengeService = new ChallengeService();
         this.postService = new PostService();
+        this.minioService = new MinIOService();
     }
 
 
@@ -35,6 +37,7 @@ export class ChallengeController {
         const files = req.files;
         const entries = {
             description: reqBody.description,
+            challengeId: reqBody.challengeId,
             userId: reqBody.userId || req.user.id,
             creatorId: req.user.id,
             createdAt: 'utc_timestamp()',
@@ -132,8 +135,196 @@ export class ChallengeController {
                 thumbnailUrl: file.thumbnailUrl || null
             }));
             const query = QueryBuilderService.getMultiInsertQuery(table.challengeEntriesMedia, challengeEntriesMedia);
-            await this.challengeServiceService.updateChallengeEntriesUpload(challengeEntryId);
+            await this.challengeService.updateChallengeEntriesUpload(challengeEntryId);
             return SqlService.executeQuery(query);
         }
+    }
+
+    async formatChallengeEntries(req, rawEntries) {
+        if (_.isEmpty(rawEntries)) {
+            return [];
+        }
+        const challengeEntryIds = _.map(rawEntries, r => r.id);
+        const uniqChallengeEntryIds = _.uniq(challengeEntryIds);
+        if (challengeEntryIds.length !== uniqChallengeEntryIds.length) {
+            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+        }
+        const [comments, subMoods, respects, reactions, trusts, mediaList, challengeEntriesViews] = await Promise.all([
+            this.challengeService.getComments(uniqChallengeEntryIds),
+            this.postService.getSubMoodByPostId(uniqChallengeEntryIds),
+            this.postService.getRespects(uniqChallengeEntryIds),
+            this.postService.getPostReactions(uniqChallengeEntryIds),
+            this.postService.getPostTrust(uniqChallengeEntryIds),
+            this.challengeService.getChallengeEntryMedia(uniqChallengeEntryIds),
+            this.challengeService.getChallengeEntriesViews(uniqChallengeEntryIds),
+        ])
+
+        const challengeEntries = [];
+        _.forEach(rawEntries, (entries) => {
+            const _entries = this.getChallengeEntries(
+                {userId: req.user.id, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}
+            );
+            challengeEntries.push(_entries);
+        });
+        return challengeEntries;
+    }
+
+    getChallengeEntries({userId, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}) {
+        const challengeEntriesViewFiltered = challengeEntriesViews.filter(challengeEntriesViews => challengeEntriesViews.challengeEntryId === entries.id);
+
+        let viewCount = 0;
+        let viewedByUsers = [];
+        if (challengeEntriesViewFiltered.length > 0) {
+            viewCount = challengeEntriesViewFiltered.length;
+            viewedByUsers = challengeEntriesViewFiltered.map(p => {
+                return {
+                    id: p.userId,
+                    name: p.userName,
+                    imageUrl: p.userImageUrl,
+                }
+            })
+        }
+
+        const postComments = comments.filter(comment => comment.postId === entries.id);
+        const subMoodData = subMoods.filter(subMood => subMood.postId === entries.id);
+        const basicDetails = this.getBasicChallengeEntriesDetails(userId, entries, respects);
+        const media = mediaList
+            .filter(m => m.challengeEntryId === entries.id && m.url !== null && m.commentId === 0)
+            .map(p => ({
+                type: p.type,
+                url: p.url,
+                thumbnailUrl: p.thumbnailUrl
+            }));
+        const formattedComments = this.getFormattedComments(postComments);
+
+        const {
+            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+            trust, voteUpCount, voteDownCount, noVoteCount,
+        } = this.getReactionsWithCount(userId, entries, reactions, trusts);
+        return {
+            ...basicDetails,
+            viewCount,
+            viewedByUsers,
+            subMood: subMoodData,
+            media,
+            trustMeter: {
+                voteUpCount, voteDownCount, noVoteCount,
+                trustByMe: _.isEmpty(trust) ? null : trust.type,
+            },
+            reactions: {
+                loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+                reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
+            },
+            comments: formattedComments,
+            commentCount: formattedComments.length
+        }
+    }
+
+    getBasicChallengeEntriesDetails(userId, entries, respects) {
+        const respectedByMe = _.find(respects, (r) => {
+            return userId === r.respectBy && entries.userId === r.respectFor;
+        });
+        return {
+            id: entries.id,
+            distanceInMeters: Utils.getDistanceInMeters(entries.distance),
+            createdAt: Utils.getNumericDate(entries.createdAt),
+            description: entries.description,
+            type: entries.postType,
+            mood: entries.mood,
+            source: entries.source,
+            language: entries.language,
+            languageCode: entries.languageCode,
+            linkToShare: "https://www.socialmediatoday.com",
+            user: {
+                id: entries.userId,
+                displayName: entries.displayName || entries.userName,
+                profileType: entries.profileType || ProfileType.personal,
+                imageUrl: entries.imageUrl,
+                bgImageUrl: entries.bgImageUrl,
+                audioUrl: entries.audioUrl,
+                respectedByMe: !_.isEmpty(respectedByMe),
+            },
+            location: {
+                latitude: entries.latitude,
+                longitude: entries.longitude,
+                address: entries.address
+            }
+        }
+    }
+
+    getFormattedComments(comments) {
+        const final = [];
+        while (!_.isEmpty(comments)) {
+            const consumedCommentIds = [];
+            final.push(this.getFormattedComment(comments[0], comments, consumedCommentIds));
+            comments = comments.filter(c => consumedCommentIds.indexOf(c.id) < 0)
+        }
+        return final;
+    }
+
+    getFormattedComment(comment, allComments, consumedCommentIds) {
+        consumedCommentIds.push(comment.id);
+        return {
+            id: comment.id,
+            comment: comment.comment,
+            media: {
+                type: comment.type,
+                url: comment.url
+            },
+            user: {
+                name: comment.name,
+                imageUrl: comment.imageUrl,
+                id: comment.userId
+            },
+            replies: this.getCommentReplies(comment.id, allComments, consumedCommentIds)
+        };
+    }
+
+    getCommentReplies(commentId, allComments, consumedCommentIds) {
+        const comments = allComments.filter(c => c.replyToCommentId === commentId);
+        return comments.map(c => {
+            return this.getFormattedComment(c, allComments, consumedCommentIds)
+        })
+    }
+
+    getReactionsWithCount(userId, post, reactions, trusts) {
+        const trust = _.find(trusts, (r) => {
+            return userId === r.reactedBy && post.id === r.postId;
+        });
+        const voteUpCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.voteUp;
+        }).length;
+        const voteDownCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.voteDown;
+        }).length;
+        const noVoteCount = _.filter(trusts, (r) => {
+            return r.postId === post.id && r.type === PostVoteOption.noVote;
+        }).length;
+
+        const reaction = _.find(reactions, (r) => {
+            return userId === r.reactedBy && post.id === r.postId;
+        });
+        const loveCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.love;
+        }).length;
+        const angryCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.angry;
+        }).length;
+        const enjoyCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.enjoy;
+        }).length;
+        const lolCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.lol;
+        }).length;
+        const wowCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.wow;
+        }).length;
+        const sadCount = _.filter(reactions, (r) => {
+            return r.postId === post.id && r.type === PostReaction.sad;
+        }).length;
+        return {
+            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
+            trust, voteUpCount, voteDownCount, noVoteCount,
+        };
     }
 }
