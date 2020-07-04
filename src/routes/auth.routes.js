@@ -9,6 +9,8 @@ import {SMSService} from "../service/common/sms.service";
 import {Environment} from "../enum/common.enum";
 import * as _ from "lodash";
 import {ErrorModel, SuccessModel} from "../model/common.model";
+import {PostService} from "../service/post.service";
+import {PostController} from "../controller/post.controller";
 
 const router = express();
 
@@ -18,6 +20,8 @@ export class AuthRoutes {
 
         this.userService = new UserService();
         this.userController = new UserController();
+        this.postService = new PostService();
+        this.postController = new PostController();
         this.initRoutes();
     }
 
@@ -57,6 +61,21 @@ export class AuthRoutes {
                 const {phone, otp} = req.body;
                 await this.userService.verifyOTP(otp, phone, true);
                 return res.status(HttpCode.ok).json(new SuccessModel(AppCode.success, "Phone verified"));
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/post/:postId', async (req, res) => {
+            try {
+                let result = await this.postService.getPostData({postId: req.params.postId});
+                result = await this.postController.formatPosts(req, result);
+                const html = await Utils.getCompiledHtml(result[0]);
+                return res.status(HttpCode.ok).send(html);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {

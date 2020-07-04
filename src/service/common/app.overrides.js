@@ -1,5 +1,8 @@
+import {Config} from "../../config";
+
 const moment = require("moment");
 import fs from 'fs';
+import {Environment} from "../../enum/common.enum";
 
 export default class AppOverrides {
     constructor(app) {
@@ -7,6 +10,7 @@ export default class AppOverrides {
         this.addResponseHeaders();
         this.overrideJSONSerializer();
         this.overrideJSONDeserializer();
+        this.updateConfig();
 
         global.log = {
             i: (info) => {
@@ -40,5 +44,15 @@ export default class AppOverrides {
         Date.prototype.toJSON = function() {
             return moment(this).format("YYYY-MM-DDTHH:mm:ss.000") + "Z";
         };
+    }
+
+    updateConfig() {
+        if (Config.env === Environment.prod) {
+            Config.serverUrl.base = Config.serverUrl.prod
+        } else if (Config.env === Environment.test) {
+            Config.serverUrl.base = Config.serverUrl.test
+        } else {
+            Config.serverUrl.base = Config.serverUrl.dev
+        }
     }
 }

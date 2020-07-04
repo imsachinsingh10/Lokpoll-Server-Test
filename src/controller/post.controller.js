@@ -11,6 +11,7 @@ import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import fs from 'fs';
 import {FirebaseController} from "./firebase.controller";
+import {Config} from "../config";
 
 export class PostController {
     constructor() {
@@ -112,7 +113,7 @@ export class PostController {
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {userId: req.user.id, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
+                {userId: req.user ? req.user.id : 0, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
             );
             posts.push(_post);
         });
@@ -209,6 +210,15 @@ export class PostController {
         const respectedByMe = _.find(respects, (r) => {
             return userId === r.respectBy && post.userId === r.respectFor;
         });
+        let linkToShare = `${Config.serverUrl.base}/post/${post.id}`;
+        if (!_.isEmpty(post.description)) {
+            if (post.description.length > 200) {
+                const shortDesc = post.description.substr(0, 200) + '...';
+                linkToShare = `${shortDesc}\n\n${linkToShare}`;
+            } else {
+                linkToShare = `${post.description}\n\n${linkToShare}`;
+            }
+        }
         return {
             id: post.id,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
@@ -219,7 +229,7 @@ export class PostController {
             source: post.source,
             language: post.language,
             languageCode: post.languageCode,
-            linkToShare: "https://www.socialmediatoday.com",
+            linkToShare,
             user: {
                 id: post.userId,
                 displayName: post.displayName || post.userName,

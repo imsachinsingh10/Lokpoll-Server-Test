@@ -38,7 +38,7 @@ export class EmailService {
                 const compiledHtml = tpl({
                     ...receiver, link: {
                         text: Utils.getRandomString(),
-                        redirectTo: `${Config.clientApp.baseUrl}/${receiver.id}/${otp}`
+                        redirectTo: `${Config.clientApp.baseUrlProd}/${receiver.id}/${otp}`
                     }
                 });
                 const transporter = nodemailer.createTransport({

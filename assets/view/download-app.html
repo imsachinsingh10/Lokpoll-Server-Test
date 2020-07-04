@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@model.title</title>
+    <meta name="description" content="@model.title | LocalBol App"/>
+<!--    <link href="https://public.app/video/sp_jhh83vwmmpktx" rel="canonical" />-->
+<!--    <link rel="alternate" media="only screen and (max-width: 640px)" href="https://public.app/video/sp_jhh83vwmmpktx">-->
+<!--    <link rel="alternate" media="handheld" href="https://public.app/video/sp_jhh83vwmmpktx" />-->
+<!--    <link rel="amphtml" href="https://public.app/amp_video/sp_jhh83vwmmpktx">-->
+
+    <link rel="icon" sizes="192x192" href="/assets/image/logo.png">
+<!--    <meta property="og:image" content="https://static.getinpix.com/public/images/v1/variants/jpg/m/2020/07_jul/1_wed/img_1593616659689_949.jpg" />-->
+    <meta property="og:image" content="@model.mediaLink" />
+    <meta property="og:description" content="@model.title | LocalBol App" />
+    <meta property="og:updated_time" content="1593616658000" />
+    <meta property="og:rich_attachment" content="true" />
+    <meta property="al:web:should_fallback" content="true" />
+
+<!--    <meta property="al:android:url" content="public://video/sp_jhh83vwmmpktx" />-->
+<!--    <meta property="al:android:package" content="com.cardfeed.video_public" />-->
+<!--    <meta property="al:android:app_name" content="Public" />-->
+    <style>
+        header, main {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <img src="/assets/image/logo.png" alt="localbol">
+</header>
+<main>
+    <h4 style="font-size: 2rem; padding: 0px 80px">@model.title</h4>
+    <hr>
+    <p style="margin-top: 100px">Download app from play store now</p>
+    <a href="https://play.google.com/store/apps/details?id=com.aeon.lokpoll&hl=en_IN" style="margin-top: 80px">
+        <img src="/assets/image/play-store.png" alt="play store icon" style="width: 500px">
+    </a>
+</main>
+</body>
+</html>

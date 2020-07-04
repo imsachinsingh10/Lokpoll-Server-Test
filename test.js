@@ -1,3 +1,7 @@
 import {SMSService} from "./src/service/common/sms.service";
+import path from 'path';
 
-SMSService.sendTestSMS();
+// SMSService.sendTestSMS();
+
+
+console.log(path.resolve('assets'))

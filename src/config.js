@@ -42,6 +42,13 @@ export class Config {
         baseUrlLocal: 'http://localhost:3000/#',
     };
 
+    static serverUrl = {
+        prod: 'https://localbol-prod.cloudjiffy.net',
+        test: 'https://lokpoll-server.cloudjiffy.net',
+        dev: 'http://localhost:9003',
+        base: ''
+    };
+
     static minio = {
         baseUrlProd: 'https://localbol.cloudjiffy.net',
         baseUrlTest: 'https://common-storage.cloudjiffy.net',

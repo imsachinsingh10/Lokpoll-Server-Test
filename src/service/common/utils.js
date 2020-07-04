@@ -1,8 +1,14 @@
 import * as _ from 'lodash';
 import {Config} from "../../config";
 
+import vash from 'vash';
+import fs from 'fs';
+import path from 'path';
+import {Environment} from "../../enum/common.enum";
+
 export default class Utils {
     static formData = {remember: ''};
+
     static getRandomString(maxChars = 100, exclude) {
         let chars = _.shuffle('0123456789abcdefghijklmnopqrstuvqxyzABCDEFGHIJKLMNOPQRSTUVQXYZ@!#$%^&)(_@!#$%^&)(_').join('');
         if (exclude && exclude.specialChars) {
@@ -14,7 +20,13 @@ export default class Utils {
         }
         return link;
     }
-    static getRandomStringV2(maxChars = 100, config = {smallLetters: false, capitalLetters: false, numbers: false, symbols: false}) {
+
+    static getRandomStringV2(maxChars = 100, config = {
+        smallLetters: false,
+        capitalLetters: false,
+        numbers: false,
+        symbols: false
+    }) {
         let numbers = '0123456789';
         let smallLetters = 'abcdefghijklmnopqrstuvwxyz';
         let capitalLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -78,8 +90,7 @@ export default class Utils {
     static getMediaType(mimeType) {
         if (mimeType.startsWith('image/')) {
             return 'image';
-        }
-        else if (mimeType.startsWith('video/')) {
+        } else if (mimeType.startsWith('video/')) {
             return 'video';
         }
     }
@@ -96,4 +107,29 @@ export default class Utils {
         })
     }
 
+    static getCompiledHtml = async (post) => {
+        return new Promise((resolve, reject) => {
+            let _path = path.resolve(__dirname, `../../../assets/view/download-app.html`);
+            fs.readFile(_path, async (err, data) => {
+                if (err) {
+                    return reject({
+                        code: 'no_template_found'
+                    })
+                }
+                const tpl = vash.compile(data.toString());
+                let title = 'Download Localbol app to remain upto date with local talent';
+                if (!_.isEmpty(post.description)) {
+                    title = `${post.description}`;
+                }
+                let mediaLink = `${Config.serverUrl.base}/assets/image/logo.png`;
+                // post.media.forEach((m) => {
+                //     if (m.type === 'image') {
+                //         mediaLink = m.url;
+                //     }
+                // })
+                const compiledHtml = tpl({title, mediaLink});
+                resolve(compiledHtml);
+            });
+        })
+    };
 }
