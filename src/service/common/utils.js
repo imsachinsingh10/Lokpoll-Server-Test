@@ -122,11 +122,11 @@ export default class Utils {
                     title = `${post.description}`;
                 }
                 let mediaLink = `${Config.serverUrl.base}/assets/image/logo.png`;
-                // post.media.forEach((m) => {
-                //     if (m.type === 'image') {
-                //         mediaLink = m.url;
-                //     }
-                // })
+                post.media.forEach((m) => {
+                    if (m.type === 'image') {
+                        mediaLink = m.thumbnailUrl;
+                    }
+                })
                 const compiledHtml = tpl({title, mediaLink});
                 resolve(compiledHtml);
             });
