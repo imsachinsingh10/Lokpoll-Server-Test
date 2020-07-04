@@ -123,7 +123,7 @@ export class ChallengeRoutes {
         router.post('/createChallengeEntries', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
             try {
                 const {id, userId} = await this.challengeController.createChallengeEntries(req);
-                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor.js');
+                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor-challenge-entries.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
                     this.kill();
@@ -142,6 +142,58 @@ export class ChallengeRoutes {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+
+        router.post('/getChallengeEntries', async (req, res) => {
+            const start = new Date();
+            try {
+                const request = {
+                    "latitude": req.body.latitude,
+                    "longitude": req.body.longitude,
+                    "type": req.body.type || 'normal',
+                    "radiusInMeter": req.body.radiusInMeter,
+                    "lastPostId": req.body.lastPostId,
+                    "postCount": req.body.postCount || 20,
+                    "entryByUserId": req.body.postByUserId,
+                    "moodIds": req.body.moodIds,
+                    "offset": req.body.offset || 0,
+                    "languageCode": req.body.languageCode,
+                    "challengeId" : req.body.challengeId,
+                };
+                let result = await this.challengeService.getAllChallengeEntries(request);
+                result = await this.challengeController.formatChallengeEntries(req, result);
+                // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
+                // result = result.map(r => r.id);
+                const end = new Date() - start;
+                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
+                // return await res.json({result, processingTime: end / 1000 + ' seconds'});
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getChallengeEntriesByEntriesId', async (req, res) => {
+            try {
+                const request = {
+                    "challengeEntryId": req.challengeEntryId.postId
+                };
+                let result = await this.challengeService.getChallengeEntriesData(request);
+                console.log('post data', result);
+                result = await this.challengeController.formatChallengeEntries(req, result);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
             }
         });
 

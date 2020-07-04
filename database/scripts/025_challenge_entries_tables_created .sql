@@ -88,3 +88,17 @@ CREATE TABLE `challenge_entries_comment` (
 alter table challenge_entries change latitude latitude double default null, change longitude longitude double default null;
 ALTER TABLE `challenge_entries`
 add COLUMN `languageCode` varchar(50) DEFAULT NULL;
+
+ALTER TABLE `challenge_entries`
+add COLUMN `challengeId` bigint(20) DEFAULT 0;
+
+
+drop table if exists challenge_entries_view;
+create table challenge_entries_view (
+	id bigint primary key auto_increment,
+    userId bigint,
+    challengeEntryId bigint,
+    seenDate datetime
+)
+
+

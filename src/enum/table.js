@@ -33,6 +33,7 @@ export const table = {
     challengeEntriesLocation: "challenge_entries_location",
     challengeEntriesReaction: "challenge_entries_reaction",
     challengeEntriesComment: "challenge_entries_comment",
+    challengeEntriesView: "challenge_entries_view",
 };
 
 export const dbview = {

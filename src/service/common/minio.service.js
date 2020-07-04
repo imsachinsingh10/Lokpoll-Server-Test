@@ -146,7 +146,7 @@ export class MinIOService {
                 })
             }
 
-            await this.createBucket(minioConfig.bucket.root);
+            await this.createBucket(bucket.root);
             let bucketPath = this.getBucketPath(mediaType);
             const fileUrl = await this.uploadFileToMinio(bucketPath, file.filename, file.path);
             unlink(file.path);
