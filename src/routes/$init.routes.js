@@ -11,6 +11,7 @@ import {ProfileTypeRoutes} from "./profile-type.routes";
 import {ProductRoutes} from "./product.routes";
 import {LocationRoutes} from "./location.routes";
 import {ChallengeRoutes} from "./challenge.routes";
+import {JudgeRoutes} from "./judge.routes";
 
 export class InitRoutes {
 
@@ -54,5 +55,6 @@ export class InitRoutes {
         new MediaRoutes(app);
         new LocationRoutes(app);
         new ChallengeRoutes(app);
+        new JudgeRoutes(app);
     }
 }

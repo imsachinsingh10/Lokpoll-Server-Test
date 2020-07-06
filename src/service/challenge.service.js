@@ -181,4 +181,13 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async getWinnerDetails(req) {
+        const query = `select r.id, r.marks,r.rank, u.id as userId , u.name, u.imageUrl, u.bgImageUrl
+                        from ${table.result} r
+                            left join user u on u.id = r.userId
+                        where 
+                            r.challengeId = ${req.challengeId};`;
+        return SqlService.executeQuery(query);
+    }
+
 }

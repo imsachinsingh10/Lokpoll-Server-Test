@@ -197,5 +197,18 @@ export class ChallengeRoutes {
             }
         });
 
+        router.post('/getWinnersByChallengesId', async (req, res) => {
+            try {
+                const user = await this.challengeController.getFormattedWinnerDetails(req);
+                return await res.json(user);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
     }
 }
