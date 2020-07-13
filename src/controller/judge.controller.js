@@ -9,40 +9,27 @@ import {HttpCode} from "../enum/http-code";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {AgeRange} from "../enum/common.enum";
+import {JudgeService} from "../service/judge.service";
 
 export class JudgeController {
     constructor() {
-        this.userService = new UserService();
+        this.judgeService = new JudgeService();
     }
 
-    async checkIfUserRegistered(user) {
-        const _user = await this.userService.getUserByEmail(user);
+    async checkIfJudgeRegistered(judege) {
+        const _judege = await this.judgeService.getJudgeByEmail(judege);
         if (
-            (!user.id && !_.isEmpty(_user))
-            || (user.id && !_.isEmpty(_user) && user.id !== _user.id)
+            (!judege.id && !_.isEmpty(_judege))
+            || (judege.id && !_.isEmpty(_judege) && judege.id !== _judege.id)
         ) {
             throw {
-                message: `user already registered with email ${user.email}`,
+                message: `judge already registered with email ${judege.email}`,
                 code: AppCode.duplicate_entity
             }
         }
     }
 
-    async validateAndCheckIfUserRegisteredByPhone(phone) {
-        if (_.isEmpty(phone) || phone.length !== 10) {
-            throw {
-                message: `Please enter valid phone number of 10 digits.`,
-                code: AppCode.invalid_phone
-            }
-        }
-        const _users = await this.userService.getUserByPhone(phone);
-        if (!_.isEmpty(_users)) {
-            throw {
-                message: `User already registered with phone ${phone}.`,
-                code: AppCode.duplicate_entity
-            }
-        }
-    }
+
 
     async searchUsers(searchCriteria) {
         const _searchCriteria = {

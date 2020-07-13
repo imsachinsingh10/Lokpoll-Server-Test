@@ -7,7 +7,12 @@ import {Environment, PostType} from "../enum/common.enum";
 import {sendTestMessage} from "../service/firebase.service";
 import {ChallengeService} from "../service/challenge.service";
 import {ChallengeController} from "../controller/challenge.controller";
-import {MinIOService, uploadFile, uploadChallengeEntriesMediaMiddleware} from "../service/common/minio.service";
+import {
+    MinIOService,
+    uploadFile,
+    uploadChallengeEntriesMediaMiddleware,
+    uploadPostMediaMiddleware
+} from "../service/common/minio.service";
 import path from "path";
 import {Config} from "../config";
 import childProcess from "child_process";
@@ -22,7 +27,6 @@ export class ChallengeRoutes {
         this.challengeService = new ChallengeService();
         this.minioService = new MinIOService();
         this.challengeController = new ChallengeController();
-
         this.initRoutes();
     }
 
@@ -47,13 +51,15 @@ export class ChallengeRoutes {
             }
         });
 
-        router.post('/add', uploadFile, async (req, res) => {
+        router.post('/add', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
             try {
                 const challenge = {
                     moodId: req.body.moodId,
+                    languageCode:req.body.languageCode,
                     topic: req.body.topic,
                     description: req.body.description,
                     startDate: req.body.startDate,
+                    resultAnnounceDate: req.body.resultAnnounceDate,
                     deadlineDate: req.body.deadlineDate,
                     createdAt: 'utc_timestamp()',
                 };
@@ -70,6 +76,19 @@ export class ChallengeRoutes {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/update', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
+            try {
+                await this.challengeService.updateChallenge(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error("test Data",`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
             }
         });
 

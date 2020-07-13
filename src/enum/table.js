@@ -34,6 +34,7 @@ export const table = {
     challengeEntriesReaction: "challenge_entries_reaction",
     challengeEntriesComment: "challenge_entries_comment",
     challengeEntriesView: "challenge_entries_view",
+    judge: "judge",
     result: "result",
 };
 

@@ -20,6 +20,21 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async updateChallenge(reqBody) {
+        const challenge = {
+            id: reqBody.id,
+            languageCode: reqBody.languageCode,
+            moodId: reqBody.moodId,
+            description: reqBody.description,
+            startDate: reqBody.startDate,
+            resultAnnounceDate: reqBody.resultAnnounceDate,
+            deadlineDate: reqBody.deadlineDate,
+        }
+        const condition = `where id = ${challenge.id}`;
+        const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
+        return SqlService.executeQuery(query);
+    }
+
     async createChallengeEntries(challengeEntries) {
         const query = QueryBuilderService.getInsertQuery(table.challengeEntries, challengeEntries);
         return SqlService.executeQuery(query);
