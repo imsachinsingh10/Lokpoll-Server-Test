@@ -165,13 +165,24 @@ export class UserService {
                         where u.email = '${user.email}' 
                         and u.password = '${user.password}';`;
         const u = await SqlService.getSingle(query);
-        if (_.isEmpty(u)) {
+
+        const query1 = `select j.id 
+						from ${table.judge} j
+                        where j.email = '${user.email}' 
+                        and j.password = '${user.password}';`;
+        const judge = await SqlService.getSingle(query1);
+            
+        if (_.isEmpty(u) && _.isEmpty(judge)) {
             throw {
                 code: AppCode.invalid_creds,
                 message: "Email or password is incorrect"
             };
         }
-        return u;
+        if(_.isEmpty(u)){
+            return judge;
+        }else{
+            return u;
+        }
     }
 
     async loginUserByPhone(user) {
