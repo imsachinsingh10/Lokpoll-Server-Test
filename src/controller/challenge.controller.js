@@ -327,4 +327,22 @@ export class ChallengeController {
             trust, voteUpCount, voteDownCount, noVoteCount,
         };
     }
+
+
+    async getFormattedWinnerDetails(req) {
+        let rawArray = await this.challengeService.getWinnerDetails(req);
+        return rawArray.map((obj) => {
+            return {
+                id: obj.id,
+                marks: obj.marks,
+                rank: obj.rank,
+                user: {
+                    id: obj.userId,
+                    name: obj.name,
+                    imageUrl: obj.imageUrl,
+                    bgImageUrl: obj.bgImageUrl,
+                }
+            }
+        })
+    };
 }
