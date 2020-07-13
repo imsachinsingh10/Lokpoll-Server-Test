@@ -4,7 +4,7 @@ import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
-import {PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
+import {LanguageCode, PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
@@ -210,15 +210,7 @@ export class PostController {
         const respectedByMe = _.find(respects, (r) => {
             return userId === r.respectBy && post.userId === r.respectFor;
         });
-        let linkToShare = `${Config.serverUrl.base}/post/${post.id}`;
-        if (!_.isEmpty(post.description)) {
-            if (post.description.length > 200) {
-                const shortDesc = post.description.substr(0, 200) + '...';
-                linkToShare = `${shortDesc}\n\n${linkToShare}`;
-            } else {
-                linkToShare = `${post.description}\n\n${linkToShare}`;
-            }
-        }
+        let linkToShare = this.getLinkToShare(post);
         return {
             id: post.id,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
@@ -245,6 +237,34 @@ export class PostController {
                 address: post.address
             }
         }
+    }
+
+    getLinkToShare(post) {
+        let linkToShare = `${Config.serverUrl.base}/post/${post.id}`;
+        if (!_.isEmpty(post.description)) {
+            if (post.description.length > 200) {
+                const shortDesc = post.description.substr(0, 200) + '...';
+                linkToShare = `${shortDesc}\n\n ${linkToShare}`;
+            } else {
+                linkToShare = `${post.description}\n\n ${linkToShare}`;
+            }
+        }
+        switch (post.languageCode) {
+            case LanguageCode.English:
+                linkToShare += '\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes, business from your preferred location in your local language.'
+                break;
+            case LanguageCode.Hindi:
+                linkToShare += '\n\n अपनी स्थानीय भाषा में अपने पसंदीदा स्थान से स्थानीय समाचार, सामाजिक कार्य, व्यवसाय से सीधे अपडेट प्राप्त करने के लिए भारत का अपना स्थानीय ऐप LocalBol डाउनलोड करें.';
+                break;
+            case LanguageCode.Odia:
+                linkToShare += '\n\n LocalBol app ଡାଉନଲୋଡ୍ଯୋ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ. ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.';
+                break;
+            case LanguageCode.Sambalpuri:
+                linkToShare += '\n\n ପହେଲା ଥର, ଆମର ଭାଷା ରେ  APP କେ ଚଲାବାର ମଜା ଅଲଗା ଲାଗବା !! ନିଜର ଜାଗା, ନିଜର ଲୋକ ଆଉ ନିଜର ଭାଷା ଲାଗିର ବନା ହୋଇଛେ. \n\n Link ଦିଆହେଇଛେ ନିଜେ download କରୁନ ଆଉ ସମକୁ forward କରୁନ.';
+                break;
+        }
+        linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
+        return linkToShare;
     }
 
     getReactionsWithCount(userId, post, reactions, trusts) {
