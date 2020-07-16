@@ -36,6 +36,8 @@ export const table = {
     challengeEntriesView: "challenge_entries_view",
     judge: "judge",
     result: "result",
+    assignJudge: "assign_judge",
+    challengeRemark: "challenge_remark",
 };
 
 export const dbview = {

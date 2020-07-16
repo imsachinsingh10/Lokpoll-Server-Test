@@ -25,10 +25,13 @@ export class ChallengeService {
             id: reqBody.id,
             languageCode: reqBody.languageCode,
             moodId: reqBody.moodId,
+            topic: reqBody.description,
             description: reqBody.description,
             startDate: reqBody.startDate,
             resultAnnounceDate: reqBody.resultAnnounceDate,
             deadlineDate: reqBody.deadlineDate,
+            latitude: reqBody.body.latitude,
+            longitude: reqBody.body.longitude,
         }
         const condition = `where id = ${challenge.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
@@ -45,11 +48,26 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async saveChallengeRemark(challengeRemark) {
+        const query = QueryBuilderService.getInsertQuery(table.challengeRemark, challengeRemark);
+        return SqlService.executeQuery(query);
+    }
+
+    async saveAssignJudgesOnChallenge(assignJudge) {
+        console.log("sdad",assignJudge);
+        const query = QueryBuilderService.getInsertQuery(table.assignJudge, assignJudge);
+        return SqlService.executeQuery(query);
+    }
+
     async getAllChallenges(data) {
-        const condition1 = ` c.topic LIKE '%${data.body.searchText}%'`;
+        let condition1 = ``;
+        if (data.body.judgeId) {
+            condition1 = `where c.id IN (SELECT id FROM assign_judge WHERE judgeId = ${data.body.judgeId})`;
+        }
         const query = `select c.*, m.${'en'} 'moodName'
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
+	    				 ${condition1} 
                         order by id desc
                          LIMIT ${data.body.limit} OFFSET ${data.body.offset}`;
         return SqlService.executeQuery(query);

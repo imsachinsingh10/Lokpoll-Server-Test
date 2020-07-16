@@ -61,6 +61,8 @@ export class ChallengeRoutes {
                     startDate: req.body.startDate,
                     resultAnnounceDate: req.body.resultAnnounceDate,
                     deadlineDate: req.body.deadlineDate,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
                     createdAt: 'utc_timestamp()',
                 };
                 if (req.file) {
@@ -226,6 +228,43 @@ export class ChallengeRoutes {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/assignJudge',uploadChallengeEntriesMediaMiddleware , async (req, res) => {
+            try {
+                const challenge = {
+                    judgeId: req.body.judgeId,
+                    challengeId: req.body.challengeId,
+                };
+                const result = await this.challengeService.saveAssignJudgesOnChallenge(challenge);
+
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.duplicate_entity) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/addRemark', async (req, res) => {
+            try {
+                const challengeRemark = {
+                    judgeId:  req.body.judgeId,
+                    challengeId: req.body.challengeId,
+                    entryId: req.body.id,
+                    remark: req.body.remark
+                };
+                await this.challengeService.saveChallengeRemark(challengeRemark);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
             }
         });
 

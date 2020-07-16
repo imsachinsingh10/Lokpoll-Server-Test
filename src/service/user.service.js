@@ -171,7 +171,7 @@ export class UserService {
                         where j.email = '${user.email}' 
                         and j.password = '${user.password}';`;
         const judge = await SqlService.getSingle(query1);
-            
+
         if (_.isEmpty(u) && _.isEmpty(judge)) {
             throw {
                 code: AppCode.invalid_creds,
@@ -179,6 +179,7 @@ export class UserService {
             };
         }
         if(_.isEmpty(u)){
+            judge.roleId = 4;
             return judge;
         }else{
             return u;
