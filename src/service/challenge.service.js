@@ -101,6 +101,15 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async checkAlreadyRemark(req) {
+        console.log("rewqn", req);
+        const query = `select c.*
+	    				from ${table.challengeRemark} c
+	    				where entryId = ${req.entryId}
+	    				and judgeId = ${req.judgeId}`;
+        return SqlService.executeQuery(query);
+    }
+
     async updateChallengeEntriesUpload(challengeEntryId) {
         const query = `update ${table.challengeEntries} 
                         set isPostUpload = 1 

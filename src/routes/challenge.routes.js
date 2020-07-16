@@ -268,5 +268,18 @@ export class ChallengeRoutes {
             }
         });
 
+        router.post('/checkRemark', async (req, res) => {
+            try {
+                const result = await this.challengeService.checkAlreadyRemark(req.body);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
     }
 }
