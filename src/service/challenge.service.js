@@ -25,10 +25,16 @@ export class ChallengeService {
             id: reqBody.id,
             languageCode: reqBody.languageCode,
             moodId: reqBody.moodId,
+            topic: reqBody.topic,
+            winners: reqBody.winners,
+            entries: reqBody.entries,
             description: reqBody.description,
             startDate: reqBody.startDate,
             resultAnnounceDate: reqBody.resultAnnounceDate,
             deadlineDate: reqBody.deadlineDate,
+            latitude: reqBody.latitude,
+            longitude: reqBody.longitude,
+            location: reqBody.location,
         }
         const condition = `where id = ${challenge.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
@@ -45,14 +51,44 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async saveChallengeRemark(challengeRemark) {
+        const query = QueryBuilderService.getInsertQuery(table.challengeRemark, challengeRemark);
+        return SqlService.executeQuery(query);
+    }
+
+    async saveAssignJudgesOnChallenge(assignJudge) {
+        console.log("sdad",assignJudge);
+        const query = QueryBuilderService.getInsertQuery(table.assignJudge, assignJudge);
+        return SqlService.executeQuery(query);
+    }
+
     async getAllChallenges(data) {
-        const condition1 = ` c.topic LIKE '%${data.body.searchText}%'`;
-        const query = `select c.*, m.${'en'} 'moodName'
+        let condition1 = ``;
+        if (data.body.judgeId) {
+            condition1 = `where c.id IN (SELECT id FROM assign_judge WHERE judgeId = ${data.body.judgeId})`;
+        }
+
+        const query = `select c.*, m.${'en'} 'moodName' , count(ce.id) challengeEntries
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
+	    				left join challenge_entries ce on ce.challengeId = c.id
+	    				 ${condition1} 
+	    				 group by c.id
                         order by id desc
                          LIMIT ${data.body.limit} OFFSET ${data.body.offset}`;
         return SqlService.executeQuery(query);
+    }
+
+    async getTotalChallengeCount(data) {
+        let condition1 = ``;
+        if (data.body.judgeId) {
+            condition1 = `where c.id IN (SELECT id FROM assign_judge WHERE judgeId = ${data.body.judgeId})`;
+        }
+        const query = `select count("id") count
+	    				from ${table.challenge} c
+	    				left join mood m on m.id = c.moodId
+	    				 ${condition1} ;`;
+        return SqlService.getSingle(query);
     }
 
     async getActiveChallenges(req) {
@@ -80,6 +116,14 @@ export class ChallengeService {
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId`;
+        return SqlService.executeQuery(query);
+    }
+
+    async checkAlreadyRemark(req) {
+        const query = `select c.*, j.name 'judgeName'
+	    				from ${table.challengeRemark} c
+	    				left join judge j on j.id = c.judgeId
+	    				where entryId = ${req.entryId}`;
         return SqlService.executeQuery(query);
     }
 
@@ -113,6 +157,7 @@ export class ChallengeService {
         if (req.challengeId) {
             condition4 = `and ce.challengeId = '${req.challengeId}'`;
         }
+
         try {
             const moodIds = JSON.parse(req.moodIds);
             if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
@@ -153,6 +198,80 @@ export class ChallengeService {
                         ;`;
         return SqlService.executeQuery(query);
     }
+
+    async getAllChallengeEntriesForAdmin(req) {
+        // new SqlService();
+        const reqCoordinate = {
+            latitude: req.latitude,
+            longitude: req.longitude,
+        };
+        let condition1 = ``;
+        let condition2 = ``;
+        let condition3 = ``;
+        let condition4 = '';
+        let joinCondition = '';
+        let remarkQuery = '';
+        let distanceQuery = ``;
+        let havingCondition = ``;
+
+        if (req.languageCode) {
+            condition4 = `and ce.languageCode = '${req.languageCode}'`;
+        }
+        if (req.entryByUserId > 0) {
+            condition2 = `and ce.userId = ${req.entryByUserId}`;
+            condition4 = '';
+        }
+        if (req.challengeId) {
+            condition4 = `and ce.challengeId = '${req.challengeId}'`;
+        }
+
+        if (req.judgeId) {
+            remarkQuery = `,cr.remark`;
+            joinCondition = `left join challenge_remark cr on (cr.entryId = ce.id and cr.challengeId = '${req.challengeId}' and cr.judgeId = '${req.judgeId}')`;
+        }
+        try {
+            const moodIds = JSON.parse(req.moodIds);
+            if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
+                condition3 = `and ce.moodId in ${Utils.getRange(moodIds)}`
+            }
+        } catch (e) {
+
+        }
+
+        if (req.latitude && req.longitude && req.radiusInMeter) {
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            distanceQuery = `, SQRT(
+                                POW(69.1 * (ce.latitude - ${reqCoordinate.latitude}), 2) +
+                                POW(69.1 * (${reqCoordinate.longitude} - ce.longitude) * COS(ce.latitude / 57.3), 2)
+                            ) AS distance`
+        }
+        const query = `select ce.id, ce.createdAt, ce.description, ce.source, 
+                            ce.latitude, ce.longitude, ce.address, l.name language, ce.languageCode,
+                            0 'respects', 0 'comments',
+                            ce.type 'postType',
+                            pro.name 'displayName', pro.type 'profileType',
+                            u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
+                            m.${req.languageCode || 'en'} 'mood'
+                            ${distanceQuery} 
+                            ${remarkQuery}
+                        from ${table.challengeEntries} ce 
+                            join user u on u.id = ce.userId
+                            left join mood m on m.id = ce.moodId
+                            left join profile pro on pro.type = ce.profileType and pro.userId = u.id
+                            left join language l on l.code = ce.languageCode
+                            ${joinCondition}
+                        where 
+                            ce.isDeleted = 0
+                            and ce.latitude is not null and ce.longitude is not null
+                            ${condition1} ${condition2} ${condition3} ${condition4}
+                            ${havingCondition}
+                        order by ce.id desc
+                        limit ${req.postCount} offset ${req.offset}
+                        ;`;
+        return SqlService.executeQuery(query);
+    }
+
+    
 
     async getComments(entryIds) {
         const query = `select pc.*, u.name, u.imageUrl, u.id userId, pm.url, pm.type

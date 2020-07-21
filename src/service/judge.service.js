@@ -22,7 +22,6 @@ export class JudgeService {
 
 
     async createJudge(judge) {
-        judge.password = '1234';
         const query = QueryBuilderService.getInsertQuery(table.judge, judge);
         return SqlService.executeQuery(query);
     }
