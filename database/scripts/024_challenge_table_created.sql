@@ -30,3 +30,12 @@ add COLUMN `latitude` varchar(100) DEFAULT NULL;
 
 ALTER TABLE `challenge`
 add COLUMN `longitude` varchar(100) DEFAULT NULL;
+
+ALTER TABLE `challenge`
+add COLUMN `winners` bigint(20) DEFAULT 0;
+
+ALTER TABLE `challenge`
+add COLUMN `entries` bigint(20) DEFAULT 0;
+
+ALTER TABLE `challenge`
+add COLUMN `location` varchar(200) DEFAULT NULL;
