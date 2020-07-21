@@ -73,7 +73,7 @@ export class PostRoutes {
 
         router.post('/totalPosts', async (req, res) => {
             try {
-                let result = await this.postService.getTotalPostCount(req.body);
+                let result = await this.postService.getTotalPostCount(req);
                 return await res.json(result.count);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -88,16 +88,17 @@ export class PostRoutes {
             const start = new Date();
             try {
                 const request = {
-                    "latitude": req.body.latitude,
-                    "longitude": req.body.longitude,
-                    "type": req.body.type || 'normal',
-                    "radiusInMeter": req.body.radiusInMeter,
-                    "lastPostId": req.body.lastPostId,
-                    "postCount": req.body.postCount || 20,
-                    "postByUserId": req.body.postByUserId,
-                    "moodIds": req.body.moodIds,
-                    "offset": req.body.offset || 0,
-                    "languageCode": req.body.languageCode,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
+                    type: req.body.type || 'normal',
+                    radiusInMeter: req.body.radiusInMeter,
+                    lastPostId: req.body.lastPostId,
+                    postCount: req.body.postCount || 20,
+                    postByUserId: req.body.postByUserId,
+                    moodIds: req.body.moodIds,
+                    offset: req.body.offset || 0,
+                    languageCode: req.body.languageCode,
+                    roleId: req.user.roleId
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);

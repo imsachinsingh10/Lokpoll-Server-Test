@@ -5,9 +5,10 @@ import * as _ from 'lodash';
 import Utils from "./common/utils";
 import {AppCode} from "../enum/app-code";
 import {ErrorModel} from "../model/common.model";
-import {Message, ProfileType} from "../enum/common.enum";
+import {Environment, Message, ProfileType} from "../enum/common.enum";
 import Validator from "./common/validator.service";
 import {FirebaseController} from "../controller/firebase.controller";
+import {Config} from "../config";
 
 export class UserService {
     constructor() {
@@ -27,26 +28,35 @@ export class UserService {
 
     async createUser(user) {
         user.avatarBG = Utils.getRandomColor();
-        user.password = '1234';
+        user.password = Config.env === Environment.prod ? Utils.getRandomStringV2(8, {
+            smallLetters: true,
+            capitalLetters: true,
+            numbers: true,
+            symbols: true
+        }) : '1234';
         const query = QueryBuilderService.getInsertQuery(table.user, user);
         return SqlService.executeQuery(query);
     }
 
     async getAllUsers(data) {
-        let condition1 = ``;
-        let condition2 = ``;
+        let c1 = ``;
+        let c2 = ``;
+        let c3 = `u.roleId = 3`;
         if (data.body.isTestUser) {
-            condition1 = `and u.isTestUser = 1`;
+            c1 = `and u.isTestUser = 1`;
         }
         if (!_.isEmpty(data.body.searchText)) {
-            condition2 = `and u.name LIKE '%${data.body.searchText}%'
+            c2 = `and u.name LIKE '%${data.body.searchText}%'
                             or u.email LIKE '%${data.body.searchText}%'`;
+        }
+        if (data.body.roleId) {
+            c3 = `u.roleId = ${data.body.roleId}`;
         }
 
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
-	    				where u.roleId = 3 ${condition1} ${condition2}
+	    				where ${c3} ${c1} ${c2}
 	    				order by id desc
 	    				LIMIT ${data.body.limit || 0} 
 	    				OFFSET ${data.body.offset || 0}`;
@@ -74,21 +84,20 @@ export class UserService {
     }
 
     async searchUsers(searchCriteria) {
-        let condition1 = ``;
+        let c1 = ``;
         if (Array.isArray(searchCriteria.roleId)) {
-            condition1 = `and roleId in ${Utils.getRange(searchCriteria.roleId)}`;
+            c1 = `and roleId in ${Utils.getRange(searchCriteria.roleId)}`;
         } else if (searchCriteria.roleId > 0) {
-            condition1 = `and roleId = '${searchCriteria.roleId}'`;
+            c1 = `and roleId = '${searchCriteria.roleId}'`;
         }
-        const condition2 = `and u.workingStatus = '${searchCriteria.workingStatus}'`;
-        const condition3 = `and u.firmId = '${searchCriteria.firmId}'`;
+        const c2 = `and u.workingStatus = '${searchCriteria.workingStatus}'`;
         const query = `select u.*, ur.name role, ll.loginTime
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id
 	    					left join ${dbview.lastLoginAudit} ll on ll.userId = u.id
                         where 
-                        	u.id > 0 ${condition1}
-							${!_.isEmpty(searchCriteria.workingStatus) ? condition2 : ''}
+                        	u.id > 0 ${c1}
+							${!_.isEmpty(searchCriteria.workingStatus) ? c2 : ''}
                         order by u.id desc
                         limit ${searchCriteria.limit} 
                         offset ${searchCriteria.offset};`;
@@ -165,24 +174,23 @@ export class UserService {
                         where u.email = '${user.email}' 
                         and u.password = '${user.password}';`;
         const u = await SqlService.getSingle(query);
+        if (!_.isEmpty(u)) {
+            return u;
+        }
 
-        const query1 = `select j.id 
+        const query1 = `select j.id, 4 roleId
 						from ${table.judge} j
                         where j.email = '${user.email}' 
                         and j.password = '${user.password}';`;
         const judge = await SqlService.getSingle(query1);
-            
-        if (_.isEmpty(u) && _.isEmpty(judge)) {
-            throw {
-                code: AppCode.invalid_creds,
-                message: "Email or password is incorrect"
-            };
-        }
-        if(_.isEmpty(u)){
+        if (!_.isEmpty(judge)) {
             return judge;
-        }else{
-            return u;
         }
+
+        throw {
+            code: AppCode.invalid_creds,
+            message: "Email or password is incorrect"
+        };
     }
 
     async loginUserByPhone(user) {
@@ -265,18 +273,22 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async getTotalUsers(data) {
-        let condition1 = ``;
+    async  getTotalUsers(data) {
+        let c0 = `u.roleId = 3`;
+        let c1 = ``;
         if (data.isTestUser) {
-            condition1 = `and u.isTestUser = 1`;
+            c1 = `and u.isTestUser = 1`;
         }
-        const condition2 = ` and u.name LIKE '%${data.searchText}%'
+        if (data.roleId) {
+            c0 = `u.roleId = ${data.roleId}`;
+        }
+        const c2 = ` and u.name LIKE '%${data.searchText}%'
                             or u.email LIKE '%${data.searchText}%'`;
         const query = `select count("id") totalUsers
 	    				from ${table.user} u 
 	    					left join ${table.userRole} ur on u.roleId = ur.id 
-	    				where u.roleId <> 1 ${condition1}
-	    				${!_.isEmpty(data.searchText) ? condition2 : ''}`;
+	    				where ${c0} ${c1}
+	    				${!_.isEmpty(data.searchText) ? c2 : ''}`;
         return SqlService.getSingle(query);
     }
 

@@ -23,11 +23,16 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async getTotalPostCount(data) {
+    async getTotalPostCount(req) {
+        let c1 = '';
+        if (req.user.roleId === 2) {
+            c1 = `and u.roleId = ${req.user.roleId}`;
+        }
         const query = `select count("id") count
 	    				from ${table.post} p
 	    				join user u on u.id = p.userId
 	    				where p.isDeleted = 0
+	    				    ${c1}
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1;`;
         return SqlService.getSingle(query);
@@ -39,27 +44,32 @@ export class PostService {
             latitude: req.latitude,
             longitude: req.longitude,
         };
-        let condition1 = ``;
-        let condition2 = ``;
-        let condition3 = ``;
-        let condition4 = '';
+        let c1 = ``;
+        let c2 = ``;
+        let c3 = ``;
+        let c4 = '';
+        let c5 = '';
         let distanceQuery = ``;
         let havingCondition = ``;
 
         if (req.languageCode) {
-            condition4 = `and p.languageCode = '${req.languageCode}'`;
+            c4 = `and p.languageCode = '${req.languageCode}'`;
         }
         if (req.postByUserId > 0) {
-            condition2 = `and p.userId = ${req.postByUserId}`;
-            condition4 = '';
+            c2 = `and p.userId = ${req.postByUserId}`;
+            c4 = '';
         }
         try {
             const moodIds = JSON.parse(req.moodIds);
             if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
-                condition3 = `and p.moodId in ${Utils.getRange(moodIds)}`
+                c3 = `and p.moodId in ${Utils.getRange(moodIds)}`
             }
         } catch (e) {
 
+        }
+
+        if (req.roleId === 2) {
+            c5 = `and u.roleId = 2`;
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
@@ -86,7 +96,7 @@ export class PostService {
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1 
-                            ${condition1} ${condition2} ${condition3} ${condition4}
+                            ${c1} ${c2} ${c3} ${c4} ${c5}
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
