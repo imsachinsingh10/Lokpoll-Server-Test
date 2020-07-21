@@ -168,7 +168,7 @@ export class UserService {
                 message: "Email or password is missing"
             };
         }
-        const query = `select u.id, ur.id roleId 
+        let query = `select u.id, ur.id roleId 
 						from ${table.user} u
 							left join ${table.userRole} ur on ur.id = u.roleId 
                         where u.email = '${user.email}' 
@@ -178,11 +178,11 @@ export class UserService {
             return u;
         }
 
-        const query1 = `select j.id, 4 roleId
+        query = `select j.id, 4 roleId
 						from ${table.judge} j
                         where j.email = '${user.email}' 
                         and j.password = '${user.password}';`;
-        const judge = await SqlService.getSingle(query1);
+        const judge = await SqlService.getSingle(query);
         if (!_.isEmpty(judge)) {
             return judge;
         }
