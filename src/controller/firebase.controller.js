@@ -60,6 +60,9 @@ export class FirebaseController {
         return this.sendNotifications(receiverIds, notification);
     }
 
+
+
+
     async sendNotificationForReaction(reaction, reactionCount) {
         const query = `select userId
                         from ${table.post} 

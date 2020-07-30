@@ -14,6 +14,7 @@ import {Config} from "../config";
 import Utils from "../service/common/utils";
 import * as _ from "lodash";
 import {sendTestMessage} from "../service/firebase.service";
+import {ChallengeController} from "../controller/challenge.controller";
 
 
 const router = express();
@@ -26,6 +27,7 @@ export class PostRoutes {
         this.postService = new PostService();
         this.productService = new ProductService();
         this.postController = new PostController();
+        this.challengeController = new ChallengeController();
 
         this.initRoutes();
     }
@@ -57,6 +59,20 @@ export class PostRoutes {
                     return res.status(HttpCode.internal_server_error).send(e);
                 }
             });
+
+        router.post('/createContentPost', uploadPostMediaMiddleware, async (req, res) => {
+            try {
+                const {id} = await this.postController.createContentPost(req);
+                return res.status(HttpCode.ok).json({postId: id});
+            } catch (e) {
+                console.error("test Data",`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
 
         router.post('/update', uploadPostMediaMiddleware, async (req, res) => {
                 try {
@@ -103,6 +119,7 @@ export class PostRoutes {
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
                 result = await this.postController.formatPosts(req, result);
+               // result = await this.challengeController.formatChallengeEntries(req, result);
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;

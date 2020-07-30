@@ -16,6 +16,7 @@ import {
 import path from "path";
 import {Config} from "../config";
 import childProcess from "child_process";
+import {PostController} from "../controller/post.controller";
 
 const router = express();
 
@@ -27,6 +28,7 @@ export class ChallengeRoutes {
         this.challengeService = new ChallengeService();
         this.minioService = new MinIOService();
         this.challengeController = new ChallengeController();
+        this.postController = new PostController()
         this.initRoutes();
     }
 
@@ -51,7 +53,7 @@ export class ChallengeRoutes {
             }
         });
 
-        router.post('/add', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
+        router.post('/add', uploadFile, async (req, res) => {
             try {
                 const challenge = {
                     moodId: req.body.moodId,
@@ -84,9 +86,14 @@ export class ChallengeRoutes {
             }
         });
 
-        router.post('/update', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
+        router.post('/update', uploadFile, async (req, res) => {
             try {
-                await this.challengeService.updateChallenge(req.body);
+                const challenge = req.body;
+                if (req.file) {
+                    const file = await this.minioService.uploadFile(req.file);
+                    challenge.posterUrl = file.url;
+                }
+                await this.challengeService.updateChallenge(challenge);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error("test Data",`${req.method}: ${req.url}`, e);
@@ -183,16 +190,25 @@ export class ChallengeRoutes {
         });
 
 
+
         router.post('/getChallengeEntries', async (req, res) => {
             const start = new Date();
             try {
                 const request = {
-
+                    "latitude": req.body.latitude,
+                    "longitude": req.body.longitude,
+                    "type": req.body.type || 'normal',
+                    "radiusInMeter": req.body.radiusInMeter,
+                    "lastPostId": req.body.lastPostId,
                     "postCount": req.body.postCount || 20,
+                    "entryByUserId": req.body.postByUserId,
+                    "moodIds": req.body.moodIds,
+                    "offset": req.body.offset || 0,
+                    "languageCode": req.body.languageCode,
                     "challengeId" : req.body.challengeId,
                 };
                 let result = await this.challengeService.getAllChallengeEntries(request);
-                result = await this.challengeController.formatChallengeEntries(req, result);
+                result = await this.postController.formatPosts(req, result);
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
@@ -248,7 +264,6 @@ export class ChallengeRoutes {
                     "challengeEntryId": req.challengeEntryId.postId
                 };
                 let result = await this.challengeService.getChallengeEntriesData(request);
-                console.log('post data', result);
                 result = await this.challengeController.formatChallengeEntries(req, result);
                 return await res.json(result);
             } catch (e) {
@@ -323,5 +338,32 @@ export class ChallengeRoutes {
             }
         });
 
+        router.post('/declareResult', async (req, res) => {
+            try {
+                let result = await this.challengeService.declareResult(req);
+                console.log()
+                if (result) {
+                   // const results = res.json(result);
+                    const resultData = result
+                        .map((p, index) => ({
+                            userId: p.userId,
+                            challengeId: p.challengeId,
+                            challengeEntryId: p.entryId,
+                            rank: index+1,
+                            marks: p.marks,
+
+                        }));
+                        console.log("resultData", resultData);
+                    await this.challengeService.createResult(resultData);
+                }
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }

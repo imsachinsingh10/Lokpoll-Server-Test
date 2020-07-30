@@ -35,6 +35,7 @@ export class PostController {
             address: reqBody.address,
             source: reqBody.source,
             languageCode: reqBody.languageCode,
+            challengeId: reqBody.challengeId || 0,
         };
         if (files.image || files.video || files.audio) {
             post.isPostUpload = '0';
@@ -48,6 +49,43 @@ export class PostController {
         await this.insertSubMoods(reqBody, result.insertId);
         delete post.createdAt;
         return {id: result.insertId, ...post};
+    }
+
+    async createContentPost(req) {
+        const reqBody = req.body;
+        const post = {
+            description: reqBody.description,
+            userId: reqBody.userId || req.user.id,
+            creatorId: req.user.id,
+            createdAt: 'utc_timestamp()',
+            type: reqBody.type,
+            profileType: reqBody.profileType,
+            latitude: reqBody.latitude,
+            longitude: reqBody.longitude,
+            address: reqBody.address,
+            source: reqBody.source,
+            languageCode: reqBody.languageCode,
+            challengeId: reqBody.challengeId || 0,
+            isPostUpload: 1,
+        };
+
+        post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
+        const result = await this.postService.createPost(post);
+        await this.insertPostMediaUrl(reqBody, result.insertId);
+        delete post.createdAt;
+        return {id: result.insertId, ...post};
+    }
+
+    async insertPostMediaUrl(reqBody, postId) {
+        const postMedia = {
+            postId: postId,
+            commentId: 0,
+            url: reqBody.posterUrl,
+            type: "image",
+            thumbnailUrl: reqBody.posterUrl || null
+        }
+        const query = QueryBuilderService.getInsertQuery(table.postMedia, postMedia);
+        return SqlService.executeQuery(query);
     }
 
     async insertSubMoods(reqBody, postId) {

@@ -144,7 +144,7 @@ export class ChallengeController {
         if (_.isEmpty(rawEntries)) {
             return [];
         }
-        const challengeEntryIds = _.map(rawEntries, r => r.id);
+        const challengeEntryIds = _.map(rawEntries, r => r.source === 'CONTEST' ? r.id : '');
         const uniqChallengeEntryIds = _.uniq(challengeEntryIds);
         if (challengeEntryIds.length !== uniqChallengeEntryIds.length) {
             console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
@@ -162,7 +162,7 @@ export class ChallengeController {
         const challengeEntries = [];
         _.forEach(rawEntries, (entries) => {
             const _entries = this.getChallengeEntries(
-                {userId: req.user.id, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}
+                {userId: req.user ? req.user.id : 0, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}
             );
             challengeEntries.push(_entries);
         });
@@ -178,45 +178,25 @@ export class ChallengeController {
         if (challengeEntryIds.length !== uniqChallengeEntryIds.length) {
             console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        const [comments, subMoods, respects, reactions, trusts, mediaList, challengeEntriesViews] = await Promise.all([
-            this.challengeService.getComments(uniqChallengeEntryIds),
-            this.postService.getSubMoodByPostId(uniqChallengeEntryIds),
-            this.postService.getRespects(uniqChallengeEntryIds),
-            this.postService.getPostReactions(uniqChallengeEntryIds),
-            this.postService.getPostTrust(uniqChallengeEntryIds),
-            this.challengeService.getChallengeEntryMedia(uniqChallengeEntryIds),
-            this.challengeService.getChallengeEntriesViews(uniqChallengeEntryIds),
+        const [mediaList] = await Promise.all([
+
+            this.challengeService.getChallengeEntryMedia(uniqChallengeEntryIds)
         ])
 
         const challengeEntries = [];
         _.forEach(rawEntries, (entries) => {
             const _entries = this.getChallengeEntriesForAdmin(
-                {userId: req.user.id, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}
+                {userId: req.user.id, entries ,mediaList}
             );
             challengeEntries.push(_entries);
         });
         return challengeEntries;
     }
 
-    getChallengeEntriesForAdmin({userId, entries, comments, challengeEntriesViews, subMoods, respects, reactions, trusts, mediaList}) {
-        const challengeEntriesViewFiltered = challengeEntriesViews.filter(challengeEntriesViews => challengeEntriesViews.challengeEntryId === entries.id);
+    getChallengeEntriesForAdmin({userId, entries, mediaList}) {
 
-        let viewCount = 0;
-        let viewedByUsers = [];
-        if (challengeEntriesViewFiltered.length > 0) {
-            viewCount = challengeEntriesViewFiltered.length;
-            viewedByUsers = challengeEntriesViewFiltered.map(p => {
-                return {
-                    id: p.userId,
-                    name: p.userName,
-                    imageUrl: p.userImageUrl,
-                }
-            })
-        }
 
-        const postComments = comments.filter(comment => comment.postId === entries.id);
-        const subMoodData = subMoods.filter(subMood => subMood.postId === entries.id);
-        const basicDetails = this.getBasicChallengeEntriesDetailsForAdmin(userId, entries, respects);
+        const basicDetails = this.getBasicChallengeEntriesDetailsForAdmin(userId, entries);
         const media = mediaList
             .filter(m => m.challengeEntryId === entries.id && m.url !== null && m.commentId === 0)
             .map(p => ({
@@ -224,35 +204,14 @@ export class ChallengeController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
-        const formattedComments = this.getFormattedComments(postComments);
-
-        const {
-            reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
-            trust, voteUpCount, voteDownCount, noVoteCount,
-        } = this.getReactionsWithCount(userId, entries, reactions, trusts);
         return {
             ...basicDetails,
-            viewCount,
-            viewedByUsers,
-            subMood: subMoodData,
-            media,
-            trustMeter: {
-                voteUpCount, voteDownCount, noVoteCount,
-                trustByMe: _.isEmpty(trust) ? null : trust.type,
-            },
-            reactions: {
-                loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
-                reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
-            },
-            comments: formattedComments,
-            commentCount: formattedComments.length
+            media
         }
     }
 
-    getBasicChallengeEntriesDetailsForAdmin(userId, entries, respects) {
-        const respectedByMe = _.find(respects, (r) => {
-            return userId === r.respectBy && entries.userId === r.respectFor;
-        });
+    getBasicChallengeEntriesDetailsForAdmin(userId, entries) {
+
         return {
             id: entries.id,
             distanceInMeters: Utils.getDistanceInMeters(entries.distance),
@@ -271,8 +230,7 @@ export class ChallengeController {
                 profileType: entries.profileType || ProfileType.personal,
                 imageUrl: entries.imageUrl,
                 bgImageUrl: entries.bgImageUrl,
-                audioUrl: entries.audioUrl,
-                respectedByMe: !_.isEmpty(respectedByMe),
+                audioUrl: entries.audioUrl
             },
             location: {
                 latitude: entries.latitude,
@@ -439,6 +397,27 @@ export class ChallengeController {
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
         };
+    }
+
+    async reactOnChallengeEntries(req) {
+        if (!Validator.isValidPostReactionType(req.body.type)) {
+            throw new ErrorModel(AppCode.invalid_request, `Invalid post react type ${req.body.type}`);
+        }
+        return this.challengeService.reactOnChallengeEntries(req);
+    }
+
+    async commentOnChallengeEntries(req) {
+        const reqBody = req.body;
+        const post = {
+            challengeEntryId: reqBody.postId,
+            userId: req.user.id,
+            createdAt: 'utc_timestamp()',
+            comment: reqBody.comment,
+            replyToCommentId: reqBody.replyToCommentId > 0 ? reqBody.replyToCommentId : undefined
+        };
+        const result = await this.challengeService.createChallengeEntriesComment(post);
+        await this.firebaseController.sendMessageForNewCommentOnChallengeEntry(post);
+        return {id: result.insertId, ...post}
     }
 
 

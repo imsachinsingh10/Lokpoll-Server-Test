@@ -9,3 +9,7 @@ CREATE TABLE `challenge_remark` (
   `remark` VARCHAR(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+
+ALTER TABLE `post`
+add COLUMN `challengeId` bigint(20) DEFAULT 0;
