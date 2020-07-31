@@ -135,7 +135,6 @@ export class PostRoutes {
             }
         });
 
-
         router.post('/getpostByPostId', async (req, res) => {
             try {
                 const request = {

@@ -74,8 +74,7 @@ export class AuthRoutes {
             try {
                 let result = await this.postService.getPostData({postId: req.params.postId});
                 result = await this.postController.formatPosts(req, result);
-                const html = await Utils.getCompiledHtml(result[0]);
-                return res.status(HttpCode.ok).send(html);
+                return res.status(HttpCode.ok).json(result[0]);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
