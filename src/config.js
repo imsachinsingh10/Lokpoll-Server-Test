@@ -42,12 +42,6 @@ export class Config {
         baseUrlLocal: 'http://localhost:3000/#',
     };
 
-    static clientPostApp = {
-        baseUrlProd: 'http://www.localbol.com/post/#',
-        baseUrlTest: 'http://www.localbol.com/post/#',
-        baseUrlDev: 'http://localhost:3000/#',
-    };
-
     static serverUrl = {
         prod: 'https://localbol-prod.cloudjiffy.net',
         test: 'https://lokpoll-server.cloudjiffy.net',
