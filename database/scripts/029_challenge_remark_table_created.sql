@@ -13,3 +13,7 @@ CREATE TABLE `challenge_remark` (
 
 ALTER TABLE `post`
 add COLUMN `challengeId` bigint(20) DEFAULT 0;
+
+
+ALTER TABLE `post`
+add COLUMN `isOriginalContest` bigint(20) DEFAULT 0;

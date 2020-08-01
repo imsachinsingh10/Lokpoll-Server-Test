@@ -80,7 +80,7 @@ export class PostService {
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const query = `select p.id, p.createdAt, p.description, p.source, 
+        const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',

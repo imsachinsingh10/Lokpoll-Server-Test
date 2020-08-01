@@ -67,6 +67,7 @@ export class PostController {
             languageCode: reqBody.languageCode,
             challengeId: reqBody.challengeId || 0,
             isPostUpload: 1,
+            isOriginalContest : reqBody.isOriginalContest || 0
         };
 
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
@@ -259,6 +260,7 @@ export class PostController {
             source: post.source,
             language: post.language,
             languageCode: post.languageCode,
+            isOriginalContest: post.isOriginalContest,
             linkToShare,
             user: {
                 id: post.userId,

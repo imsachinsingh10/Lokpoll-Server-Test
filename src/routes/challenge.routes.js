@@ -122,7 +122,10 @@ export class ChallengeRoutes {
             let result;
             try {
                 const request = {
-                    "userId": 2
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
+                    languageCode: req.body.languageCode,
+                    radiusInMeter: req.body.radiusInMeter,
                 };
                 result = await this.challengeController.getAllChallenges(request);
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});

@@ -21,8 +21,6 @@ export class ChallengeService {
     }
 
     async updateChallenge(challenge) {
-
-
         const condition = `where id = ${challenge.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
         return SqlService.executeQuery(query);
@@ -79,23 +77,66 @@ export class ChallengeService {
     }
 
     async getActiveChallenges(req) {
+        const reqCoordinate = {
+            latitude: req.latitude,
+            longitude: req.longitude,
+        };
+        let c1 = ``;
+        let distanceQuery = ``;
+        let havingCondition = ``;
+        if (req.languageCode) {
+            c1 = `and c.languageCode = '${req.languageCode}'`;
+        }
+
+        if (req.latitude && req.longitude && req.radiusInMeter) {
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            distanceQuery = `, SQRT(
+                                POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
+                                POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
+                            ) AS distance`
+        }
         const datetime = new Date();
         const todayDate = datetime.toISOString().slice(0,10);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
+                         ${distanceQuery}
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
-	    				WHERE DATE_FORMAT(c.startDate, "%Y-%m-%d") <= '${todayDate}'
-	    				and DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate};'`;
+	    				WHERE DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
+	    				${c1} 
+                        ${havingCondition}
+                        order by c.id desc;`;
         return SqlService.executeQuery(query);
     }
 
     async getPastChallenges(req) {
+        const reqCoordinate = {
+            latitude: req.latitude,
+            longitude: req.longitude,
+        };
+        let c1 = ``;
+        let distanceQuery = ``;
+        let havingCondition = ``;
+        if (req.languageCode) {
+            c1 = `and c.languageCode = '${req.languageCode}'`;
+        }
+
+        if (req.latitude && req.longitude && req.radiusInMeter) {
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            distanceQuery = `, SQRT(
+                                POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
+                                POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
+                            ) AS distance`
+        }
         const datetime = new Date();
         const todayDate = datetime.toISOString().slice(0,10);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
+                        ${distanceQuery}
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
-	    				WHERE DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") < '${todayDate}'`;
+	    				WHERE DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") < '${todayDate}'
+	    				${c1} 
+                        ${havingCondition}
+                        order by c.id desc;`;
         return SqlService.executeQuery(query);
     }
 
