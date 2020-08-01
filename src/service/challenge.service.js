@@ -89,7 +89,7 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.location is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
@@ -121,7 +121,7 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.location is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
