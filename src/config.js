@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.test;
+    static env = Environment.prod;
 
     static version = {
         majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
