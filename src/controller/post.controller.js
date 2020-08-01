@@ -4,7 +4,7 @@ import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
-import {LanguageCode, PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
+import {Environment, LanguageCode, PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
@@ -280,7 +280,10 @@ export class PostController {
     }
 
     getLinkToShare(post) {
-        let linkToShare = `http://www.localbol.com/post/#/${post.id}`;
+        let linkToShare = `http://www.localbol.com/post-test/#/${post.id}`;
+        if (Config.env === Environment.prod) {
+            linkToShare = `http://www.localbol.com/post/#/${post.id}`;
+        }
         if (!_.isEmpty(post.description)) {
             if (post.description.length > 200) {
                 const shortDesc = post.description.substr(0, 200) + '...';
