@@ -280,7 +280,7 @@ export class PostController {
     }
 
     getLinkToShare(post) {
-        let linkToShare = `${Config.serverUrl.base}/post/${post.id}`;
+        let linkToShare = `http://www.localbol.com/post/#/${post.id}`;
         if (!_.isEmpty(post.description)) {
             if (post.description.length > 200) {
                 const shortDesc = post.description.substr(0, 200) + '...';
