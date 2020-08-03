@@ -261,6 +261,7 @@ export class PostController {
             language: post.language,
             languageCode: post.languageCode,
             isOriginalContest: post.isOriginalContest,
+            topic: post.contestTopic,
             linkToShare,
             user: {
                 id: post.userId,

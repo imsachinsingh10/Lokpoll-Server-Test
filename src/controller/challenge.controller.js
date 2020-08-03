@@ -32,6 +32,19 @@ export class ChallengeController {
         }
     }
 
+    async checkIfJudgeAlreadyAssign(challenge) {
+        const _challenge = await this.challengeService.checkAlreadyAssign(challenge);
+        if (
+            (!challenge.id && !_.isEmpty(_challenge))
+            || (challenge.id && !_.isEmpty(_challenge) && challenge.id !== _challenge.id)
+        ) {
+            throw {
+                message: `Judge is already assigned on this contest.`,
+                code: AppCode.duplicate_entity
+            }
+        }
+    }
+
     async createChallengeEntries(req) {
         const reqBody = req.body;
         const files = req.files;

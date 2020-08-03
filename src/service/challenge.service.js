@@ -20,6 +20,13 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async checkAlreadyAssign(challenge) {
+        const query = `select * from ${table.assignJudge} 
+                            where challengeId = '${challenge.challengeId}'
+                            and judgeId ='${challenge.judgeId}';`;
+        return await SqlService.getSingle(query);
+    }
+
     async updateChallenge(challenge) {
         const condition = `where id = ${challenge.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
@@ -46,12 +53,16 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async deleteChallenge(challengeId) {
+        const query = `delete from ${table.challenge} where id = ${challengeId};`;
+        return SqlService.executeQuery(query);
+    }
+
     async getAllChallenges(data) {
         let condition1 = ``;
         if (data.body.judgeId) {
             condition1 = `where c.id IN (SELECT challengeId FROM assign_judge WHERE judgeId = ${data.body.judgeId})`;
         }
-
         const query = `select c.*, m.${'en'} 'moodName' , count(ce.id) challengeEntries , count(r.id) resultCount
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
@@ -89,7 +100,7 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.location is null and c.longitude is null`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.latitude is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
@@ -121,7 +132,7 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.location is null and c.longitude is null`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.latitude is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
@@ -206,7 +217,7 @@ export class ChallengeService {
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',
-                            pro.name 'displayName', pro.type 'profileType',
+                            pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
                             ${distanceQuery}
@@ -215,6 +226,7 @@ export class ChallengeService {
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                             left join language l on l.code = p.languageCode
+                            left join challenge c on c.id = p.challengeId
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
