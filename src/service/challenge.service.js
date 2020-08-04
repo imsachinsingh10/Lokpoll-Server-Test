@@ -106,8 +106,9 @@ export class ChallengeService {
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const datetime = new Date();
-        const todayDate = datetime.toISOString().slice(0,10);
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
+        console.log("sdfsdfsdf", todayDate);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                          ${distanceQuery}
 	    				from ${table.challenge} c
@@ -138,8 +139,11 @@ export class ChallengeService {
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const datetime = new Date();
-        const todayDate = datetime.toISOString().slice(0,10);
+        /*const datetime = new Date();
+        const todayDate = datetime.toISOString().slice(0,10);*/
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
+        console.log("sdfsdfsdf", todayDate);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                         ${distanceQuery}
 	    				from ${table.challenge} c
@@ -390,8 +394,8 @@ export class ChallengeService {
     }
 
     async getChallengeEntryMedia(uniqChallengeEntryIds) {
-        const query = `select pm.challengeEntryId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.challengeEntriesMedia}  pm
-                        where challengeEntryId in ${Utils.getRange(uniqChallengeEntryIds)}`;
+        const query = `select pm.postId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.postMedia}  pm
+                        where postId in ${Utils.getRange(uniqChallengeEntryIds)}`;
         return SqlService.executeQuery(query);
     }
 

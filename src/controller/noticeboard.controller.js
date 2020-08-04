@@ -8,13 +8,12 @@ import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
-import {ChallengeService} from "../service/challenge.service";
 import {MinIOService} from "../service/common/minio.service";
+import {NoticeboardService} from "../service/noticeboard.service";
 
-export class ChallengeController {
+export class NoticeboardController {
     constructor() {
-        this.challengeService = new ChallengeService();
-        this.postService = new PostService();
+        this.noticeboardService = new NoticeboardService();
         this.minioService = new MinIOService();
     }
 
