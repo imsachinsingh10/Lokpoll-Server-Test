@@ -108,12 +108,12 @@ export class ChallengeService {
         }
         const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
         const todayDate = (new Date(datetime)).toISOString().slice(0,10);
-        console.log("sdfsdfsdf", todayDate);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                          ${distanceQuery}
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
-	    				WHERE DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
+	    				WHERE DATE_FORMAT(c.startDate, "%Y-%m-%d") <= '${todayDate}'
+                        and DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
 	    				${c1} 
                         ${havingCondition}
                         order by c.id desc;`;
@@ -143,7 +143,6 @@ export class ChallengeService {
         const todayDate = datetime.toISOString().slice(0,10);*/
         const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
         const todayDate = (new Date(datetime)).toISOString().slice(0,10);
-        console.log("sdfsdfsdf", todayDate);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                         ${distanceQuery}
 	    				from ${table.challenge} c
@@ -156,9 +155,18 @@ export class ChallengeService {
     }
 
     async getNoticeChallenges(req) {
-        const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
-	    				from ${table.challenge} c
-	    				left join mood m on m.id = c.moodId`;
+        let c1 = ``;
+        if (req.languageCode) {
+            c1 = `and n.languageCode = '${req.languageCode}'`;
+        }
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
+        const query = `select n.*
+	    				from ${table.noticeboard} n
+	    				WHERE DATE_FORMAT(n.startDate, "%Y-%m-%d") <= '${todayDate}'
+	    				and DATE_FORMAT(n.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
+	    				${c1} 
+	    				order by n.id desc;`;
         return SqlService.executeQuery(query);
     }
 
