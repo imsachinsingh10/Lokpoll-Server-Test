@@ -70,7 +70,7 @@ export class AuthRoutes {
             }
         });
 
-        router.get('/post/:postId', async (req, res) => {
+        router.get('/post/getById/:postId', async (req, res) => {
             try {
                 let result = await this.postService.getPostData({postId: req.params.postId});
                 result = await this.postController.formatPosts(req, result);

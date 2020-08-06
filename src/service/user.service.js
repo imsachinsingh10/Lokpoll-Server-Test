@@ -28,12 +28,14 @@ export class UserService {
 
     async createUser(user) {
         user.avatarBG = Utils.getRandomColor();
-        user.password = user.password || Config.env === Environment.prod ? Utils.getRandomStringV2(8, {
-            smallLetters: true,
-            capitalLetters: true,
-            numbers: true,
-            symbols: true
-        }) : '1234';
+        if (!user.password) {
+            user.password = user.password || Config.env === Environment.prod ? Utils.getRandomStringV2(8, {
+                smallLetters: true,
+                capitalLetters: true,
+                numbers: true,
+                symbols: true
+            }) : '1234';
+        }
         const query = QueryBuilderService.getInsertQuery(table.user, user);
         return SqlService.executeQuery(query);
     }

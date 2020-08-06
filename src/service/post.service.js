@@ -26,7 +26,7 @@ export class PostService {
     async getTotalPostCount(req) {
         let c1 = '';
         if (req.user.roleId === 2) {
-            c1 = `and u.roleId = ${req.user.roleId}`;
+            c1 = `and p.userId = ${req.user.id}`;
         }
         const query = `select count("id") count
 	    				from ${table.post} p
@@ -70,7 +70,7 @@ export class PostService {
         }
 
         if (req.roleId === 2) {
-            c5 = `and u.roleId = 2`;
+            c5 = `and p.userId = ${req.userId}`;
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {

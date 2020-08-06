@@ -114,7 +114,8 @@ export class PostRoutes {
                     moodIds: req.body.moodIds,
                     offset: req.body.offset || 0,
                     languageCode: req.body.languageCode,
-                    roleId: req.body.userId
+                    roleId: req.user.roleId,
+                    userId: req.user.id
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
@@ -154,7 +155,7 @@ export class PostRoutes {
         });
 
         router.get('/getAllTypes', async (req, res) => {
-            sendTestMessage();
+            // sendTestMessage();
             try {
                 return await res.json(PostType);
             } catch (e) {
