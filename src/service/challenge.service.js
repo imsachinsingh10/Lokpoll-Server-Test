@@ -20,6 +20,13 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async checkAlreadyAssign(challenge) {
+        const query = `select * from ${table.assignJudge} 
+                            where challengeId = '${challenge.challengeId}'
+                            and judgeId ='${challenge.judgeId}';`;
+        return await SqlService.getSingle(query);
+    }
+
     async updateChallenge(challenge) {
         const condition = `where id = ${challenge.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.challenge, challenge, condition);
@@ -46,12 +53,16 @@ export class ChallengeService {
         return SqlService.executeQuery(query);
     }
 
+    async deleteChallenge(challengeId) {
+        const query = `delete from ${table.challenge} where id = ${challengeId};`;
+        return SqlService.executeQuery(query);
+    }
+
     async getAllChallenges(data) {
         let condition1 = ``;
         if (data.body.judgeId) {
             condition1 = `where c.id IN (SELECT challengeId FROM assign_judge WHERE judgeId = ${data.body.judgeId})`;
         }
-
         const query = `select c.*, m.${'en'} 'moodName' , count(ce.id) challengeEntries , count(r.id) resultCount
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
@@ -89,19 +100,20 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.latitude is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const datetime = new Date();
-        const todayDate = datetime.toISOString().slice(0,10);
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                          ${distanceQuery}
 	    				from ${table.challenge} c
 	    				left join mood m on m.id = c.moodId
-	    				WHERE DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
+	    				WHERE DATE_FORMAT(c.startDate, "%Y-%m-%d") <= '${todayDate}'
+                        and DATE_FORMAT(c.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
 	    				${c1} 
                         ${havingCondition}
                         order by c.id desc;`;
@@ -121,14 +133,16 @@ export class ChallengeService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or c.latitude is null and c.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (c.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - c.longitude) * COS(c.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const datetime = new Date();
-        const todayDate = datetime.toISOString().slice(0,10);
+        /*const datetime = new Date();
+        const todayDate = datetime.toISOString().slice(0,10);*/
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
         const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
                         ${distanceQuery}
 	    				from ${table.challenge} c
@@ -141,9 +155,18 @@ export class ChallengeService {
     }
 
     async getNoticeChallenges(req) {
-        const query = `select c.*, m.${LanguageCode[req.language] || 'en'} 'moodName'
-	    				from ${table.challenge} c
-	    				left join mood m on m.id = c.moodId`;
+        let c1 = ``;
+        if (req.languageCode) {
+            c1 = `and n.languageCode = '${req.languageCode}'`;
+        }
+        const datetime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        const todayDate = (new Date(datetime)).toISOString().slice(0,10);
+        const query = `select n.*
+	    				from ${table.noticeboard} n
+	    				WHERE DATE_FORMAT(n.startDate, "%Y-%m-%d") <= '${todayDate}'
+	    				and DATE_FORMAT(n.deadlineDate, "%Y-%m-%d") >= '${todayDate}'
+	    				${c1} 
+	    				order by n.id desc;`;
         return SqlService.executeQuery(query);
     }
 
@@ -206,7 +229,7 @@ export class ChallengeService {
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',
-                            pro.name 'displayName', pro.type 'profileType',
+                            pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
                             ${distanceQuery}
@@ -215,6 +238,7 @@ export class ChallengeService {
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                             left join language l on l.code = p.languageCode
+                            left join challenge c on c.id = p.challengeId
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
@@ -378,8 +402,8 @@ export class ChallengeService {
     }
 
     async getChallengeEntryMedia(uniqChallengeEntryIds) {
-        const query = `select pm.challengeEntryId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.challengeEntriesMedia}  pm
-                        where challengeEntryId in ${Utils.getRange(uniqChallengeEntryIds)}`;
+        const query = `select pm.postId, pm.type, pm.url, pm.thumbnailUrl, pm.commentId from ${table.postMedia}  pm
+                        where postId in ${Utils.getRange(uniqChallengeEntryIds)}`;
         return SqlService.executeQuery(query);
     }
 

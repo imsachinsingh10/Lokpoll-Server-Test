@@ -104,6 +104,16 @@ export class ChallengeRoutes {
             }
         });
 
+        router.get('/deleteChallenge/:challengeId', async (req, res) => {
+            try {
+                await this.challengeService.deleteChallenge(req.params.challengeId);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
         router.post('/totalChallenges', async (req, res) => {
             try {
                 let result = await this.challengeService.getTotalChallengeCount(req);
@@ -297,6 +307,7 @@ export class ChallengeRoutes {
                     judgeId: req.body.judgeId,
                     challengeId: req.body.challengeId,
                 };
+                await this.challengeController.checkIfJudgeAlreadyAssign(challenge);
                 const result = await this.challengeService.saveAssignJudgesOnChallenge(challenge);
 
                 return res.sendStatus(HttpCode.ok);

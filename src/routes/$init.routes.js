@@ -12,6 +12,7 @@ import {ProductRoutes} from "./product.routes";
 import {LocationRoutes} from "./location.routes";
 import {ChallengeRoutes} from "./challenge.routes";
 import {JudgeRoutes} from "./judge.routes";
+import {NoticeboardRoutes} from "./noticeboard.routes";
 
 export class InitRoutes {
 
@@ -56,5 +57,6 @@ export class InitRoutes {
         new LocationRoutes(app);
         new ChallengeRoutes(app);
         new JudgeRoutes(app);
+        new NoticeboardRoutes(app);
     }
 }

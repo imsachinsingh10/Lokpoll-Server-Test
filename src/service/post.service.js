@@ -84,7 +84,7 @@ export class PostService {
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType',
-                            pro.name 'displayName', pro.type 'profileType',
+                            pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
                             ${distanceQuery}
@@ -93,6 +93,7 @@ export class PostService {
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                             left join language l on l.code = p.languageCode
+                            left join challenge c on c.id = p.challengeId
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
