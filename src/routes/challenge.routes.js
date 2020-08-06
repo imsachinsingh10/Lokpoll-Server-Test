@@ -379,5 +379,25 @@ export class ChallengeRoutes {
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+
+        router.post('/getActiveContest', async (req, res) => {
+            try {
+                const request = {
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
+                    languageCode: req.body.languageCode,
+                    radiusInMeter: req.body.radiusInMeter,
+                };
+                const result = await this.challengeService.getActiveChallenges(request);
+                return await res.json(result);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
     }
 }
