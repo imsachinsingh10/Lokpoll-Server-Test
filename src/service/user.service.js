@@ -28,7 +28,7 @@ export class UserService {
 
     async createUser(user) {
         user.avatarBG = Utils.getRandomColor();
-        user.password = Config.env === Environment.prod ? Utils.getRandomStringV2(8, {
+        user.password = user.password || Config.env === Environment.prod ? Utils.getRandomStringV2(8, {
             smallLetters: true,
             capitalLetters: true,
             numbers: true,

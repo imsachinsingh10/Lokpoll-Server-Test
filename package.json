@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "nodemon --exec babel-node src/main.js",
+    "start": "node src/main.js",
     "build": "babel src --out-dir dist/lokpoll-server/src",
     "serve": "node dist/main.js",
     "test": "babel-node test.js",

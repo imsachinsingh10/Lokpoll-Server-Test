@@ -89,7 +89,7 @@ export class UserController {
             ageRangeId: user.ageRangeId,
             appLanguage: user.appLanguage,
             contentLanguage: user.contentLanguage,
-            // phone: user.phone
+            password: user.password
         };
         if (user.subscribed === 'true' || user.subscribed === true) {
             _user.subscribed = true;
