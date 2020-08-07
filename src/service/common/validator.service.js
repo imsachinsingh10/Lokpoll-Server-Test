@@ -43,9 +43,14 @@ export default class Validator {
         return false
     }
 
-    static validateRequiredFields(reqBody) {
+    static validateRequiredFields(reqBody, req) {
         for (let key in reqBody) {
             const value = reqBody[key];
+            if (req && req.user.roleId !== 2)  {
+                if (key === 'latitude' || key === 'longitude' || key === 'address') {
+                    continue;
+                }
+            }
             if (value === undefined) {
                 throw new ErrorModel(AppCode.invalid_request, `${key} is not valid`);
             }

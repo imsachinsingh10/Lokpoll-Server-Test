@@ -36,14 +36,19 @@ export class PostController {
             source: reqBody.source,
             languageCode: reqBody.languageCode,
             challengeId: reqBody.challengeId || 0,
+            isPublished: 1
         };
         if (files.image || files.video || files.audio) {
             post.isPostUpload = '0';
         } else {
             post.isPostUpload = '1';
         }
+        if (reqBody.publishDate && reqBody.publishDate !== 'null') {
+            post.isPublished = 0;
+            post.publishDate = reqBody.publishDate;
+        }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
-        Validator.validateRequiredFields(post);
+        Validator.validateRequiredFields(post, req);
 
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
@@ -255,6 +260,8 @@ export class PostController {
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,
+            isPublished: post.isPublished,
+            publishDate: post.publishDate,
             type: post.postType,
             mood: post.mood,
             source: post.source,

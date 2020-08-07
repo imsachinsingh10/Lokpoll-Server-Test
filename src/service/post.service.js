@@ -25,14 +25,18 @@ export class PostService {
 
     async getTotalPostCount(req) {
         let c1 = '';
+        let c2 = '';
         if (req.user.roleId === 2) {
             c1 = `and p.userId = ${req.user.id}`;
+        }
+        if (req.user.roleId === 3) {
+            c2 = `and p.isPublished = 1`;
         }
         const query = `select count("id") count
 	    				from ${table.post} p
 	    				join user u on u.id = p.userId
 	    				where p.isDeleted = 0
-	    				    ${c1}
+	    				    ${c1} ${c2}
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1;`;
         return SqlService.getSingle(query);
@@ -49,6 +53,7 @@ export class PostService {
         let c3 = ``;
         let c4 = '';
         let c5 = '';
+        let c6 = '';
         let distanceQuery = ``;
         let havingCondition = ``;
 
@@ -73,8 +78,12 @@ export class PostService {
             c5 = `and p.userId = ${req.userId}`;
         }
 
+        if (req.roleId === 3) {
+            c6 = `and p.isPublished = 1`;
+        }
+
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or p.latitude is null and p.longitude is null`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
@@ -83,7 +92,7 @@ export class PostService {
         const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
-                            p.type 'postType',
+                            p.type 'postType', p.isPublished, p.publishDate,
                             pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
@@ -97,8 +106,8 @@ export class PostService {
                         where 
                             p.isDeleted = 0
                             and p.latitude is not null and p.longitude is not null
-                            and p.isPostUpload = 1 
-                            ${c1} ${c2} ${c3} ${c4} ${c5}
+                            and p.isPostUpload = 1
+                            ${c1} ${c2} ${c3} ${c4} ${c5} ${c6}
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
