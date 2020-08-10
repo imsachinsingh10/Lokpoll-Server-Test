@@ -36,7 +36,8 @@ export class PostController {
             source: reqBody.source,
             languageCode: reqBody.languageCode,
             challengeId: reqBody.challengeId || 0,
-            isPublished: 1
+            isPublished: 1,
+            isGeneric: 0,
         };
         if (files.image || files.video || files.audio) {
             post.isPostUpload = '0';
@@ -46,6 +47,12 @@ export class PostController {
         if (reqBody.publishDate && reqBody.publishDate !== 'null') {
             post.isPublished = 0;
             post.publishDate = reqBody.publishDate;
+        }
+        if (!post.latitude && !post.longitude) {
+            post.latitude = 0;
+            post.address = '';
+            post.longitude = 0;
+            post.isGeneric = 1
         }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
         Validator.validateRequiredFields(post, req);
@@ -262,6 +269,7 @@ export class PostController {
             description: post.description,
             isPublished: post.isPublished,
             publishDate: post.publishDate,
+            isGeneric: post.isGeneric,
             type: post.postType,
             mood: post.mood,
             source: post.source,
