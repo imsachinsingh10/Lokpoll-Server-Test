@@ -83,7 +83,7 @@ export class PostService {
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having (distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or isGeneric = 1)`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
@@ -105,9 +105,7 @@ export class PostService {
                             left join challenge c on c.id = p.challengeId
                         where 
                             p.isDeleted = 0
-                            and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1
-                            or p.isGeneric = 1
                             ${c1} ${c2} ${c3} ${c4} ${c5} ${c6}
                             ${havingCondition}
                         order by p.id desc
