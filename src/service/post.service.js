@@ -32,6 +32,9 @@ export class PostService {
         if (req.user.roleId === 3) {
             c2 = `and p.isPublished = 1`;
         }
+        if (req.body.futurePost) {
+            c2 = `and p.isPublished = 0`;
+        }
         const query = `select count("id") count
 	    				from ${table.post} p
 	    				join user u on u.id = p.userId
@@ -80,6 +83,10 @@ export class PostService {
 
         if (req.roleId === 3) {
             c6 = `and p.isPublished = 1`;
+        }
+
+        if (req.futurePost) {
+            c6 = `and p.isPublished = 0`;
         }
 
         if (req.latitude && req.longitude && req.radiusInMeter) {
@@ -357,7 +364,6 @@ export class PostService {
         console.log('end post service for video stream');
     }
 
-
     async getTrustOnPost(req) {
         console.log(req.postId);
         const query = `select pr.id, pr.type as trustType, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
@@ -412,15 +418,29 @@ export class PostService {
         const query = `select * from ${table.subMood} where name = '${name}';`;
         return await SqlService.getSingle(query);
     }
+
     async getSubMoodByNames(names) {
         const query = `select * from ${table.subMood} 
                         where trim(lower(name)) in ${Utils.getRange(names)};`;
         return await SqlService.executeQuery(query);
     }
+
     async deletePostComment(model) {
         const query = `update ${table.postComment} 
                         set isDeleted = 1 
                         where id = ${model.commentId};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async publishPost(postId) {
+        let c1 = ``;
+        if (postId > 0) {
+            c1 = `and id = ${postId}`
+        }
+        const query = `update ${table.post} 
+                        set isPublished = 1 
+                        where publishDate is not null
+                        ${c1};`;
         return SqlService.executeQuery(query);
     }
 }

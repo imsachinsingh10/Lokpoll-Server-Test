@@ -73,7 +73,6 @@ export class PostRoutes {
             }
         });
 
-
         router.post('/update', uploadPostMediaMiddleware, async (req, res) => {
                 try {
                     await this.postService.updatePost(req.body);
@@ -115,7 +114,8 @@ export class PostRoutes {
                     offset: req.body.offset || 0,
                     languageCode: req.body.languageCode,
                     roleId: req.user.roleId,
-                    userId: req.user.id
+                    userId: req.user.id,
+                    futurePost: req.body.futurePost,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
@@ -337,6 +337,18 @@ export class PostRoutes {
         router.post('/deletePostComment', async (req, res) => {
             try {
                 await this.postService.deletePostComment(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/publishPost/:postId', async (req, res) => {
+            try {
+                await this.postService.publishPost(req.params.postId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {

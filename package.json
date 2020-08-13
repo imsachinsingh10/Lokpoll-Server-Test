@@ -9,6 +9,7 @@
     "build": "babel src --out-dir dist/lokpoll-server/src",
     "serve": "node dist/main.js",
     "test": "babel-node test.js",
+    "ps": "babel-node src/service/post-schedular.js",
     "sql": "node database/generate-full-db.js"
   },
   "author": "Himanshu Sharma",
