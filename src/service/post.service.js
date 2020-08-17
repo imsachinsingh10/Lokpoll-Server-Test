@@ -148,6 +148,7 @@ export class PostService {
             languageCode: reqBody.languageCode,
             moodId: reqBody.moodId,
             description: reqBody.description,
+            publishDate: reqBody.publishDate,
         }
         const condition = `where id = ${post.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.post, post, condition);

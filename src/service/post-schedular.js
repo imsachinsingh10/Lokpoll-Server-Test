@@ -32,8 +32,8 @@ export class PostScheduler {
     }
 
     async getEligiblePostToPublish() {
-        const today = moment().utc().format('YYYY-MM-DD');
-        const query = `select id, description from post where publishDate = '${today}' and isPublished = 0;`
+        const today = moment().utc().format('YYYY-MM-DD HH:mm:ss');
+        const query = `select id, description, publishDate from post where publishDate <= '${today}' and isPublished = 0;`;
         const posts = await SqlService.executeQuery(query);
         const postIds = posts.map(p => p.id);
         return postIds;
@@ -48,3 +48,7 @@ export class PostScheduler {
         console.log(cron.validate('59 * * * *'))
     }
 }
+
+// new PostScheduler().getEligiblePostToPublish().then((postIds) => {
+//     console.log('postIds', postIds);
+// });
