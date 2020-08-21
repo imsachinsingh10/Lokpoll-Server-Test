@@ -56,3 +56,14 @@ export default class AppOverrides {
         }
     }
 }
+
+/*
+`name_hi` varchar(100) DEFAULT NULL,
+`name_en` varchar(100) DEFAULT NULL,
+`name_or` varchar(100) DEFAULT NULL,
+`name_ta` varchar(100) DEFAULT NULL,
+`description_hi` varchar(100) DEFAULT NULL,
+`description_en` varchar(100) DEFAULT NULL,
+`description_or` varchar(100) DEFAULT NULL,
+`description_ta` varchar(100) DEFAULT NULL,
+* */

@@ -13,6 +13,7 @@ import {LocationRoutes} from "./location.routes";
 import {ChallengeRoutes} from "./challenge.routes";
 import {JudgeRoutes} from "./judge.routes";
 import {NoticeboardRoutes} from "./noticeboard.routes";
+import {MoodCategoryRoutes} from "./mood-category.routes";
 
 export class InitRoutes {
 
@@ -50,6 +51,7 @@ export class InitRoutes {
         new UserRoutes(app);
         new LanguageRoutes(app);
         new MoodRoutes(app);
+        new MoodCategoryRoutes(app);
         new PostRoutes(app);
         new ProfileTypeRoutes(app);
         new ProductRoutes(app);

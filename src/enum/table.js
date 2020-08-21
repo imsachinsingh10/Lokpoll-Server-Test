@@ -39,6 +39,7 @@ export const table = {
     assignJudge: "assign_judge",
     challengeRemark: "challenge_remark",
     noticeboard: "noticeboard",
+    moodCategory: "mood_category",
 };
 
 export const dbview = {

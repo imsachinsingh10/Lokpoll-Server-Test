@@ -36,6 +36,7 @@ export class MoodRoutes {
                     ta: req.body.ta,
                     createdAt: 'utc_timestamp()',
                     position: req.body.position,
+                    categoryId: req.body.categoryId,
                     isActive: req.body.isActive,
                 };
                 if (req.file) {
