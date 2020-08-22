@@ -21,17 +21,11 @@ export class MoodCategoryController {
 
     async getAllMoodCategories(reqBody) {
         const categories = await this.moodCategoryService.getAllMoodCategories(reqBody);
-        const moods = await this.moodService.getAllMoods({});
+        const moods = await this.moodService.getAllMoods(reqBody);
         const moodGrouped = _.groupBy(moods, 'categoryId');
-        // const result = [];
-        // for (const cId in moodGrouped) {
-        //     const category = categories.filter(c => c.id === cId);
-        //     category.moods = moodGrouped[cId];
-        //     result.push({category})
-        // }
-        //
+
         categories.forEach((category) => {
-            // category.moods = moodGrouped[category.id];
+            category.moods = moodGrouped[category.id];
         })
         return categories;
     }
