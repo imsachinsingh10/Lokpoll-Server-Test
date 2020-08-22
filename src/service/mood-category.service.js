@@ -41,8 +41,9 @@ export class MoodCategoryService {
     }
 
     async deleteMoodCategory(categoryId) {
-        const query = `delete from ${table.moodCategory} where id = ${categoryId};`;
-        return SqlService.executeQuery(query);
+        const q1 = `delete from ${table.moodCategory} where id = ${categoryId};`;
+        const q2 = `delete from ${table.mood} where categoryId = ${categoryId};`;
+        return SqlService.executeMultipleQueries([q1, q2]);
     }
 
     async getTotalMoodCategories(data) {
