@@ -14,6 +14,7 @@ import {ChallengeRoutes} from "./challenge.routes";
 import {JudgeRoutes} from "./judge.routes";
 import {NoticeboardRoutes} from "./noticeboard.routes";
 import {MoodCategoryRoutes} from "./mood-category.routes";
+import {Config} from "../config";
 
 export class InitRoutes {
 
@@ -28,7 +29,8 @@ export class InitRoutes {
         app.get('/', async (req, res) => {
             return res.json({
                 version: Utils.getVersion(),
-                system_time: new Date()
+                system_time: new Date(),
+                env: Config.env
             });
         });
 

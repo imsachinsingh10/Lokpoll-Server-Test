@@ -178,8 +178,17 @@ export class UserController {
     async loginWeb(req, res) {
         try {
             let user = req.body;
-            user = await this.userService.validateUserByEmail(user);
-            await this.userService.updateLoginHistory(req, user);
+            if (_.isEmpty(user) || _.isEmpty(user.username) || _.isEmpty(user.password)) {
+                throw {
+                    code: AppCode.invalid_creds,
+                    message: "Email/Phone or password is missing"
+                };
+            }
+            if (isNaN(user.username)) {
+                user = await this.userService.validateUserByEmail(user);
+            } else {
+                user = await this.userService.validateUserByPhone(user);
+            }
             const token = jwt.sign(
                 user,
                 Config.auth.secretKey,

@@ -57,6 +57,7 @@ export class PostService {
         let c4 = '';
         let c5 = '';
         let c6 = '';
+        let c7 = '';
         let distanceQuery = ``;
         let havingCondition = ``;
 
@@ -89,12 +90,30 @@ export class PostService {
             c6 = `and p.isPublished = 0`;
         }
 
+        if (req.categoryId) {
+            c7 = `and m.categoryId = ${req.categoryId}`;
+        }
+
         if (req.latitude && req.longitude && req.radiusInMeter) {
             havingCondition = `having (distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or isGeneric = 1)`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
                             ) AS distance`
+        }
+
+        if (req.locations && Array.isArray(req.locations) && !_.isEmpty(req.locations) && req.radiusInMeter) {
+            havingCondition = `having (`;
+            for (let i = 0; i < req.locations.length; i++) {
+                const {longitude, latitude} = req.locations[i];
+                havingCondition += `distance${i + 1} <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or `
+                distanceQuery += `, SQRT(
+                                POW(69.1 * (p.latitude - ${latitude}), 2) +
+                                POW(69.1 * (${longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
+                            ) AS distance${i + 2}`;
+            }
+
+            havingCondition += `isGeneric = 1)`;
         }
         const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,

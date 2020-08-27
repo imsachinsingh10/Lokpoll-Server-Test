@@ -67,7 +67,7 @@ export class MoodCategoryRoutes {
 
         router.post('/update', async (req, res) => {
             try {
-                const category = _.omit(req.body, 'createdAt', 'createdBy');
+                const category = _.omit(req.body, 'createdAt', 'createdBy', 'moods');
                 await this.categoryService.updateMoodCategory(category);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {

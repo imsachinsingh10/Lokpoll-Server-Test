@@ -164,17 +164,12 @@ export class UserService {
     }
 
     async validateUserByEmail(user) {
-        if (_.isEmpty(user) || _.isEmpty(user.email) || _.isEmpty(user.password)) {
-            throw {
-                code: AppCode.invalid_creds,
-                message: "Email or password is missing"
-            };
-        }
         let query = `select u.id, ur.id roleId 
 						from ${table.user} u
 							left join ${table.userRole} ur on ur.id = u.roleId 
-                        where u.email = '${user.email}' 
-                        and u.password = '${user.password}';`;
+                        where u.email = '${user.username}' 
+                        and u.password = '${user.password}'
+                        and (u.roleId in (1, 2, 4) or (u.roleId = 3 and u.isCreator = 1));`;
         const u = await SqlService.getSingle(query);
         if (!_.isEmpty(u)) {
             return u;
@@ -182,11 +177,29 @@ export class UserService {
 
         query = `select j.id, 4 roleId
 						from ${table.judge} j
-                        where j.email = '${user.email}' 
+                        where j.email = '${user.username}' 
                         and j.password = '${user.password}';`;
         const judge = await SqlService.getSingle(query);
         if (!_.isEmpty(judge)) {
             return judge;
+        }
+
+        throw {
+            code: AppCode.invalid_creds,
+            message: "Email or password is incorrect"
+        };
+    }
+
+    async validateUserByPhone(user) {
+        let query = `select u.id, ur.id roleId 
+						from ${table.user} u
+							left join ${table.userRole} ur on ur.id = u.roleId 
+                        where u.phone = '${user.username}' 
+                        and u.password = '${user.password}'
+                        and (u.roleId in (1, 2, 4) or (u.roleId = 3 and u.isCreator = 1));`;
+        const u = await SqlService.getSingle(query);
+        if (!_.isEmpty(u)) {
+            return u;
         }
 
         throw {

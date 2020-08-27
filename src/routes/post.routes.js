@@ -116,6 +116,8 @@ export class PostRoutes {
                     roleId: req.user.roleId,
                     userId: req.user.id,
                     futurePost: req.body.futurePost,
+                    locations: req.body.locations,
+                    categoryId: req.body.categoryId,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
