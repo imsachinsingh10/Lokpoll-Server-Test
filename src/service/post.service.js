@@ -132,7 +132,7 @@ export class PostService {
                         where 
                             p.isDeleted = 0
                             and p.isPostUpload = 1
-                            ${c1} ${c2} ${c3} ${c4} ${c5} ${c6}
+                            ${c1} ${c2} ${c3} ${c4} ${c5} ${c6} ${c7}
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
