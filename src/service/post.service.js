@@ -110,7 +110,7 @@ export class PostService {
                 distanceQuery += `, SQRT(
                                 POW(69.1 * (p.latitude - ${latitude}), 2) +
                                 POW(69.1 * (${longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
-                            ) AS distance${i + 2}`;
+                            ) AS distance${i + 1}`;
             }
 
             havingCondition += `isGeneric = 1)`;
