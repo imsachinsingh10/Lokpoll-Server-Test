@@ -102,18 +102,25 @@ export class PostService {
                             ) AS distance`
         }
 
-        if (req.locations && Array.isArray(req.locations) && !_.isEmpty(req.locations) && req.radiusInMeter) {
-            havingCondition = `having (`;
-            for (let i = 0; i < req.locations.length; i++) {
-                const {longitude, latitude} = req.locations[i];
-                havingCondition += `distance${i + 1} <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or `
-                distanceQuery += `, SQRT(
+        if (req.locations && req.radiusInMeter) {
+            try {
+                const locations = JSON.parse(req.locations);
+                if (!_.isEmpty(req.moodIds) && Array.isArray(locations)) {
+                    havingCondition = `having (`;
+                    for (let i = 0; i < locations.length; i++) {
+                        const {longitude, latitude} = req.locations[i];
+                        havingCondition += `distance${i + 1} <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or `
+                        distanceQuery += `, SQRT(
                                 POW(69.1 * (p.latitude - ${latitude}), 2) +
                                 POW(69.1 * (${longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
                             ) AS distance${i + 1}`;
-            }
+                    }
 
-            havingCondition += `isGeneric = 1)`;
+                    havingCondition += `isGeneric = 1)`;
+                }
+            } catch (e) {
+                console.log('+++++++ failed parsing locations', req.locations, typeof req.locations);
+            }
         }
         const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
