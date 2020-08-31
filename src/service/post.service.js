@@ -105,10 +105,11 @@ export class PostService {
         if (req.locations && req.radiusInMeter) {
             try {
                 const locations = JSON.parse(req.locations);
-                if (!_.isEmpty(req.moodIds) && Array.isArray(locations)) {
+                console.log('==========parsed', locations);
+                if (!_.isEmpty(req.locations) && Array.isArray(locations)) {
                     havingCondition = `having (`;
                     for (let i = 0; i < locations.length; i++) {
-                        const {longitude, latitude} = req.locations[i];
+                        const {longitude, latitude} = locations[i];
                         havingCondition += `distance${i + 1} <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or `
                         distanceQuery += `, SQRT(
                                 POW(69.1 * (p.latitude - ${latitude}), 2) +
