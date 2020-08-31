@@ -101,6 +101,8 @@ export class PostRoutes {
 
         router.post('/getAll', async (req, res) => {
             const start = new Date();
+            console.log('++++++++++ getAll req body', req.body);
+            console.log('++++++++++ getAll req body temp', JSON.stringify(req.body));
             try {
                 const request = {
                     latitude: req.body.latitude,
