@@ -144,7 +144,10 @@ export class UserController {
                 let user = req.body;
                 await this.userService.verifyOTP(user.otp, user.phone, true);
                 user = {
-                    phone: user.phone, roleId: 3, regDate: 'utc_timestamp()'
+                    phone: user.phone,
+                    roleId: 3,
+                    regDate: 'utc_timestamp()',
+                    referralCode: user.referralCode
                 };
                 const result = await this.userService.createUser(user);
                 await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
