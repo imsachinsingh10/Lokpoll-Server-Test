@@ -7,7 +7,8 @@ export const Environment = {
 export const Message = {
     otpExpired: "OTP expired, Please request another OTP.",
     incorrectOtp: "OTP not verified",
-    phoneOrOtpIncorrect: "Phone or OTP is incorrect"
+    phoneOrOtpIncorrect: "Phone or OTP is incorrect",
+    invalidReferralCode: "Please Enter valid referral code",
 };
 
 export const WorkingStatus = {

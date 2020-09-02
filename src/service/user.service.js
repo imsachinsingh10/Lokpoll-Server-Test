@@ -265,16 +265,24 @@ export class UserService {
 							;`;
         let verification = await SqlService.getSingle(query);
         if (_.isEmpty(verification)) {
-            throw new ErrorModel(AppCode.invalid_creds, Message.incorrectOtp);
+            throw new ErrorModel(AppCode.invalid_request, Message.incorrectOtp);
         }
         if (!_.isEmpty(verification.verifiedAt)) {
-            throw new ErrorModel(AppCode.otp_expired, Message.otpExpired);
+            throw new ErrorModel(AppCode.invalid_request, Message.otpExpired);
         }
         if (saveVerificationDate) {
             query = `update ${table.verification} set verifiedAt = utc_timestamp() where id = ${verification.id}`;
             await SqlService.executeQuery(query);
         }
         return true;
+    }
+
+    async validateReferralCode(code) {
+        const query = `select 1 from user where referralCode = '${code}' limit 1;`;
+        const result = await SqlService.getSingle(query);
+        if (_.isEmpty(result)) {
+            throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
+        }
     }
 
     async getSearchUsers(searchData) {

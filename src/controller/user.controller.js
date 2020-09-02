@@ -141,43 +141,40 @@ export class UserController {
 
     async registerAndroidUser(req, res) {
         try {
-            try {
-                let user = req.body;
-                await this.userService.verifyOTP(user.otp, user.phone, true);
-                user = {
-                    phone: user.phone,
-                    roleId: 3,
-                    regDate: 'utc_timestamp()',
-                    parentReferralCode: user.referralCode,
-                    referralCode: Utils.getRandomStringV2(6, {capitalLetters: true, numbers: true})
-                };
+            let user = req.body;
+            user = {
+                phone: user.phone,
+                roleId: 3,
+                regDate: 'utc_timestamp()',
+                referralCode: Utils.getRandomStringV2(6, {capitalLetters: true, numbers: true})
+            };
 
-                const result = await this.userService.createUser(user);
-                await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
-                user = await this.getUserDetails(result.insertId);
-                const token = jwt.sign(
-                    {id: result.insertId, roleId: 3},
-                    Config.auth.secretKey,
-                    {expiresIn: Config.auth.expiryInSeconds}
-                );
-                return await res.json({
-                    token,
-                    user,
-                    isNewUser: true
-                });
-            } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.otp_expired || e.code === AppCode.invalid_creds) {
-                    return res.status(HttpCode.unauthorized).json(e);
-                }
-                return res.sendStatus(HttpCode.internal_server_error);
+            if (req.body.referralCode) {
+                await this.userService.validateReferralCode(req.body.referralCode)
+                user.parentReferralCode = req.body.referralCode;
             }
+
+            await this.userService.verifyOTP(req.body.otp, user.phone, true);
+
+            const result = await this.userService.createUser(user);
+            await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+            user = await this.getUserDetails(result.insertId);
+            const token = jwt.sign(
+                {id: result.insertId, roleId: 3},
+                Config.auth.secretKey,
+                {expiresIn: Config.auth.expiryInSeconds}
+            );
+            return await res.json({
+                token,
+                user,
+                isNewUser: true
+            });
         } catch (e) {
             console.error(`${req.method}: ${req.url}`, e);
-            if (e.code === AppCode.invalid_creds) {
-                return res.status(HttpCode.unauthorized).send(e);
+            if (e.code === AppCode.invalid_request) {
+                return res.status(HttpCode.unauthorized).json(e);
             }
-            res.sendStatus(HttpCode.internal_server_error);
+            return res.sendStatus(HttpCode.internal_server_error);
         }
     }
 
