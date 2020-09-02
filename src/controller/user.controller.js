@@ -9,6 +9,7 @@ import {HttpCode} from "../enum/http-code";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {AgeRange} from "../enum/common.enum";
+import Utils from "../service/common/utils";
 
 export class UserController {
     constructor() {
@@ -147,8 +148,10 @@ export class UserController {
                     phone: user.phone,
                     roleId: 3,
                     regDate: 'utc_timestamp()',
-                    referralCode: user.referralCode
+                    parentReferralCode: user.referralCode,
+                    referralCode: Utils.getRandomStringV2(6, {capitalLetters: true, numbers: true})
                 };
+
                 const result = await this.userService.createUser(user);
                 await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
                 user = await this.getUserDetails(result.insertId);
