@@ -202,7 +202,7 @@ export class UserRoutes {
                     throw new ErrorModel(AppCode.invalid_request, 'Please select files, no files to upload');
                 }
                 const result = await Promise.all(promises);
-                const user = Object.assign({id: req.user.id}, result[0], result[1] ,result[2]);
+                const user = Object.assign({id: req.user.id}, result[0], result[1], result[2]);
                 await this.userService.updateUser(user);
                 return await res.json(_.omit(user, ['id']));
             } catch (e) {
@@ -233,7 +233,7 @@ export class UserRoutes {
 
         router.post('/getWhoRespectingMe', async (req, res) => {
             try {
-                let result =  await this.userController.getFormattedWhoRespectingMe(req);
+                let result = await this.userController.getFormattedWhoRespectingMe(req);
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -270,6 +270,25 @@ export class UserRoutes {
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/addReferralCode', async (req, res) => {
+            try {
+                const user = {
+                    id: req.user.id,
+                }
+                if (req.body.referralKey) {
+                    user.parentReferralCode = await this.userService.validateReferralCode(req.body.referralKey);
+                    await this.userService.updateUser(user);
+                }
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });

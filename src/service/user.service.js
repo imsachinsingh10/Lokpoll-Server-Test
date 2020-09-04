@@ -277,14 +277,6 @@ export class UserService {
         return true;
     }
 
-    async validateReferralCode(code) {
-        const query = `select 1 from user where referralCode = '${code}' limit 1;`;
-        const result = await SqlService.getSingle(query);
-        if (_.isEmpty(result)) {
-            throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
-        }
-    }
-
     async getSearchUsers(searchData) {
         const query = `select u.*, ur.name role
 	    				from ${table.user} u 
@@ -386,5 +378,23 @@ export class UserService {
     async saveToken(model) {
         const query = `update ${table.user} set deviceToken = '${model.deviceToken}' where id = ${model.userId};`;
         return SqlService.executeQuery(query);
+    }
+
+    async validateReferralCode(key) {
+        const query = `select 1 from user where referralCode = '${key}' limit 1;`;
+        const result = await SqlService.getSingle(query);
+        if (!_.isEmpty(result)) {
+            return key;
+        }
+        return await this.validateReferralPhone(key);
+    }
+
+    async validateReferralPhone(phone) {
+        const query = `select referralCode from user where phone = '${phone}' limit 1;`;
+        const result = await SqlService.getSingle(query);
+        if (_.isEmpty(result)) {
+            throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
+        }
+        return result.referralCode;
     }
 }

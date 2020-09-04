@@ -148,12 +148,6 @@ export class UserController {
                 regDate: 'utc_timestamp()',
                 referralCode: Utils.getRandomStringV2(6, {capitalLetters: true, numbers: true})
             };
-
-            if (req.body.referralCode) {
-                await this.userService.validateReferralCode(req.body.referralCode)
-                user.parentReferralCode = req.body.referralCode;
-            }
-
             await this.userService.verifyOTP(req.body.otp, user.phone, true);
 
             const result = await this.userService.createUser(user);

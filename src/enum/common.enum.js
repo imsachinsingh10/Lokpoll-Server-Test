@@ -8,7 +8,7 @@ export const Message = {
     otpExpired: "OTP expired, Please request another OTP.",
     incorrectOtp: "OTP not verified",
     phoneOrOtpIncorrect: "Phone or OTP is incorrect",
-    invalidReferralCode: "Please Enter valid referral code",
+    invalidReferralCode: "Please Enter valid referral code or phone",
 };
 
 export const WorkingStatus = {
