@@ -280,7 +280,26 @@ export class UserRoutes {
                     id: req.user.id,
                 }
                 if (req.body.referralKey) {
-                    user.parentReferralCode = await this.userService.validateReferralCode(req.body.referralKey);
+                    user.parentId = await this.userService.validateReferralCode(user, req.body.referralKey);
+                    await this.userService.updateUser(user);
+                }
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/getNetwork', async (req, res) => {
+            try {
+                const user = {
+                    id: req.user.id,
+                }
+                if (req.body.referralKey) {
+                    user.parentId = await this.userService.validateReferralCode(req.body.referralKey);
                     await this.userService.updateUser(user);
                 }
                 return res.sendStatus(HttpCode.ok);

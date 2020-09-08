@@ -164,14 +164,17 @@ export class PostController {
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {userId: req.user ? req.user.id : 0, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
+                {user: req.user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
             );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost({userId, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+    getPost({user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+        const {referralCode} = user;
+        const userId = user ? user.id: 0;
+
         const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
 
         let viewCount = 0;
@@ -189,7 +192,7 @@ export class PostController {
 
         const postComments = comments.filter(comment => comment.postId === post.id);
         const subMoodData = subMoods.filter(subMood => subMood.postId === post.id);
-        const basicDetails = this.getBasicPostDetails(userId, post, respects);
+        const basicDetails = this.getBasicPostDetails(userId, referralCode, post, respects);
         const media = mediaList
             .filter(m => m.postId === post.id && m.url !== null && m.commentId === 0)
             .map(p => ({
@@ -257,11 +260,11 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(userId, post, respects) {
+    getBasicPostDetails(userId, referralCode, post, respects) {
         const respectedByMe = _.find(respects, (r) => {
             return userId === r.respectBy && post.userId === r.respectFor;
         });
-        let linkToShare = this.getLinkToShare(post);
+        let linkToShare = this.getLinkToShare(post, referralCode);
         return {
             id: post.id,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
@@ -295,7 +298,7 @@ export class PostController {
         }
     }
 
-    getLinkToShare(post) {
+    getLinkToShare(post, code) {
         let linkToShare = `http://www.localbol.com/post-test/#/${post.id}`;
         if (Config.env === Environment.prod) {
             linkToShare = `http://www.localbol.com/post/#/${post.id}`;
@@ -310,16 +313,28 @@ export class PostController {
         }
         switch (post.languageCode) {
             case LanguageCode.English:
-                linkToShare += '\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes, business from your preferred location in your local language.'
+                linkToShare += `\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes, business from your preferred location in your local language.`;
+                if (code) {
+                    linkToShare += `\n\n Please use my Referral code ${code} or my Mobile number when you signup for LocalBol.`
+                }
                 break;
             case LanguageCode.Hindi:
-                linkToShare += '\n\n अपनी स्थानीय भाषा में अपने पसंदीदा स्थान से स्थानीय समाचार, सामाजिक कार्य, व्यवसाय से सीधे अपडेट प्राप्त करने के लिए भारत का अपना स्थानीय ऐप LocalBol डाउनलोड करें.';
+                linkToShare += `\n\n अपनी स्थानीय भाषा में अपने पसंदीदा स्थान से स्थानीय समाचार, सामाजिक कार्य, व्यवसाय से सीधे अपडेट प्राप्त करने के लिए भारत का अपना स्थानीय ऐप LocalBol डाउनलोड करें.`;
+                if (code) {
+                    linkToShare += `\n\n जब आप LocalBol के लिए साइन अप करते हैं तो कृपया मेरे रेफरल कोड ${code} या मेरे मोबाइल नंबर का उपयोग करें`
+                }
                 break;
             case LanguageCode.Odia:
-                linkToShare += '\n\n LocalBol app ଡାଉନଲୋଡ୍ଯୋ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ. ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.';
+                linkToShare += `\n\n LocalBol app ଡାଉନଲୋଡ୍ଯୋ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ. ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.\n\n ଯେତେବେଳେ ଆପଣ ଲୋକାଲ୍ ବୋଲ୍ ପାଇଁ ସାଇନ୍ ଅପ୍ କରନ୍ତି ଦୟାକରି ମୋର ରେଫରାଲ୍ କୋଡ୍ ${code} କିମ୍ବା ମୋ ମୋବାଇଲ୍ ନମ୍ବର ବ୍ୟବହାର କରନ୍ତୁ |`;
+                if (code) {
+                    linkToShare += `\n\n ଯେତେବେଳେ ଆପଣ ଲୋକାଲ୍ ବୋଲ୍ ପାଇଁ ସାଇନ୍ ଅପ୍ କରନ୍ତି ଦୟାକରି ମୋର ରେଫରାଲ୍ କୋଡ୍ ${code} କିମ୍ବା ମୋ ମୋବାଇଲ୍ ନମ୍ବର ବ୍ୟବହାର କରନ୍ତୁ |`
+                }
                 break;
             case LanguageCode.Sambalpuri:
-                linkToShare += '\n\n ପହେଲା ଥର, ଆମର ଭାଷା ରେ  APP କେ ଚଲାବାର ମଜା ଅଲଗା ଲାଗବା !! ନିଜର ଜାଗା, ନିଜର ଲୋକ ଆଉ ନିଜର ଭାଷା ଲାଗିର ବନା ହୋଇଛେ. \n\n Link ଦିଆହେଇଛେ ନିଜେ download କରୁନ ଆଉ ସମକୁ forward କରୁନ.';
+                linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର ବେଭାର କରୁନ |`;
+                if (code) {
+                    linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର ବେଭାର କରୁନ |`
+                }
                 break;
         }
         linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'

@@ -137,9 +137,10 @@ export class UserService {
         const query = `select u.id, u.name, u.email, u.phone, 
                                 u.gender, u.imageUrl, u.bgImageUrl, u.audioUrl, u.address, u.ageRangeId, 
                                 u.profession, u.company, u.latitude, u.longitude, u.appLanguage, u.contentLanguage,
-                        ur.name role, u.referralCode, u.parentReferralCode, u.gParentReferralCode
+                        ur.name role, u.referralCode, parent.referralCode parentReferralCode
 						from ${table.user} u
 		 					left join ${table.userRole} ur on u.roleId = ur.id
+		 					left join ${table.user} parent on parent.id = u.parentId
 						where
 		  					u.id = ${id} limit 1;`;
         return SqlService.getSingle(query);
@@ -380,21 +381,42 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async validateReferralCode(key) {
-        const query = `select 1 from user where referralCode = '${key}' limit 1;`;
+    async validateReferralCode(user, key) {
+        const query = `select id from user where referralCode = '${key}' and id <> ${user.id} limit 1;`;
         const result = await SqlService.getSingle(query);
         if (!_.isEmpty(result)) {
-            return key;
+            return result.id;
         }
-        return await this.validateReferralPhone(key);
+        return await this.validateReferralPhone(user, key);
     }
 
-    async validateReferralPhone(phone) {
-        const query = `select referralCode from user where phone = '${phone}' limit 1;`;
+    async validateReferralPhone(user, phone) {
+        const query = `select id from user where phone = '${phone}' and id <> ${user.id} limit 1;`;
         const result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
             throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
         }
-        return result.referralCode;
+        return result.id;
+    }
+
+    async getNetwork(userId) {
+        const query = `SELECT T2.id, T2.name, lvl
+                            FROM ( 
+                                SELECT 
+                                    @r AS _id, 
+                                    (SELECT @r := parentId FROM user WHERE id = _id) AS parentId, 
+                                    @l := @l + 1 AS lvl 
+                                FROM 
+                                    (SELECT @r := 5, @l := 0) vars, 
+                                    user h 
+                                WHERE @r <> 0) T1 
+                            JOIN user T2 
+                            ON T1._id = T2.id 
+                            ORDER BY T1.lvl DESC;`;
+        const result = await SqlService.getSingle(query);
+        if (_.isEmpty(result)) {
+            throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
+        }
+        return result.id;
     }
 }
