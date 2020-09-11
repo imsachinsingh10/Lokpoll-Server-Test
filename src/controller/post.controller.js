@@ -172,8 +172,13 @@ export class PostController {
     }
 
     getPost({user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
-        const {referralCode} = user;
-        const userId = user ? user.id: 0;
+        let referralCode;
+        let userId = 0;
+
+        if (user) {
+            referralCode = user.referralCode
+            userId = user.id;
+        }
 
         const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
 
