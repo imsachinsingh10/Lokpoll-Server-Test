@@ -105,7 +105,6 @@ export class PostService {
         if (req.locations && req.radiusInMeter) {
             try {
                 const locations = JSON.parse(req.locations);
-                console.log('==========parsed', locations);
                 if (!_.isEmpty(req.locations) && Array.isArray(locations)) {
                     havingCondition = `having (`;
                     for (let i = 0; i < locations.length; i++) {

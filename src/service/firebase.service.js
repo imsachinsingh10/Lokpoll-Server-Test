@@ -55,3 +55,16 @@ export default class FirebaseService {
         })
     };
 }
+export class FirebaseMessage {
+    static get PostCreated() {
+        return new gcm.Message({
+            data: {key1: 'msg1'},
+            notification: {
+                title: 'Post published',
+                body: 'Your post has been published',
+                icon: 'icon-gray.jpg'
+            }
+        })
+    }
+}
+

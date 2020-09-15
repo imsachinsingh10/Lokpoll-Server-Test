@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.test;
+    static env = Environment.prod;
 
     static version = {
         majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
@@ -20,10 +20,10 @@ export class Config {
     };
 
     static dbTest = {
-        host: `node23483-asa-server.cloudjiffy.net`,
+        host: `node39278-localbol-prod.cloudjiffy.net`,
         user: `root`,
-        password: `16hstpssZz`,
-        database: `lokpoll`,
+        password: `ZDGhxq62647`,
+        database: `lokpoll_test`,
         port: 3306,
         multipleStatements: true
     };

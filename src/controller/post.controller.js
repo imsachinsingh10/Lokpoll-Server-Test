@@ -12,6 +12,7 @@ import Utils from "../service/common/utils";
 import fs from 'fs';
 import {FirebaseController} from "./firebase.controller";
 import {Config} from "../config";
+import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 
 export class PostController {
     constructor() {
