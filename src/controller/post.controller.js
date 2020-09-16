@@ -319,31 +319,34 @@ export class PostController {
         }
         switch (post.languageCode) {
             case LanguageCode.English:
-                linkToShare += `\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes, business from your preferred location in your local language.`;
+                linkToShare += `\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes and business from your preferred locations in your local languages.`;
+                linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
                 if (code) {
-                    linkToShare += `\n\n Please use my Referral code ${code} or my Mobile number when you signup for LocalBol.`
+                    linkToShare += `\n\n Please use my Referral code ${code} or my Mobile number while signing up for LocalBol`
                 }
                 break;
             case LanguageCode.Hindi:
                 linkToShare += `\n\n अपनी स्थानीय भाषा में अपने पसंदीदा स्थान से स्थानीय समाचार, सामाजिक कार्य, व्यवसाय से सीधे अपडेट प्राप्त करने के लिए भारत का अपना स्थानीय ऐप LocalBol डाउनलोड करें.`;
+                linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
                 if (code) {
                     linkToShare += `\n\n जब आप LocalBol के लिए साइन अप करते हैं तो कृपया मेरे रेफरल कोड ${code} या मेरे मोबाइल नंबर का उपयोग करें`
                 }
                 break;
             case LanguageCode.Odia:
-                linkToShare += `\n\n LocalBol app ଡାଉନଲୋଡ୍ଯୋ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ. ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.\n\n ଯେତେବେଳେ ଆପଣ ଲୋକାଲ୍ ବୋଲ୍ ପାଇଁ ସାଇନ୍ ଅପ୍ କରନ୍ତି ଦୟାକରି ମୋର ରେଫରାଲ୍ କୋଡ୍ ${code} କିମ୍ବା ମୋ ମୋବାଇଲ୍ ନମ୍ବର ବ୍ୟବହାର କରନ୍ତୁ |`;
+                linkToShare += `\n\n LocalBol app ଡାଉନଲୋଡ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ I ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.`;
+                linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
                 if (code) {
                     linkToShare += `\n\n ଯେତେବେଳେ ଆପଣ ଲୋକାଲ୍ ବୋଲ୍ ପାଇଁ ସାଇନ୍ ଅପ୍ କରନ୍ତି ଦୟାକରି ମୋର ରେଫରାଲ୍ କୋଡ୍ ${code} କିମ୍ବା ମୋ ମୋବାଇଲ୍ ନମ୍ବର ବ୍ୟବହାର କରନ୍ତୁ |`
                 }
                 break;
             case LanguageCode.Sambalpuri:
-                linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର ବେଭାର କରୁନ |`;
+                linkToShare += `\n\n ପହେଲା ଥର, ଆମର ଭାଷା ରେ  APP କେ ଚଲାବାର ମଜା ଅଲଗା ଲାଗବା !! ନିଜର ଜାଗା, ନିଜର ଲୋକ ଆଉ ନିଜର ଭାଷା ଲାଗିର ବନା ହୋଇଛେ I Link ଦିଆହେଇଛେ ନିଜେ ଡାଉନଲୋଡ କରୁନ ଆଉ ସମକୁ forward କରୁନ.`;
+                linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
                 if (code) {
-                    linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର ବେଭାର କରୁନ |`
+                    linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର add କରୁନ |`
                 }
                 break;
         }
-        linkToShare += '\n\n https://play.google.com/store/apps/details?id=com.aeon.lokpoll'
         return linkToShare;
     }
 
