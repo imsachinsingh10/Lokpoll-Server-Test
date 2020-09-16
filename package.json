@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec babel-node src/main.js",
     "start": "node src/main.js",
-    "build": "mkdir dist/assets && cp -r ./assets dist/assets && cp package.json dist && cp localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json dist && babel src --out-dir dist/src",
+    "build": "cp -r ./assets dist/assets && cp package.json dist && cp localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json dist && babel src --out-dir dist/src",
     "serve": "node dist/main.js",
     "test": "babel-node test.js",
     "ps": "babel-node src/service/post-schedular.js",
