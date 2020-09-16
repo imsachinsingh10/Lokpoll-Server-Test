@@ -7,16 +7,12 @@ import {Environment, PostType} from "../enum/common.enum";
 import {sendTestMessage} from "../service/firebase.service";
 import {ChallengeService} from "../service/challenge.service";
 import {ChallengeController} from "../controller/challenge.controller";
-import {
-    MinIOService,
-    uploadFile,
-    uploadChallengeEntriesMediaMiddleware,
-    uploadPostMediaMiddleware
-} from "../service/common/minio.service";
+import {MinIOService, uploadChallengeEntriesMediaMiddleware, uploadFile} from "../service/common/minio.service";
 import path from "path";
 import {Config} from "../config";
 import childProcess from "child_process";
 import {PostController} from "../controller/post.controller";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -38,14 +34,14 @@ export class ChallengeRoutes {
         router.post('/addUserChallenge', async (req, res) => {
             try {
                 const userChallenge = {
-                    userId:  req.user.id,
+                    userId: req.user.id,
                     challengeId: req.body.challengeId,
                     createdAt: 'utc_timestamp()'
                 };
                 await this.challengeService.saveUserChallenge(userChallenge);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -57,7 +53,7 @@ export class ChallengeRoutes {
             try {
                 const challenge = {
                     moodId: req.body.moodId,
-                    languageCode:req.body.languageCode,
+                    languageCode: req.body.languageCode,
                     topic: req.body.topic,
                     winners: req.body.winners,
                     entries: req.body.entries,
@@ -78,7 +74,7 @@ export class ChallengeRoutes {
 
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -96,7 +92,7 @@ export class ChallengeRoutes {
                 await this.challengeService.updateChallenge(challenge);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error("test Data",`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -109,7 +105,7 @@ export class ChallengeRoutes {
                 await this.challengeService.deleteChallenge(req.params.challengeId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -119,7 +115,7 @@ export class ChallengeRoutes {
                 let result = await this.challengeService.getTotalChallengeCount(req);
                 return await res.json(result.count);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -141,7 +137,7 @@ export class ChallengeRoutes {
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -155,7 +151,7 @@ export class ChallengeRoutes {
                 result = await this.challengeService.getAllChallenges(req);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -169,7 +165,7 @@ export class ChallengeRoutes {
                 return await res.json(PostType);
             } catch (e) {
 
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -194,14 +190,13 @@ export class ChallengeRoutes {
                 }));
                 return res.status(HttpCode.ok).json({challengeEntryId: id});
             } catch (e) {
-                console.error("test Data",`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.status(HttpCode.internal_server_error).send(e);
             }
         });
-
 
 
         router.post('/getChallengeEntries', async (req, res) => {
@@ -218,7 +213,7 @@ export class ChallengeRoutes {
                     "moodIds": req.body.moodIds,
                     "offset": req.body.offset || 0,
                     "languageCode": req.body.languageCode,
-                    "challengeId" : req.body.challengeId,
+                    "challengeId": req.body.challengeId,
                 };
                 let result = await this.challengeService.getAllChallengeEntries(request);
                 result = await this.postController.formatPosts(req, result);
@@ -229,7 +224,7 @@ export class ChallengeRoutes {
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -251,8 +246,8 @@ export class ChallengeRoutes {
                     "moodIds": req.body.moodIds,
                     "offset": req.body.offset || 0,
                     "languageCode": req.body.languageCode,
-                    "challengeId" : req.body.challengeId,
-                    "judgeId" : req.body.judgeId,
+                    "challengeId": req.body.challengeId,
+                    "judgeId": req.body.judgeId,
                 };
                 let result = await this.challengeService.getAllChallengeEntriesForAdmin(request);
                 result = await this.challengeController.formatChallengeEntriesForAdmin(req, result);
@@ -260,7 +255,7 @@ export class ChallengeRoutes {
                 log.i('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -277,7 +272,7 @@ export class ChallengeRoutes {
                 result = await this.challengeController.formatChallengeEntries(req, result);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -290,7 +285,7 @@ export class ChallengeRoutes {
                 const user = await this.challengeController.getFormattedWinnerDetails(req);
                 return await res.json(user);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -298,7 +293,7 @@ export class ChallengeRoutes {
             }
         });
 
-        router.post('/assignJudge',uploadChallengeEntriesMediaMiddleware , async (req, res) => {
+        router.post('/assignJudge', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
             try {
                 const challenge = {
                     judgeId: req.body.judgeId,
@@ -309,7 +304,7 @@ export class ChallengeRoutes {
 
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -320,7 +315,7 @@ export class ChallengeRoutes {
         router.post('/addRemark', async (req, res) => {
             try {
                 const challengeRemark = {
-                    judgeId:  req.body.judgeId,
+                    judgeId: req.body.judgeId,
                     challengeId: req.body.challengeId,
                     entryId: req.body.id,
                     remark: req.body.remark
@@ -328,7 +323,7 @@ export class ChallengeRoutes {
                 await this.challengeService.saveChallengeRemark(challengeRemark);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -341,7 +336,7 @@ export class ChallengeRoutes {
                 const result = await this.challengeService.checkAlreadyRemark(req.body);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -353,13 +348,13 @@ export class ChallengeRoutes {
             try {
                 let result = await this.challengeService.declareResult(req);
                 if (result) {
-                   // const results = res.json(result);
+                    // const results = res.json(result);
                     const resultData = result
                         .map((p, index) => ({
                             userId: p.userId,
                             challengeId: p.challengeId,
                             challengeEntryId: p.entryId,
-                            rank: index+1,
+                            rank: index + 1,
                             marks: p.marks,
 
                         }));
@@ -367,7 +362,7 @@ export class ChallengeRoutes {
                 }
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -387,7 +382,7 @@ export class ChallengeRoutes {
                 const result = await this.challengeService.getActiveChallenges(request);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }

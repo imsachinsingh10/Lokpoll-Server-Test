@@ -1,12 +1,10 @@
 import express from 'express';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
-import {MoodController} from "../controller/mood.controller";
 import AppOverrides from "../service/common/app.overrides";
-import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import _ from 'lodash';
 import {ProductService} from "../service/product.service";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -27,7 +25,7 @@ export class ProductRoutes {
                 const tags = await this.productService.getTags();
                 return await res.json(tags);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -37,7 +35,7 @@ export class ProductRoutes {
                 await this.productService.addTags(req.body);
                 return await res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

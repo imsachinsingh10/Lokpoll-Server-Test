@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import {AppCode} from "../enum/app-code";
 import {MoodCategoryService} from "../service/mood-category.service";
 import {MoodService} from "../service/mood.service";
+import {log} from "../service/common/logger.service";
 
 export class MoodCategoryController {
     constructor() {

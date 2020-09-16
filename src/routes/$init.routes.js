@@ -15,6 +15,7 @@ import {JudgeRoutes} from "./judge.routes";
 import {NoticeboardRoutes} from "./noticeboard.routes";
 import {MoodCategoryRoutes} from "./mood-category.routes";
 import {Config} from "../config";
+import {log} from "../service/common/logger.service";
 
 export class InitRoutes {
 
@@ -41,7 +42,7 @@ export class InitRoutes {
                     message: 'database working'
                 });
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.status(HttpCode.internal_server_error).json(e);
             }
         });

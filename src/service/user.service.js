@@ -12,7 +12,6 @@ import {Config} from "../config";
 
 export class UserService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
         this.firebaseController = new FirebaseController();
     }
 

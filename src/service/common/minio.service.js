@@ -5,6 +5,7 @@ import {ErrorModel} from "../../model/common.model";
 import {AppCode} from "../../enum/app-code";
 import {promisify} from 'util';
 import {Environment} from "../../enum/common.enum";
+import {log} from "./logger.service";
 
 const Minio = require('minio');
 const fs = require('fs');
@@ -17,6 +18,7 @@ if (Config.env === Environment.prod) {
     minioConfig = Config.minio.configProd;
     minioBaseUrl = Config.minio.baseUrlProd;
 }
+
 const policy = JSON.stringify({
     "Version": "2012-10-17",
     "Statement": [

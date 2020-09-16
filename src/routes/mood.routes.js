@@ -1,13 +1,12 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {MoodService} from "../service/mood.service";
 import {MoodController} from "../controller/mood.controller";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import _ from 'lodash';
 import {MinIOService, uploadFile} from "../service/common/minio.service";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -56,7 +55,7 @@ export class MoodRoutes {
                 }
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -69,7 +68,7 @@ export class MoodRoutes {
                 let moods = await this.moodService.getAllMoods(req.body);
                 return await res.json(moods);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -99,7 +98,7 @@ export class MoodRoutes {
                 await this.moodService.updateMood(mood);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -109,7 +108,7 @@ export class MoodRoutes {
                 await this.moodService.deleteMood(req.params.moodId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -119,7 +118,7 @@ export class MoodRoutes {
                 let result = await this.moodService.getTotalMoods(req.body);
                 return await res.json(result.totalMoods);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

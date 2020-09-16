@@ -3,22 +3,11 @@ import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import {Environment, PostType} from "../enum/common.enum";
-import {sendTestMessage} from "../service/firebase.service";
-import {ChallengeService} from "../service/challenge.service";
-import {ChallengeController} from "../controller/challenge.controller";
-import {
-    MinIOService,
-    uploadFile,
-    uploadChallengeEntriesMediaMiddleware,
-    uploadPostMediaMiddleware
-} from "../service/common/minio.service";
-import path from "path";
-import {Config} from "../config";
-import childProcess from "child_process";
+import {MinIOService, uploadFile} from "../service/common/minio.service";
 import {PostController} from "../controller/post.controller";
 import {NoticeboardService} from "../service/noticeboard.service";
 import {NoticeboardController} from "../controller/noticeboard.controller";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -55,7 +44,7 @@ export class NoticeboardRoutes {
 
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -73,7 +62,7 @@ export class NoticeboardRoutes {
                 await this.noticeboardService.updateNoticeboard(noticeboard);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error("test Data", `${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -86,7 +75,7 @@ export class NoticeboardRoutes {
                 await this.noticeboardService.deleteNoticeboard(req.params.noticeboardId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -96,7 +85,7 @@ export class NoticeboardRoutes {
                 let result = await this.noticeboardService.getTotalNoticeboardCount(req);
                 return await res.json(result.count);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -118,7 +107,7 @@ export class NoticeboardRoutes {
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -132,7 +121,7 @@ export class NoticeboardRoutes {
                 result = await this.noticeboardService.getAllNoticeboards(req);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

@@ -12,18 +12,6 @@ export default class AppOverrides {
         this.overrideJSONDeserializer();
         this.updateConfig();
 
-        global.log = {
-            i: (tag, info1 = '', info2 = '') => {
-                console.log(`\n++++++ info ++++++ @ ${new Date()}\n`, tag, info1, info2);
-            },
-            e: (tag, error1, error2) => {
-                console.log(`\nxxxxxx error xxxxxx @ ${new Date()}\n`, tag, error1, error2);
-            },
-            sql: (query) => {
-                console.log(`\n****** sql ****** @ ${new Date()}\n`, query);
-            }
-        }
-
         if (!fs.existsSync('./uploads')){
             fs.mkdirSync('./uploads');
         }
@@ -62,14 +50,3 @@ export default class AppOverrides {
         }
     }
 }
-
-/*
-`name_hi` varchar(100) DEFAULT NULL,
-`name_en` varchar(100) DEFAULT NULL,
-`name_or` varchar(100) DEFAULT NULL,
-`name_ta` varchar(100) DEFAULT NULL,
-`description_hi` varchar(100) DEFAULT NULL,
-`description_en` varchar(100) DEFAULT NULL,
-`description_or` varchar(100) DEFAULT NULL,
-`description_ta` varchar(100) DEFAULT NULL,
-* */

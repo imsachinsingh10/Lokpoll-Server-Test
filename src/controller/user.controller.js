@@ -1,15 +1,13 @@
 import * as _ from 'lodash';
-
 import {Config} from '../config'
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import Validator from "../service/common/validator.service";
 import jwt from "jsonwebtoken";
 import {HttpCode} from "../enum/http-code";
-import {table} from "../enum/table";
-import {SqlService} from "../service/sql/sql.service";
 import {AgeRange} from "../enum/common.enum";
 import Utils from "../service/common/utils";
+import {log} from "../service/common/logger.service";
 
 export class UserController {
     constructor() {
@@ -129,7 +127,7 @@ export class UserController {
                 isNewUser: false
             });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
+            log.e(`${req.method}: ${req.url}`, e);
             if (e.code === AppCode.invalid_phone || e.code === AppCode.invalid_otp || e.code === AppCode.otp_expired) {
                 return res.status(HttpCode.bad_request).send(e);
             } else if (e.code === AppCode.invalid_creds) {
@@ -164,7 +162,7 @@ export class UserController {
                 isNewUser: true
             });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
+            log.e(`${req.method}: ${req.url}`, e);
             if (e.code === AppCode.invalid_request) {
                 return res.status(HttpCode.unauthorized).json(e);
             }
@@ -196,7 +194,7 @@ export class UserController {
                 user
             });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
+            log.e(`${req.method}: ${req.url}`, e);
             if (e.code === AppCode.invalid_platform) {
                 return res.status(HttpCode.bad_request).send(e);
             }

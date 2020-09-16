@@ -1,14 +1,12 @@
 import Utils from "./utils";
-
-const nodemailer = require('nodemailer');
 import vash from 'vash';
 import fs from 'fs';
 import path from 'path';
+import {log} from "./logger.service";
 
 import {Config} from '../../config'
-import {table} from "../../enum/table";
-import {QueryBuilderService} from "../sql/querybuilder.service";
-import {SqlService} from "../sql/sql.service";
+
+const nodemailer = require('nodemailer');
 
 export class EmailService {
 

@@ -2,6 +2,7 @@ import {HttpCode} from "../enum/http-code";
 import {ErrorModel} from "../model/common.model";
 import jwt from "jsonwebtoken";
 import {Config} from "../config";
+import {log} from "../service/common/logger.service";
 
 export function validateAuthToken(req, res, next) {
     // console.log("testing login flutter");

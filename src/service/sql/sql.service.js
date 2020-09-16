@@ -2,6 +2,7 @@ import {Config} from '../../config'
 import * as mysql from 'mysql';
 import {Environment} from "../../enum/common.enum";
 import _ from 'lodash';
+import {log} from "../common/logger.service";
 
 let db;
 if (Config.env === Environment.test) {

@@ -4,7 +4,6 @@ import {table} from "../enum/table";
 
 export class LocationService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
     }
 
     async addLocation(location) {

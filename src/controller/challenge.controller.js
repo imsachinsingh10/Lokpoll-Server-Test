@@ -10,6 +10,7 @@ import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import {ChallengeService} from "../service/challenge.service";
 import {MinIOService} from "../service/common/minio.service";
+import {log} from "../service/common/logger.service";
 
 export class ChallengeController {
     constructor() {

@@ -7,6 +7,7 @@ import path from "path";
 import {PostScheduler} from "./service/post-schedular";
 import {Config} from "./config";
 import {Environment} from "./enum/common.enum";
+import {log} from "./service/common/logger.service";
 
 const app = express();
 

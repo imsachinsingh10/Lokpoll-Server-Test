@@ -1,9 +1,10 @@
-import Utils from "./common/utils";
 import {PostController} from "../controller/post.controller";
 import {ProductService} from "./product.service";
 import {extractThumbnailsMiddleware} from "../middleware/thumbnail.middleware";
+import {log} from "./common/logger.service";
 
 process.on('message', async (res) => {
+    // log.i('processor started');
     let {files, postId, productTags, userId, commentId} = JSON.parse(res);
     const postController = new PostController();
     const productService = new ProductService();

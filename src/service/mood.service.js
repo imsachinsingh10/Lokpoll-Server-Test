@@ -4,7 +4,6 @@ import {table} from "../enum/table";
 
 export class MoodService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
     }
 
     async getMoodByName(mood) {

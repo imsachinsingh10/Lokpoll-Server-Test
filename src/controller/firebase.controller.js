@@ -3,6 +3,7 @@ import {table} from "../enum/table";
 import FirebaseService from "../service/firebase.service";
 import {SqlService} from "../service/sql/sql.service";
 import Utils from "../service/common/utils";
+import {log} from '../service/common/logger.service';
 
 export class FirebaseController {
     constructor() {

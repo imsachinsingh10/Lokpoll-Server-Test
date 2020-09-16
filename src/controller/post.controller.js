@@ -9,10 +9,10 @@ import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
-import fs from 'fs';
 import {FirebaseController} from "./firebase.controller";
 import {Config} from "../config";
 import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
+import {log} from "../service/common/logger.service";
 
 export class PostController {
     constructor() {

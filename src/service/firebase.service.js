@@ -4,6 +4,7 @@ import path from 'path';
 const gcm = require('node-gcm');
 const credFilePath = path.resolve('localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json');
 const serviceAccount = require(credFilePath);
+import {log} from "./common/logger.service";
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

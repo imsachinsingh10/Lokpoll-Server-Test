@@ -1,11 +1,8 @@
-import * as _ from 'lodash';
-import {AppCode} from "../enum/app-code";
-import Validator from "../service/common/validator.service";
-import {ErrorModel} from "../model/common.model";
+import {promisify} from 'util';
+import {log} from "../service/common/logger.service";
 
 const fs = require('fs');
 const path = require('path');
-import {promisify} from 'util';
 const readFile = promisify(fs.readFile);
 
 export class MediaController {

@@ -1,19 +1,13 @@
 import express from 'express';
 import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
-import {UserService} from "../service/user.service";
-import {UserController} from "../controller/user.controller";
-import {SqlService} from "../service/sql/sql.service";
-import {table} from "../enum/table";
 import AppOverrides from "../service/common/app.overrides";
-import {ErrorModel} from "../model/common.model";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import _ from 'lodash';
-import {MinIOService, uploadProfilePictures} from "../service/common/minio.service";
-import {ProfileType} from "../enum/common.enum";
+import {MinIOService} from "../service/common/minio.service";
 import {FirebaseController} from "../controller/firebase.controller";
 import {JudgeService} from "../service/judge.service";
 import {JudgeController} from "../controller/judge.controller";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -42,7 +36,7 @@ export class JudgeRoutes {
                 const result = await this.judgeService.createJudge(judge);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -55,7 +49,7 @@ export class JudgeRoutes {
                 let users = await this.judgeService.getAllUsers(req);
                 return await res.json(users);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -72,7 +66,7 @@ export class JudgeRoutes {
                 await this.judgeService.updateJudge(judge);
                 return await res.json(judge);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -85,7 +79,7 @@ export class JudgeRoutes {
                 await this.judgeService.deleteJudge(req.params.judgeId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -95,7 +89,7 @@ export class JudgeRoutes {
                 let judges = await this.judgeService.getAllJudges();
                 return await res.json(judges);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

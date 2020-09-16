@@ -2,6 +2,7 @@ import path from 'path';
 const ffmpeg = require('hs-node-ffmpeg');
 import _ from 'lodash';
 import jimp from "jimp";
+import {log} from "../service/common/logger.service";
 
 export const extractThumbnailsMiddleware = async (files, res, next) => {
     if (!_.isEmpty(files) && !_.isEmpty(files.video)) {

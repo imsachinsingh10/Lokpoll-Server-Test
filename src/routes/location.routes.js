@@ -4,7 +4,7 @@ import {AppCode} from "../enum/app-code";
 import {LocationService} from "../service/location.service";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import {uploadFile} from "../service/common/minio.service";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -25,7 +25,7 @@ export class LocationRoutes {
                 const {insertId} = await this.locationService.addLocation(req.body)
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -38,7 +38,7 @@ export class LocationRoutes {
                 let locations = await this.locationService.getAllLocations();
                 return await res.json(locations);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -52,7 +52,7 @@ export class LocationRoutes {
                 await this.locationService.updateLocation(location);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -62,7 +62,7 @@ export class LocationRoutes {
                 await this.locationService.deleteLocation(req.params.locationId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -72,7 +72,7 @@ export class LocationRoutes {
                 const result = await this.locationService.getLocationCount();
                 return res.json(result.count);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });

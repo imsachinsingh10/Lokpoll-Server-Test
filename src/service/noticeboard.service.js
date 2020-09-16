@@ -1,12 +1,6 @@
 import {QueryBuilderService} from "./sql/querybuilder.service";
 import {SqlService} from "./sql/sql.service";
 import {table} from "../enum/table";
-import Utils from "./common/utils";
-import _ from 'lodash';
-import fs from "fs";
-import path from 'path';
-import {LanguageCode} from "../enum/common.enum";
-import {FirebaseController} from "../controller/firebase.controller";
 
 export class NoticeboardService {
     constructor() {

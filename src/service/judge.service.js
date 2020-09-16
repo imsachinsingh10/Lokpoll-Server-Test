@@ -1,18 +1,11 @@
 import {QueryBuilderService} from "./sql/querybuilder.service";
 import {SqlService} from "./sql/sql.service";
-import {dbview, table} from "../enum/table";
+import {table} from "../enum/table";
 import * as _ from 'lodash';
-import Utils from "./common/utils";
 import {AppCode} from "../enum/app-code";
-import {ErrorModel} from "../model/common.model";
-import {Message, ProfileType} from "../enum/common.enum";
-import Validator from "./common/validator.service";
-import {FirebaseController} from "../controller/firebase.controller";
 
 export class JudgeService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
-        this.firebaseController = new FirebaseController();
     }
 
     async getJudgeByEmail(user) {

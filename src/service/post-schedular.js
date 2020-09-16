@@ -3,6 +3,7 @@ import moment from 'moment';
 import {SqlService} from "./sql/sql.service";
 import Utils from "./common/utils";
 import _ from 'lodash';
+import {log} from "./common/logger.service";
 
 export class PostScheduler {
 

@@ -3,10 +3,11 @@ import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
-import {MinIOService, uploadFile} from "../service/common/minio.service";
+import {MinIOService} from "../service/common/minio.service";
 import {MoodCategoryService} from "../service/mood-category.service";
 import {MoodCategoryController} from "../controller/mood-category.controller";
 import _ from 'lodash';
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -44,7 +45,7 @@ export class MoodCategoryRoutes {
                 await this.categoryService.createMoodCategory(category);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -57,7 +58,7 @@ export class MoodCategoryRoutes {
                 let categories = await this.categoryController.getAllMoodCategories(req.body);
                 return await res.json(categories);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -71,7 +72,7 @@ export class MoodCategoryRoutes {
                 await this.categoryService.updateMoodCategory(category);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -81,7 +82,7 @@ export class MoodCategoryRoutes {
                 await this.categoryService.deleteMoodCategory(req.params.categoryId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -91,7 +92,7 @@ export class MoodCategoryRoutes {
                 let result = await this.categoryService.getTotalMoodCategories(req.body);
                 return await res.json(result.count);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

@@ -1,5 +1,4 @@
 import * as _ from 'lodash';
-import {PostService} from "../service/post.service";
 import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
@@ -10,6 +9,7 @@ import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
 import {MinIOService} from "../service/common/minio.service";
 import {NoticeboardService} from "../service/noticeboard.service";
+import {log} from "../service/common/logger.service";
 
 export class NoticeboardController {
     constructor() {

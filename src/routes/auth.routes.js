@@ -3,14 +3,13 @@ import {HttpCode} from "../enum/http-code";
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import {UserController} from "../controller/user.controller";
-import {Config} from "../config";
 import Utils from "../service/common/utils";
 import {SMSService} from "../service/common/sms.service";
-import {Environment} from "../enum/common.enum";
 import * as _ from "lodash";
 import {ErrorModel, SuccessModel} from "../model/common.model";
 import {PostService} from "../service/post.service";
 import {PostController} from "../controller/post.controller";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -48,7 +47,7 @@ export class AuthRoutes {
                 }
                 return res.status(HttpCode.bad_request).json(new ErrorModel(AppCode.failure, "OTP not sent."))
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity || e.code === AppCode.invalid_phone) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -62,7 +61,7 @@ export class AuthRoutes {
                 await this.userService.verifyOTP(otp, phone, true);
                 return res.status(HttpCode.ok).json(new SuccessModel(AppCode.success, "Phone verified"));
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -76,7 +75,7 @@ export class AuthRoutes {
                 result = await this.postController.formatPosts(req, result);
                 return res.status(HttpCode.ok).json(result[0]);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.bad_request).send(e);
                 }

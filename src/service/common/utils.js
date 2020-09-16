@@ -4,7 +4,6 @@ import {Config} from "../../config";
 import vash from 'vash';
 import fs from 'fs';
 import path from 'path';
-import {Environment} from "../../enum/common.enum";
 
 export default class Utils {
     static formData = {remember: ''};
