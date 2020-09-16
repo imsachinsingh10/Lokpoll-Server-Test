@@ -287,7 +287,7 @@ export class UserService {
         return SqlService.executeQuery(query);
     }
 
-    async  getTotalUsers(data) {
+    async getTotalUsers(data) {
         let c0 = `u.roleId = 3`;
         let c1 = ``;
         if (data.isTestUser) {
@@ -398,23 +398,18 @@ export class UserService {
     }
 
     async getNetwork(userId) {
-        const query = `SELECT T2.id, T2.name, lvl
-                            FROM ( 
-                                SELECT 
-                                    @r AS _id, 
-                                    (SELECT @r := parentId FROM user WHERE id = _id) AS parentId, 
-                                    @l := @l + 1 AS lvl 
-                                FROM 
-                                    (SELECT @r := 5, @l := 0) vars, 
-                                    user h 
-                                WHERE @r <> 0) T1 
-                            JOIN user T2 
-                            ON T1._id = T2.id 
-                            ORDER BY T1.lvl DESC;`;
-        const result = await SqlService.getSingle(query);
-        if (_.isEmpty(result)) {
-            throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
-        }
-        return result.id;
+        let query = `WITH RECURSIVE resultSet AS
+                        (
+                            SELECT user1.id, user1.name, user1.parentId, user1.level, user1.avatarBG,
+                                    user1.email, user1.phone, user1.imageUrl, user1.referralCode
+                                FROM user AS user1 
+                                WHERE user1.parentId=${userId}
+                            UNION
+                            SELECT user2.id, user2.name, user2.parentId, user2.level, user2.avatarBG,
+                                    user2.email, user2.phone, user2.imageUrl, user2.referralCode
+                                FROM resultSet 	
+                                INNER JOIN user AS user2 ON resultSet.id = user2.parentId
+                        ) SELECT * FROM resultSet;`;
+        return await SqlService.executeQuery(query);
     }
 }

@@ -264,4 +264,26 @@ export class UserController {
             }
         })
     };
+
+    async getNetwork(userId) {
+        let network = await this.userService.getNetwork(userId);
+        if (_.isEmpty(network)) {
+            return [];
+        }
+        network.sort((a, b) => {
+            if (a.level < b.level) {
+                return -1;
+            }
+            if (a.level > b.level) {
+                return 1;
+            }
+            return 0;
+        })
+        const firstDownLine = network[0];
+        if (firstDownLine.level > 1) {
+            let x = firstDownLine.level - 1;
+            network = network.map(n => ({...n, level: n.level - x}))
+        }
+        return network;
+    }
 }

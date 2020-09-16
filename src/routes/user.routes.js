@@ -294,16 +294,14 @@ export class UserRoutes {
             }
         });
 
-        router.get('/getNetwork', async (req, res) => {
+        router.get('/getNetwork/:userId', async (req, res) => {
             try {
-                const user = {
-                    id: req.user.id,
-                }
-                if (req.body.referralKey) {
-                    user.parentId = await this.userService.validateReferralCode(req.body.referralKey);
-                    await this.userService.updateUser(user);
-                }
-                return res.sendStatus(HttpCode.ok);
+                const network = await this.userController.getNetwork(req.params.userId);
+                return res.json({
+                    userId: req.params.userId,
+                    children: network,
+                    parents: []
+                });
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
