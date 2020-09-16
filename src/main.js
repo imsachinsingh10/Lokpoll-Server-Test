@@ -23,5 +23,5 @@ if (Config.env !== Environment.dev) {
 
 const port = process.env.PORT || 9003;
 app.listen(port, () => {
-    console.log('Server listening at port', port);
+    log.i('Server listening at port', port);
 });

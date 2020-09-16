@@ -12,18 +12,18 @@ export class PostScheduler {
         PostScheduler.task = cron.schedule("0 * * * *", async () => {
             const postIds = await this.getEligiblePostToPublish();
             if (_.isEmpty(postIds)) {
-                console.log(new Date(), '+++++++++++ No Post To Publish');
+                log.i('No Post To Publish');
                 return;
             }
             const result = await this.publishPost(postIds);
-            console.log(new Date(), '=============== Post Published', postIds, result);
+            log.i('Post Published', postIds);
         }, {
             scheduled: false
         });
     }
 
     start() {
-        console.log(new Date(), '================ Post Scheduler Started =============')
+        log.i('Post Scheduler Started')
         PostScheduler.task.start();
     }
 

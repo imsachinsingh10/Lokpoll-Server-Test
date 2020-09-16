@@ -23,7 +23,7 @@ export class FirebaseController {
                 receiverIds
             }
         );
-        console.log('notification', notification);
+        log.i('notification', notification);
         return this.sendAndLogNotification(receiverIds, notification);
     }
 
@@ -46,7 +46,6 @@ export class FirebaseController {
             receiverIds = receiverIds.concat(postCreated.userId);
         }
 
-        console.log("comment Data",receiverIds);
         const notification = notificationModel(
             {
                 title: `Comment Added`,
@@ -56,7 +55,7 @@ export class FirebaseController {
                 receiverIds
             }
         );
-         console.log('notification', notification);
+         log.i('notification', notification);
         return this.sendNotifications(receiverIds, notification);
     }
 
@@ -95,7 +94,7 @@ export class FirebaseController {
                         where deviceToken is not null and id in ${Utils.getRange(receiverIds)};`;
         let tokens = await SqlService.executeQuery(query);
         if (_.isEmpty(tokens)) {
-            console.log('no tokens found');
+            log.i('no tokens found');
             return;
         }
         const _tokens = tokens.map(t => t.deviceToken);
@@ -118,8 +117,8 @@ export class FirebaseController {
                 ...payload
             }
         }
-        console.log('message obj', message);
-        console.log(`${_tokens.length} users notified, tokens`, _tokens);
+        log.i('message obj', message);
+        log.i(`${_tokens.length} users notified, tokens`, _tokens);
         return FirebaseService.sendMessage(message);
     }
 }

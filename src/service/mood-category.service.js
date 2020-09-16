@@ -33,7 +33,6 @@ export class MoodCategoryService {
     }
 
     async updateMoodCategory(category) {
-        console.log('category to update', category);
         const condition = `where id = ${category.id}`;
 
         const query = QueryBuilderService.getUpdateQuery(table.moodCategory, category, condition);

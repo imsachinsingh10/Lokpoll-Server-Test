@@ -22,7 +22,7 @@ export class SqlService {
     }
 
     static executeQuery(query) {
-        console.log('query', query);
+        log.sql(query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
@@ -56,7 +56,7 @@ export class SqlService {
     }
 
     static getSingle(query) {
-        console.log('query', query);
+        log.sql(query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {

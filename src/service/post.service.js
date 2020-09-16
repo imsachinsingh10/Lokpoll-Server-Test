@@ -13,8 +13,6 @@ import {FirebaseController} from "../controller/firebase.controller";
 
 export class PostService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
-        this.sqlService = new SqlService();
         this.firebaseController = new FirebaseController();
     }
 
@@ -56,7 +54,7 @@ export class PostService {
         let c3 = ``;
         let c4 = '';
         let c5 = '';
-        let c6 = '';
+        let c6 = 'and p.isPublished = 1';
         let c7 = '';
         let distanceQuery = ``;
         let havingCondition = ``;
@@ -82,8 +80,8 @@ export class PostService {
             c5 = `and p.userId = ${req.userId}`;
         }
 
-        if (req.roleId === 3) {
-            c6 = `and p.isPublished = 1`;
+        if (req.roleId === 1) {
+            c6 = ``;
         }
 
         if (req.futurePost) {
@@ -119,7 +117,7 @@ export class PostService {
                     havingCondition += `isGeneric = 1)`;
                 }
             } catch (e) {
-                console.log('+++++++ failed parsing locations', req.locations, typeof req.locations);
+                log.e('failed parsing locations', req.locations, typeof req.locations);
             }
         }
         const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
@@ -216,7 +214,6 @@ export class PostService {
     }
 
     async updatePostDescription(model) {
-        console.log(model);
         const query = `update ${table.post} 
                         set description = '${model.description}'
                         where id = ${model.postId};`;
@@ -392,7 +389,6 @@ export class PostService {
     }
 
     async getTrustOnPost(req) {
-        console.log(req.postId);
         const query = `select pr.id, pr.type as trustType, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
                         from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy

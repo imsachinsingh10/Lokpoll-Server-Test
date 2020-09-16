@@ -225,7 +225,7 @@ export class ChallengeRoutes {
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
-                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
+                log.i('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
@@ -256,11 +256,8 @@ export class ChallengeRoutes {
                 };
                 let result = await this.challengeService.getAllChallengeEntriesForAdmin(request);
                 result = await this.challengeController.formatChallengeEntriesForAdmin(req, result);
-                // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
-                // result = result.map(r => r.id);
                 const end = new Date() - start;
-                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
-                // return await res.json({result, processingTime: end / 1000 + ' seconds'});
+                log.i('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 return await res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
@@ -355,7 +352,6 @@ export class ChallengeRoutes {
         router.post('/declareResult', async (req, res) => {
             try {
                 let result = await this.challengeService.declareResult(req);
-                console.log()
                 if (result) {
                    // const results = res.json(result);
                     const resultData = result
@@ -367,7 +363,6 @@ export class ChallengeRoutes {
                             marks: p.marks,
 
                         }));
-                        console.log("resultData", resultData);
                     await this.challengeService.createResult(resultData);
                 }
                 return await res.json(result);

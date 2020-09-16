@@ -79,7 +79,6 @@ export class MoodRoutes {
 
         router.post('/getSubMoodsByMoodId', async (req, res) => {
             try {
-                console.log(req.body);
                 let subMoods = await this.moodService.getSubMoodsByMoodId(req.body);
                 return await res.json(subMoods);
             } catch (e) {

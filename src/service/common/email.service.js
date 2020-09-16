@@ -16,7 +16,7 @@ export class EmailService {
         return new Promise((resolve, reject) => {
             fs.readFile(path.resolve('./template', `${templateName}.html`), async (err, data) => {
                 if (err) {
-                    console.log('err in send mail', err);
+                    log.e('err in send mail', err);
                     return reject({
                         code: 'no_template_found'
                     })
@@ -31,10 +31,10 @@ export class EmailService {
                     // });
                     // await SqlService.executeQuery(query);
                 } catch (e) {
-                    console.log('e', e);
+                    log.e('', e);
                     return reject({code: 'unable to add user in verification'})
                 }
-                console.log('receiver', receiver);
+                log.e('receiver', receiver);
                 const compiledHtml = tpl({
                     ...receiver, link: {
                         text: Utils.getRandomString(),
@@ -57,8 +57,8 @@ export class EmailService {
                 };
 
                 transporter.sendMail(mailOptions, function (err, info) {
-                    console.log(err, info);
                     if (err) {
+                        log.e('send mail error', err)
                         return reject(false)
                     } else {
                         return resolve(true);

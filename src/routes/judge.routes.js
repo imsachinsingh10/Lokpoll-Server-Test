@@ -38,7 +38,6 @@ export class JudgeRoutes {
         router.post('/add', async (req, res) => {
             try {
                 const judge = req.body;
-                console.log("test data");
                 await this.judgeController.checkIfJudgeRegistered(judge);
                 const result = await this.judgeService.createJudge(judge);
                 return res.sendStatus(HttpCode.ok);

@@ -10,8 +10,6 @@ import {FirebaseController} from "../controller/firebase.controller";
 
 export class ChallengeService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
-        this.sqlService = new SqlService();
         this.firebaseController = new FirebaseController();
     }
 
@@ -433,7 +431,6 @@ export class ChallengeService {
     }
 
     async getWinnerDetails(req) {
-        console.log("request",req);
         const query = `select r.id, r.marks,r.rank, u.id as userId , u.name, u.imageUrl, u.bgImageUrl
                         from ${table.result} r
                             left join user u on u.id = r.userId

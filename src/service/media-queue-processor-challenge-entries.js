@@ -16,6 +16,6 @@ process.on('message', async (res) => {
 });
 
 process.on('uncaughtException', function (err) {
-    console.log("Error happened: " + err.message + "\n" + err.stack + ".\n");
-    console.log("Gracefully finish the routine.");
+    log.e("Error happened: " + err.message + "\n" + err.stack + ".\n");
+    log.e("Gracefully finish the routine.");
 });

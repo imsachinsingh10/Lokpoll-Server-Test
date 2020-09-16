@@ -83,7 +83,7 @@ export class ChallengeController {
             subMoodNames = JSON.parse(reqBody.subMoodData);
             subMoodNamesOriginal = JSON.parse(reqBody.subMoodData);
         } catch (e) {
-            console.log('e', e);
+            log.e('', e);
         }
         if (_.isEmpty(subMoodNames)) {
             return;
@@ -160,7 +160,7 @@ export class ChallengeController {
         const challengeEntryIds = _.map(rawPosts, r => r.id);
         const uniqChallengeEntryIds = _.uniq(challengeEntryIds);
         if (challengeEntryIds.length !== uniqChallengeEntryIds.length) {
-            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+            log.e('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
         const [comments, subMoods, respects, reactions, trusts, mediaList, challengeEntriesViews] = await Promise.all([
             this.challengeService.getComments(uniqChallengeEntryIds),
@@ -189,7 +189,7 @@ export class ChallengeController {
         const challengeEntryIds = _.map(rawEntries, r => r.id);
         const uniqChallengeEntryIds = _.uniq(challengeEntryIds);
         if (challengeEntryIds.length !== uniqChallengeEntryIds.length) {
-            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+            log.e('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
         const [mediaList] = await Promise.all([
 

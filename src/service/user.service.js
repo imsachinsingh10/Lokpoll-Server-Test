@@ -103,7 +103,6 @@ export class UserService {
                         order by u.id desc
                         limit ${searchCriteria.limit} 
                         offset ${searchCriteria.offset};`;
-        console.log(query);
         return SqlService.executeQuery(query);
     }
 

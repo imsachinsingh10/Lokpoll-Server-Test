@@ -10,8 +10,6 @@ import {FirebaseController} from "../controller/firebase.controller";
 
 export class NoticeboardService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
-        this.sqlService = new SqlService();
     }
 
     async createNoticeboard(noticeboard) {

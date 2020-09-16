@@ -109,7 +109,7 @@ export class PostController {
             subMoodNames = JSON.parse(reqBody.subMoodData);
             subMoodNamesOriginal = JSON.parse(reqBody.subMoodData);
         } catch (e) {
-            console.log('e', e);
+            log.e('', e);
         }
         if (_.isEmpty(subMoodNames)) {
             return;
@@ -150,7 +150,7 @@ export class PostController {
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         if (postIds.length !== uniqPostIds.length) {
-            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+            log.e('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
         const [comments, subMoods, respects, reactions, trusts, mediaList, postViews] = await Promise.all([
             this.postService.getComments(uniqPostIds),
@@ -460,7 +460,7 @@ export class PostController {
         const query = `select deviceToken from ${table.user} where id = ${userId};`;
         const result = await SqlService.getSingle(query);
         if (_.isEmpty(result) || _.isEmpty(result.deviceToken)) {
-            return console.log('+++++ no user found to notify +++++');
+            return log.i('no user found to notify');
         }
         return FirebaseService.sendMessage([result.deviceToken], FirebaseMessage.PostCreated)
     };

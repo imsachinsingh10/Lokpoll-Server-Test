@@ -44,7 +44,6 @@ export class MoodService {
     }
 
     async getSubMoodsByMoodId(data) {
-        console.log(data);
         const query = `select m.name ,m.id ,m.moodId
 	    				from ${table.subMood} m
 	    				where moodId = ${data.moodId}
@@ -53,7 +52,6 @@ export class MoodService {
     }
 
     async updateMood(mood) {
-        console.log('mood', mood);
         const condition = `where id = ${mood.id}`;
 
         const query = QueryBuilderService.getUpdateQuery(table.mood, mood, condition);

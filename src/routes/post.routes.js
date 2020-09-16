@@ -101,6 +101,7 @@ export class PostRoutes {
 
         router.post('/getAll', async (req, res) => {
             const start = new Date();
+
             try {
                 const request = {
                     latitude: req.body.latitude,
@@ -126,7 +127,7 @@ export class PostRoutes {
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
-                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
+                log.i('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
@@ -144,7 +145,6 @@ export class PostRoutes {
                     "postId": req.body.postId
                 };
                 let result = await this.postService.getPostData(request);
-                console.log('post data', result);
                 result = await this.postController.formatPosts(req, result);
                 return await res.json(result);
             } catch (e) {
@@ -273,9 +273,7 @@ export class PostRoutes {
 
         router.get('/videoStream', async (req, res) => {
             try {
-                console.log("In Video Stream");
                 await this.postService.streamVideo(req, res);
-                console.log("In Video HttpCode.ok");
                 //return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

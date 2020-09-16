@@ -21,7 +21,7 @@ export function validateAuthToken(req, res, next) {
     jwt.verify(token, Config.auth.secretKey, function (err, decoded) {
         if (err) {
             // next();
-            console.log('invalid_token', err);
+            log.e('invalid_token', err);
             return res.status(HttpCode.unauthorized).json(new ErrorModel('invalid_token', 'Token not verified'));
         } else {
             // console.log('user verified', decoded);

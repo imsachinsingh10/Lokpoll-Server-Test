@@ -20,7 +20,7 @@ export const sendTestMessage = () => {
         if (err) {
             console.error('sending error', err);
         } else {
-            console.log('response', response);
+            log.e('response', response);
         }
     });
 };

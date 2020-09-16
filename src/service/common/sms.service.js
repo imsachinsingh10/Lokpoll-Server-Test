@@ -23,10 +23,10 @@ export class SMSService {
 		const url = `https://api.textlocal.in/send/?apiKey=${apiKey}&sender=${sender}&numbers=${phone}&message=${msg}`;
 		try {
 			const result = await axios.get(url);
-			console.log(' +++++++ sms result +++++++++ ', result.data);
+			log.i('sms result', result.data);
 			return true;
 		} catch (e) {
-			console.log('error while sending message', e);
+			log.e('error while sending message', e);
 			return false;
 		}
 	};

@@ -42,7 +42,7 @@ export const extractThumbnailFromVideo = async (file) => {
             path: filePath
         };
     } catch (e) {
-        console.log('e', e);
+        log.e('', e);
     }
 };
 
@@ -60,6 +60,6 @@ export const extractThumbnailFromImage = async (file) => {
             path: destination
         };
     } catch (e) {
-        console.log('error', e);
+        log.e('thumbnail error', e);
     }
 };

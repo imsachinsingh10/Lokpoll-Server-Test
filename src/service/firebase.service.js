@@ -3,7 +3,6 @@ import path from 'path';
 
 const gcm = require('node-gcm');
 const credFilePath = path.resolve('localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json');
-console.log('cred file path', credFilePath);
 const serviceAccount = require(credFilePath);
 
 admin.initializeApp({
@@ -33,10 +32,10 @@ const message = {
 export const sendTestMessage = () => {
     admin.messaging().sendMulticast(message)
         .then((response) => {
-            console.log('Successfully sent firebase message:', response);
+            log.i('Successfully sent firebase message:', response);
         })
         .catch((error) => {
-            console.log('Error sending firebase message:', error);
+            log.e('Error sending firebase message:', error);
         });
 };
 
@@ -45,11 +44,11 @@ export default class FirebaseService {
         return new Promise((resolve, reject) => {
             admin.messaging().sendMulticast(message)
                 .then((response) => {
-                    console.log('Successfully sent firebase message:', message, response);
+                    log.i('Successfully sent firebase message:', message, response);
                     resolve(true);
                 })
                 .catch((error) => {
-                    console.error('sending error', error);
+                    log.e('sending error', error);
                     reject(false);
                 });
         })
