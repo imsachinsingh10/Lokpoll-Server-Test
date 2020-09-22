@@ -380,21 +380,21 @@ export class UserService {
     }
 
     async validateReferralCode(user, key) {
-        const query = `select id from user where referralCode = '${key}' and id <> ${user.id} limit 1;`;
+        const query = `select id, level from user where referralCode = '${key}' and id <> ${user.id} limit 1;`;
         const result = await SqlService.getSingle(query);
         if (!_.isEmpty(result)) {
-            return result.id;
+            return result;
         }
         return await this.validateReferralPhone(user, key);
     }
 
     async validateReferralPhone(user, phone) {
-        const query = `select id from user where phone = '${phone}' and id <> ${user.id} limit 1;`;
+        const query = `select id, level from user where phone = '${phone}' and id <> ${user.id} limit 1;`;
         const result = await SqlService.getSingle(query);
         if (_.isEmpty(result)) {
             throw new ErrorModel(AppCode.invalid_request, Message.invalidReferralCode);
         }
-        return result.id;
+        return result;
     }
 
     async getNetwork(userId) {

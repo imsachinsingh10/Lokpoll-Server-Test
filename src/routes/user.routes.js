@@ -281,14 +281,16 @@ export class UserRoutes {
                     id: req.user.id,
                 }
                 if (req.body.referralKey) {
-                    user.parentId = await this.userService.validateReferralCode(user, req.body.referralKey);
+                    const {id, level} = await this.userService.validateReferralCode(user, req.body.referralKey);
+                    user.parentId = id;
+                    user.level = level + 1;
                     await this.userService.updateUser(user);
                 }
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
-                    return res.status(HttpCode.unauthorized).send(e);
+                    return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCode.internal_server_error);
             }
@@ -305,7 +307,7 @@ export class UserRoutes {
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
-                    return res.status(HttpCode.unauthorized).send(e);
+                    return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.sendStatus(HttpCode.internal_server_error);
             }
