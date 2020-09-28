@@ -8,6 +8,8 @@ import {HttpCode} from "../enum/http-code";
 import {AgeRange} from "../enum/common.enum";
 import Utils from "../service/common/utils";
 import {log} from "../service/common/logger.service";
+import {table} from "../enum/table";
+import {SqlService} from "../service/sql/sql.service";
 
 export class UserController {
     constructor() {
@@ -266,7 +268,14 @@ export class UserController {
     };
 
     async getNetwork(userId) {
-        let network = await this.userService.getNetwork(userId);
+        let descendants = await this.userService.getDescendants(userId);
+        const firstDownLine = descendants[0];
+        if (firstDownLine && firstDownLine.level > 1) {
+            let x = firstDownLine.level - 1;
+            descendants = descendants.map(n => ({...n, level: n.level - x}))
+        }
+        let ancestors = await this.userService.getAncestors(userId);
+        let network = [...ancestors ,...descendants];
         if (_.isEmpty(network)) {
             return [];
         }
@@ -279,11 +288,24 @@ export class UserController {
             }
             return 0;
         })
-        const firstDownLine = network[0];
-        if (firstDownLine.level > 1) {
-            let x = firstDownLine.level - 1;
-            network = network.map(n => ({...n, level: n.level - x}))
+        network = await this.attachMyRespectInNetwork(userId, network);
+        return network;
+    }
+
+    async attachMyRespectInNetwork(userId, network) {
+        const userIds = network.map(u => u.id);
+        const q = `select * from ${table.respect} r 
+                    where respectBy = ${userId} and respectFor in ${Utils.getRange(userIds)}`;
+        const respects = await SqlService.executeQuery(q);
+        if (_.isEmpty(respects)) {
+            return network.map(u => ({...u, respectedByMe: false}));
         }
+
+        network.forEach((user) => {
+            const respectedByMe = _.find(respects, r => user.id === r.respectFor);
+            user.respectedByMe = !_.isEmpty(respectedByMe)
+        })
+
         return network;
     }
 }

@@ -281,8 +281,9 @@ export class UserRoutes {
                     id: req.user.id,
                 }
                 if (req.body.referralKey) {
-                    const {id, level} = await this.userService.validateReferralCode(user, req.body.referralKey);
+                    const {id, level, parentId} = await this.userService.validateReferralCode(user, req.body.referralKey);
                     user.parentId = id;
+                    user.gParentId = parentId;
                     user.level = level + 1;
                     await this.userService.updateUser(user);
                 }

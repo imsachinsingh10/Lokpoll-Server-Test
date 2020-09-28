@@ -380,7 +380,10 @@ export class UserService {
     }
 
     async validateReferralCode(user, key) {
-        const query = `select id, level from user where referralCode = '${key}' and id <> ${user.id} limit 1;`;
+        const query = `select user.id, user.level, parent.id parentId from user 
+                            left join user parent on parent.id = user.parentId
+                        where referralCode = '${key}' 
+                        and id <> ${user.id} limit 1;`;
         const result = await SqlService.getSingle(query);
         if (!_.isEmpty(result)) {
             return result;
@@ -397,7 +400,7 @@ export class UserService {
         return result;
     }
 
-    async getNetwork(userId) {
+    async getDescendants(userId) {
         let query = `WITH RECURSIVE resultSet AS
                         (
                             SELECT user1.id, user1.name, user1.parentId, user1.level, user1.avatarBG,
@@ -411,5 +414,42 @@ export class UserService {
                                 INNER JOIN user AS user2 ON resultSet.id = user2.parentId
                         ) SELECT * FROM resultSet;`;
         return await SqlService.executeQuery(query);
+    }
+
+    async getAncestors(userId) {
+        let query = `SELECT parent.id id1, parent.name name1, parent.avatarBG avatarBG1, parent.parentId parentId1, parent.referralCode referralCode1,
+                            parent.email email1, parent.phone phone1, parent.imageUrl imageUrl1,
+                            gParent.id id2, gParent.name name2, gParent.avatarBG avatarBG2, gParent.parentId parentId2, gParent.referralCode referralCode2,
+                            gParent.email email2, gParent.phone phone2, gParent.imageUrl imageUrl2
+                        FROM user u 
+                            left join user parent on parent.id = u.parentId
+                            left join user gParent on gParent.id = parent.parentId
+                        WHERE u.id=${userId} limit 1;`;
+        const ancestors = await SqlService.getSingle(query);
+        if (_.isEmpty(ancestors)) {
+            return [];
+        }
+        const parent = {
+            level: -1
+        };
+        const gParent = {
+            level: -2
+        };
+        for (const key in ancestors) {
+            const value = ancestors[key];
+            if (key.endsWith('1')) {
+                parent[key.slice(0, -1)] = value;
+            } else {
+                gParent[key.slice(0, -1)] = value;
+            }
+        }
+        const result = [];
+        if (parent.id) {
+            result.push(parent);
+        }
+        if (gParent.id) {
+            result.push(gParent);
+        }
+        return result;
     }
 }
