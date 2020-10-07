@@ -13,6 +13,7 @@ import {Config} from "../config";
 import childProcess from "child_process";
 import {PostController} from "../controller/post.controller";
 import {log} from "../service/common/logger.service";
+import {UserNetworkService} from "../service/user-network.service";
 
 const router = express();
 
@@ -25,6 +26,7 @@ export class ChallengeRoutes {
         this.minioService = new MinIOService();
         this.challengeController = new ChallengeController();
         this.postController = new PostController()
+        this.userNetworkService = new UserNetworkService();
         this.initRoutes();
     }
 
@@ -176,6 +178,7 @@ export class ChallengeRoutes {
         router.post('/createChallengeEntries', uploadChallengeEntriesMediaMiddleware, async (req, res) => {
             try {
                 const {id, userId} = await this.challengeController.createChallengeEntries(req);
+                this.userNetworkService.logAddContestPostActivity({userId: userId, contestPostId: id});
                 const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor-challenge-entries.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {

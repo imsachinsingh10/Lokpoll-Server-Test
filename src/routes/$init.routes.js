@@ -16,6 +16,7 @@ import {NoticeboardRoutes} from "./noticeboard.routes";
 import {MoodCategoryRoutes} from "./mood-category.routes";
 import {Config} from "../config";
 import {log} from "../service/common/logger.service";
+import {UserNetworkRoutes} from "./user-network.routes";
 
 export class InitRoutes {
 
@@ -63,5 +64,6 @@ export class InitRoutes {
         new ChallengeRoutes(app);
         new JudgeRoutes(app);
         new NoticeboardRoutes(app);
+        new UserNetworkRoutes(app);
     }
 }

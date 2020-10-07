@@ -10,10 +10,13 @@ import Utils from "../service/common/utils";
 import {log} from "../service/common/logger.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
+import {UserNetworkService} from "../service/user-network.service";
+import {Activity} from "../model/activity.model";
 
 export class UserController {
     constructor() {
         this.userService = new UserService();
+        this.userNetworkService = new UserNetworkService();
     }
 
     async checkIfUserRegistered(user) {
@@ -117,7 +120,8 @@ export class UserController {
             }
             let user = await this.userService.loginUserByPhone(req.body);
             user = await this.getUserDetails(user.id);
-            await this.userService.updateLoginHistory(req, user);
+            // await this.userService.updateLoginHistory(req, user);
+            this.userNetworkService.logSigninActivity(user.id);
             const token = jwt.sign(
                 user,
                 Config.auth.secretKey,
@@ -151,7 +155,8 @@ export class UserController {
             await this.userService.verifyOTP(req.body.otp, user.phone, true);
 
             const result = await this.userService.createUser(user);
-            await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+            // await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+            this.userNetworkService.logSignupActivity(result.insertId)
             user = await this.getUserDetails(result.insertId);
             const token = jwt.sign(
                 {id: result.insertId, roleId: 3},

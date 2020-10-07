@@ -7,8 +7,9 @@ import {UserController} from "./src/controller/user.controller";
 main();
 
 async function main() {
-    const network = await new UserController().getNetwork(41);
-    console.log('network', network);
+    const array = [1, 2, 4];
+    const filtered = array.filter(a => a === 5)[0];
+    console.log('filtered', filtered);
 }
 
 
