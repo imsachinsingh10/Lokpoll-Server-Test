@@ -41,6 +41,7 @@ export const table = {
     noticeboard: "noticeboard",
     moodCategory: "mood_category",
     coin_activity_log: "coin_activity_log",
+    coin_activity: "coin_activity",
 };
 
 export const dbview = {

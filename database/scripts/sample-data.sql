@@ -76,3 +76,16 @@ INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`i
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`imageUrl`,`hi`,`en`,`or`,`ta`,`isActive`,`position`) VALUES (66,NULL,'2020-05-09 12:16:01',101,NULL,'#9abda7','https://common-storage.cloudjiffy.net/lokpoll/mood_iconsqFxrjqKy-1589026561079-1 kuch bhi bol.png','Folklore','Folklore','Folklore','Folklore',1,24);
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`imageUrl`,`hi`,`en`,`or`,`ta`,`isActive`,`position`) VALUES (67,NULL,'2020-05-09 12:16:53',101,NULL,'#e6e6c2','https://common-storage.cloudjiffy.net/lokpoll/mood_icons7NLlqEq4-1589037568079-15 Learning Bol.png','Talks','Talks','Talks','Talks',1,26);
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`imageUrl`,`hi`,`en`,`or`,`ta`,`isActive`,`position`) VALUES (68,NULL,'2020-05-09 12:17:32',101,NULL,'#f3ebc3','https://common-storage.cloudjiffy.net/lokpoll/mood_iconsTzqkkyYz-1589037578052-15 Learning Bol.png','Books','Books','Books','Books',1,27);
+
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (1, 'signup', 'coins to me, when i signs up', 100);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (2, 'frontLineSignup', 'coins to me, when someone signs up in front line', 100);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (3, 'downLineSignup', 'coins to me, when someone signs up in down line', 10);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (4, 'login', 'coins to me, when i login', 20);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (5, 'frontLineLogin', 'coins to me, when someone login in front line', 2);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (6, 'downLineLogin', 'coins to me, when someone login in down line', 1);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (7, 'addPost', 'coins to me, when i add new post', 60);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (8, 'frontLineAddPost', 'coins to me, when someone adds new post in front line', 6);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (9, 'downLineAddPost', 'coins to me, when someone adds new post in down line', 1);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (10, 'addContestPost', 'coins to me, when i participate in contest', 40);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (11, 'frontLineAddContestPost', 'coins to me, when someone in front line participate in contest', 40);
+INSERT INTO coin_activity (id, activity, description, coins) VALUES (12, 'downLineAddContestPost', 'coins to me, when someone in down line participate in contest', 40);

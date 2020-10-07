@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.prod;
+    static env = Environment.test;
 
     static version = {
         majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
@@ -16,7 +16,7 @@ export class Config {
         password: `ZDGhxq62647`,
         database: `lokpoll`,
         port: 3306,
-        multipleStatements: true
+        insecureAuth: false
     };
 
     static dbTest = {

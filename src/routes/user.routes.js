@@ -13,6 +13,7 @@ import {MinIOService, uploadProfilePictures} from "../service/common/minio.servi
 import {ProfileType} from "../enum/common.enum";
 import {FirebaseController} from "../controller/firebase.controller";
 import {log} from "../service/common/logger.service";
+import {UserNetworkService} from "../service/user-network.service";
 
 const router = express();
 
@@ -26,6 +27,8 @@ export class UserRoutes {
         this.userController = new UserController();
         this.minioService = new MinIOService();
         this.firebaseController = new FirebaseController();
+        this.userNetworkService = new UserNetworkService();
+
         this.initRoutes();
     }
 
@@ -304,6 +307,21 @@ export class UserRoutes {
                     userId: req.params.userId,
                     children: network,
                     parents: []
+                });
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/getCoinDetails/:userId', async (req, res) => {
+            try {
+                const coins = await this.userNetworkService.getCoinLogs(req.params.userId);
+                return res.json({
+                    coins
                 });
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);

@@ -135,7 +135,7 @@ export class UserService {
         const query = `select u.id, u.name, u.email, u.phone, 
                                 u.gender, u.imageUrl, u.bgImageUrl, u.audioUrl, u.address, u.ageRangeId, 
                                 u.profession, u.company, u.latitude, u.longitude, u.appLanguage, u.contentLanguage,
-                        ur.name role, u.referralCode, parent.referralCode parentReferralCode, u.roleId
+                        ur.name role, u.referralCode, parent.referralCode parentReferralCode, u.roleId, u.coins
 						from ${table.user} u
 		 					left join ${table.userRole} ur on u.roleId = ur.id
 		 					left join ${table.user} parent on parent.id = u.parentId

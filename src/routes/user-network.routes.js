@@ -25,9 +25,36 @@ export class UserNetworkRoutes {
     initRoutes() {
         router.use(validateAuthToken);
 
-        router.post('/getProfile', async (req, res) => {
+        router.post('/addCoinActivity', async (req, res) => {
             try {
+                await this.userNetworkService.addCoinActivity(req);
+                res.json('New Coin activity added');
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
 
+        router.post('/updateCoinActivity', async (req, res) => {
+            try {
+                await this.userNetworkService.updateCoinActivity(req);
+                res.json('Coin activity updated');
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/getAllCoinActivities', async (req, res) => {
+            try {
+                const activities = await this.userNetworkService.getAllCoinActivities();
+                res.json(activities);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {

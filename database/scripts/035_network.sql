@@ -3,6 +3,18 @@ insert into db_logs (`dev`, scriptName) values ('himanshu', '035_network.sql');
 alter table user add column level bigint default 0;
 
 -- -----------------------------------------------------
+-- Table `coin_activity`
+-- -----------------------------------------------------
+drop table if exists coin_activity;
+create table coin_activity (
+    id bigint auto_increment primary key,
+    activity varchar(50),
+    description varchar(500),
+    coins mediumint,
+    updatedOn datetime
+)
+
+-- -----------------------------------------------------
 -- Table `coin_activity_log`
 -- -----------------------------------------------------
 drop table if exists coin_activity_log;

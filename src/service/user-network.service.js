@@ -102,4 +102,39 @@ export class UserNetworkService {
         const query2 = `update user set coins = coins + ${activity.coins} where id = ${activity.userId};`
         return SqlService.executeMultipleQueries([query1, query2]);
     }
+
+    async getCoinLogs(userId) {
+        const q = `select * from ${table.coin_activity_log} c where userId = ${userId};`
+        return SqlService.executeQuery(q);
+    }
+
+    async addCoinActivity(req) {
+        const __ = req.body;
+        const model = {
+            createdOn: 'utc_timestamp()',
+            activity: __['activity'],
+            description: __['description'],
+            coins: __['coins'],
+        }
+        const q = QueryBuilderService.getInsertQuery(table.coin_activity, model);
+        const result = await SqlService.executeQuery(q);
+        return result.insertId;
+    }
+
+    async updateCoinActivity(req) {
+        const __ = req.body;
+        const model = {
+            activity: __['activity'],
+            coins: __['coins'],
+        }
+        const q = QueryBuilderService.getUpdateQuery(table.coin_activity, model, `where id = ${__['id']}`);
+        const result = await SqlService.executeQuery(q);
+        return result.insertId;
+    }
+
+    async getAllCoinActivities() {
+        const q = `select * from ${table.coin_activity};`
+        return SqlService.executeQuery(q);
+    }
+
 }
