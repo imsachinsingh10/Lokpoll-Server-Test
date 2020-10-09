@@ -51,10 +51,23 @@ export class UserNetworkRoutes {
             }
         });
 
-        router.post('/getAllCoinActivities', async (req, res) => {
+        router.get('/getAllCoinActivities', async (req, res) => {
             try {
                 const activities = await this.userNetworkService.getAllCoinActivities();
                 res.json(activities);
+            } catch (e) {
+                console.error(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.put('/updateCoinActivity', async (req, res) => {
+            try {
+                const result = await this.userNetworkService.updateCoinActivity(req.body);
+                res.json(result);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {

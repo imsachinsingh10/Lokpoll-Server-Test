@@ -121,19 +121,16 @@ export class UserNetworkService {
         return result.insertId;
     }
 
-    async updateCoinActivity(req) {
-        const __ = req.body;
-        const model = {
-            activity: __['activity'],
-            coins: __['coins'],
-        }
-        const q = QueryBuilderService.getUpdateQuery(table.coin_activity, model, `where id = ${__['id']}`);
-        const result = await SqlService.executeQuery(q);
-        return result.insertId;
-    }
-
     async getAllCoinActivities() {
         const q = `select * from ${table.coin_activity};`
+        return SqlService.executeQuery(q);
+    }
+
+    async updateCoinActivity(activity) {
+        const q = `update ${table.coin_activity} 
+                    set coins = ${activity.coins}, 
+                        updatedOn = utc_timestamp()
+                    where id = ${activity.id};`;
         return SqlService.executeQuery(q);
     }
 
