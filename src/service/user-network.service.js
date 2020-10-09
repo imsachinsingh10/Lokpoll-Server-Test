@@ -17,8 +17,18 @@ export class UserNetworkService {
         this.userService = new UserService();
     }
 
+    async getCoinsByActivityName(activity) {
+        const q = `select coins from ${table.coin_activity} where activity = '${activity}' limit 1;`;
+        const result = await SqlService.getSingle(q);
+        if (_.isEmpty(result)) {
+            return 0;
+        }
+        return result.coins;
+    }
+
     async logSignupActivity(userId) {
-        await this.logActivity({userId, activity: Activity.signup, coins: 100});
+        let coins = await this.getCoinsByActivityName(Activity.signup);
+        await this.logActivity({userId, activity: Activity.signup, coins});
 
         const ancestors = await this.userService.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -27,17 +37,20 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            await this.logActivity({userId: parent.id, activity: Activity.frontLineSignup, coins: 100});
+            coins = await this.getCoinsByActivityName(Activity.frontLineSignup);
+            await this.logActivity({userId: parent.id, activity: Activity.frontLineSignup, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            await this.logActivity({userId: gParent.id, activity: Activity.downLineSignup, coins: 10});
+            coins = await this.getCoinsByActivityName(Activity.downLineSignup);
+            await this.logActivity({userId: gParent.id, activity: Activity.downLineSignup, coins});
         }
     }
 
     async logSigninActivity(userId) {
-        await this.logActivity({userId, activity: Activity.login, coins: 20});
+        let coins = await this.getCoinsByActivityName(Activity.login);
+        await this.logActivity({userId, activity: Activity.login, coins});
 
         const ancestors = await this.userService.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -46,17 +59,20 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            await this.logActivity({userId: parent.id, activity: Activity.frontLineLogin, coins: 2});
+            coins = await this.getCoinsByActivityName(Activity.frontLineLogin);
+            await this.logActivity({userId: parent.id, activity: Activity.frontLineLogin, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            await this.logActivity({userId: gParent.id, activity: Activity.downLineLogin, coins: 1});
+            coins = await this.getCoinsByActivityName(Activity.downLineLogin);
+            await this.logActivity({userId: gParent.id, activity: Activity.downLineLogin, coins});
         }
     }
 
     async logAddPostActivity({userId, postId}) {
-        await this.logActivity({userId, postId, activity: Activity.addPost, coins: 60});
+        let coins = await this.getCoinsByActivityName(Activity.addPost);
+        await this.logActivity({userId, postId, activity: Activity.addPost, coins});
 
         const ancestors = await this.userService.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -65,17 +81,20 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            await this.logActivity({userId: parent.id, postId, activity: Activity.frontLineAddPost, coins: 6});
+            coins = await this.getCoinsByActivityName(Activity.frontLineAddPost);
+            await this.logActivity({userId: parent.id, postId, activity: Activity.frontLineAddPost, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            await this.logActivity({userId: gParent.id, postId, activity: Activity.downLineAddPost, coins: 3});
+            coins = await this.getCoinsByActivityName(Activity.downLineAddPost);
+            await this.logActivity({userId: gParent.id, postId, activity: Activity.downLineAddPost, coins});
         }
     }
 
     async logAddContestPostActivity({userId, contestPostId}) {
-        await this.logActivity({userId, contestPostId, activity: Activity.addContestPost, coins: 40});
+        let coins = await this.getCoinsByActivityName(Activity.addContestPost);
+        await this.logActivity({userId, contestPostId, activity: Activity.addContestPost, coins});
 
         const ancestors = await this.userService.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -84,12 +103,14 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            await this.logActivity({userId: parent.id, contestPostId, activity: Activity.frontLineAddContestPost, coins: 4});
+            coins = await this.getCoinsByActivityName(Activity.frontLineAddContestPost);
+            await this.logActivity({userId: parent.id, contestPostId, activity: Activity.frontLineAddContestPost, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            await this.logActivity({userId: gParent.id, contestPostId, activity: Activity.downLineAddContestPost, coins: 2});
+            coins = await this.getCoinsByActivityName(Activity.downLineAddContestPost);
+            await this.logActivity({userId: gParent.id, contestPostId, activity: Activity.downLineAddContestPost, coins});
         }
     }
 
