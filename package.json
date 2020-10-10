@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "nodemon --exec babel-node src/main.js",
     "start": "node src/main.js",
-    "build": "cp -r ./assets dist/assets && cp package.json dist && cp localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json dist && babel src --out-dir dist/src",
-    "serve": "node dist/main.js",
+    "build": "cp -r ./assets dist/assets && cp package.json dist && cp swagger.json dist/ && cp localbol-c5fed-firebase-adminsdk-xe0k3-adf63d7aae.json dist && babel src --out-dir dist/src",
+    "serve": "node dist/src/main.js",
     "test": "babel-node test.js",
     "ps": "babel-node src/service/post-schedular.js",
     "sql": "node database/generate-full-db.js"
@@ -34,6 +34,7 @@
     "node-gcm": "^1.0.2",
     "nodemailer": "^6.3.0",
     "request-ip": "^2.1.3",
+    "swagger-ui-express": "^4.1.4",
     "underscore": "^1.9.1",
     "vash": "^0.12.6"
   },

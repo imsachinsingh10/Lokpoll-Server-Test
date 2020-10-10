@@ -10,7 +10,7 @@ if (Config.env === Environment.test) {
 } else if (Config.env === Environment.prod) {
     db = Config.dbProd
 } else {
-    db = Config.dbDev;
+    db = Config.dbTest;
 }
 const pool = mysql.createPool(db);
 // console.log('mysql pool created');

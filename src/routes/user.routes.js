@@ -25,6 +25,7 @@ export class UserRoutes {
 
         this.userService = new UserService();
         this.userController = new UserController();
+        this.userController = new UserController();
         this.minioService = new MinIOService();
         this.firebaseController = new FirebaseController();
         this.userNetworkService = new UserNetworkService();
@@ -284,7 +285,7 @@ export class UserRoutes {
                     id: req.user.id,
                 }
                 if (req.body.referralKey) {
-                    const {id, level, parentId} = await this.userService.validateReferralCode(user, req.body.referralKey);
+                    const {id, level, parentId} = await this.userNetworkService.validateReferralCode(user, req.body.referralKey);
                     user.parentId = id;
                     user.gParentId = parentId;
                     user.level = level + 1;
@@ -300,37 +301,6 @@ export class UserRoutes {
             }
         });
 
-        router.get('/getNetwork/:userId', async (req, res) => {
-            try {
-                const network = await this.userController.getNetwork(req.params.userId);
-                return res.json({
-                    userId: req.params.userId,
-                    children: network,
-                    parents: []
-                });
-            } catch (e) {
-                log.e(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.invalid_request) {
-                    return res.status(HttpCode.bad_request).send(e);
-                }
-                return res.sendStatus(HttpCode.internal_server_error);
-            }
-        });
-
-        router.get('/getCoinDetails/:userId', async (req, res) => {
-            try {
-                const coins = await this.userNetworkService.getCoinLogs(req.params.userId);
-                return res.json({
-                    coins
-                });
-            } catch (e) {
-                log.e(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.invalid_request) {
-                    return res.status(HttpCode.bad_request).send(e);
-                }
-                return res.sendStatus(HttpCode.internal_server_error);
-            }
-        });
     }
 }
 

@@ -1,0 +1,217 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "localbol-server",
+    "description": "Localbol APIs Documentation",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:9003",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Test",
+      "description": "Test APIs"
+    },
+    {
+      "name": "User",
+      "description": "API for users in the system"
+    },
+    {
+      "name": "User Network",
+      "description": "API related to user network"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "parameters": {
+    "tokenHeader": {
+      "in": "header",
+      "name": "token",
+      "type": "string",
+      "description": "Authorization token",
+      "default": "",
+      "required": true
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "OK"
+    }
+  },
+  "paths": {
+    "/user/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "User login API",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                },
+                "otp": {
+                  "type": "string",
+                  "example": ""
+                },
+                "platform": {
+                  "type": "string",
+                  "example": "android"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/sendOTP": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Send OTP to user",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/verifyOTP": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Verify OTP",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                },
+                "otp": {
+                  "type": "string",
+                  "description": "OTP",
+                  "example": ""
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/getNetwork": {
+      "get": {
+        "summary": "Get my network",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/networkCoinSummaryByUser": {
+      "get": {
+        "summary": "Get my coin summary",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": [{
+              "frontLineCount": 0,
+              "downLineCount": 0,
+              "currentBalance": {
+                "sum": 20
+              },
+              "lifetimeEarning": {
+                "sum": 20
+              },
+              "lifetimeBurns": 0,
+              "lifetimeWinnings": 0
+            }]
+          }
+        }
+      }
+    },
+    "/user/getCoinActivities": {
+      "get": {
+        "summary": "Get my coin activities",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

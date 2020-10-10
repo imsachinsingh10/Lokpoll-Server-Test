@@ -105,4 +105,14 @@ export class Config {
     static firebase = {
         serverKey: 'AAAAOwz4hOo:APA91bEXIOPMCjB-1r8UumEuGG9z7xHUJLI7FnJfgOaimi8kLO-AGoikhyGjZswyg_P12sbj1AkpkUPjg0zMb3KW_zcWy6m0kt1EncAcFVvk5dt7lof1Ze7eY3dfEcOxhrTowgrxs4h5'
     }
+
+    static get host() {
+        if (this.env === Environment.test) {
+            return 'lokpoll-server.cloudjiffy.net'
+        }
+        if (this.env === Environment.prod) {
+            return 'localbol-prod.cloudjiffy.net'
+        }
+        return 'localhost:9003'
+    }
 }
