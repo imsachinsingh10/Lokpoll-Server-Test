@@ -38,13 +38,13 @@ export class Config {
 
     static clientApp = {
         baseUrlProd: 'https://localbol-admin-web.cloudjiffy.net/#',
-        baseUrlDev: 'http://test-asa.cloudjiffy.net/#',
-        baseUrlLocal: 'http://localhost:3000/#',
+        baseUrlTest: 'https://localbol-admin-web.cloudjiffy.net/test/#',
+        baseUrlDev: 'http://localhost:3000/#',
     };
 
     static serverUrl = {
         prod: 'https://localbol-prod.cloudjiffy.net',
-        test: 'https://lokpoll-server.cloudjiffy.net',
+        test: 'https://localbol-test.cloudjiffy.net',
         dev: 'http://localhost:9003',
         base: ''
     };
@@ -108,7 +108,7 @@ export class Config {
 
     static get host() {
         if (this.env === Environment.test) {
-            return 'lokpoll-server.cloudjiffy.net'
+            return 'localbol-test.cloudjiffy.net'
         }
         if (this.env === Environment.prod) {
             return 'localbol-prod.cloudjiffy.net'
