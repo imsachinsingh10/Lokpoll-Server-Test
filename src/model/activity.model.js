@@ -1,10 +1,12 @@
+
+// Note: if you change anything here, please take care of
 export const Activity = {
     signup: 'signup',
     frontLineSignup: 'frontLineSignup',
     downLineSignup: 'downLineSignup',
-    login: 'login',
-    frontLineLogin: 'frontLineLogin',
-    downLineLogin: 'downLineLogin',
+    dailyVisit: 'dailyVisit',
+    frontLineDailyVisit: 'frontLineDailyVisit',
+    downLineDailyVisit: 'downLineDailyVisit',
     addPost: 'addPost',
     frontLineAddPost: 'frontLineAddPost',
     downLineAddPost: 'downLineAddPost',

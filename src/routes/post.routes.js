@@ -36,7 +36,7 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const {id, userId} = await this.postController.createPost(req);
-                this.userNetworkService.logAddPostActivity({userId, postId: id});
+                await this.userNetworkService.logAddPostActivity({userId, postId: id});
                 const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
@@ -101,8 +101,6 @@ export class PostRoutes {
         router.post('/getAll', async (req, res) => {
             const start = new Date();
 
-            log.i('request user', req.user);
-
             try {
                 const request = {
                     latitude: req.body.latitude,
@@ -124,6 +122,7 @@ export class PostRoutes {
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
                 result = await this.postController.formatPosts(req, result);
+                this.userNetworkService.logDailyVisitActivity(request.userId);
                 // result = await this.challengeController.formatChallengeEntries(req, result);
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);

@@ -42,6 +42,7 @@ export const table = {
     moodCategory: "mood_category",
     coin_activity_log: "coin_activity_log",
     coin_activity: "coin_activity",
+    user_app_access: 'user_app_access'
 };
 
 export const dbview = {

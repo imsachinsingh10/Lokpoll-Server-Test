@@ -10,6 +10,8 @@ import Validator from "./common/validator.service";
 import {FirebaseController} from "../controller/firebase.controller";
 import {Activity} from "../model/activity.model";
 import {UserService} from "./user.service";
+import moment from "moment";
+import {log} from "./common/logger.service";
 
 export class UserNetworkService {
     constructor() {
@@ -48,9 +50,49 @@ export class UserNetworkService {
         }
     }
 
-    async logSigninActivity(userId) {
-        let coins = await this.getCoinsByActivityName(Activity.login);
-        await this.logActivity({userId, activity: Activity.login, coins});
+    async addAppAccessLog(userId) {
+        const accessLog = await this.getAppAccessLog({userId});
+        let q = '';
+        if (_.isEmpty(accessLog)) {
+            const model = {userId, logDate: 'utc_timestamp()', activity: Activity.dailyVisit,}
+            q = QueryBuilderService.getInsertQuery(table.user_app_access, model);
+            await SqlService.executeQuery(q);
+        } else {
+            const model = {logDate: 'utc_timestamp()'};
+            q = QueryBuilderService.getUpdateQuery(table.user_app_access, model, `where id = ${accessLog.id}`);
+            await SqlService.executeQuery(q);
+        }
+    }
+
+    async getAppAccessLog({userId, date}) {
+        let c1 = '';
+        if (date) {
+            c1 = `and date(logDate) = '${date}'`;
+        }
+
+        const q = `select * from ${table.user_app_access} 
+                    where userId = ${userId} 
+                        and activity = '${Activity.dailyVisit}' 
+                        ${c1}
+                    limit 1;`
+        return SqlService.getSingle(q);
+    }
+
+    async checkIfUserVisitedToday(userId) {
+        const today = moment.utc().format('YYYY-MM-DD');
+        const result = await this.getAppAccessLog({userId, date: today});
+        return !_.isEmpty(result);
+    }
+
+    async logDailyVisitActivity(userId) {
+        const hasUserVisitedToday = await this.checkIfUserVisitedToday(userId);
+        if (hasUserVisitedToday) {
+            return;
+        }
+
+        this.addAppAccessLog(userId).then(null);
+        let coins = await this.getCoinsByActivityName(Activity.dailyVisit);
+        await this.logActivity({userId, activity: Activity.dailyVisit, coins});
 
         const ancestors = await this.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -59,14 +101,14 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            coins = await this.getCoinsByActivityName(Activity.frontLineLogin);
-            await this.logActivity({userId: parent.id, activity: Activity.frontLineLogin, coins});
+            coins = await this.getCoinsByActivityName(Activity.frontLineDailyVisit);
+            await this.logActivity({userId: parent.id, activity: Activity.frontLineDailyVisit, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            coins = await this.getCoinsByActivityName(Activity.downLineLogin);
-            await this.logActivity({userId: gParent.id, activity: Activity.downLineLogin, coins});
+            coins = await this.getCoinsByActivityName(Activity.downLineDailyVisit);
+            await this.logActivity({userId: gParent.id, activity: Activity.downLineDailyVisit, coins});
         }
     }
 
@@ -104,13 +146,23 @@ export class UserNetworkService {
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
             coins = await this.getCoinsByActivityName(Activity.frontLineAddContestPost);
-            await this.logActivity({userId: parent.id, contestPostId, activity: Activity.frontLineAddContestPost, coins});
+            await this.logActivity({
+                userId: parent.id,
+                contestPostId,
+                activity: Activity.frontLineAddContestPost,
+                coins
+            });
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
             coins = await this.getCoinsByActivityName(Activity.downLineAddContestPost);
-            await this.logActivity({userId: gParent.id, contestPostId, activity: Activity.downLineAddContestPost, coins});
+            await this.logActivity({
+                userId: gParent.id,
+                contestPostId,
+                activity: Activity.downLineAddContestPost,
+                coins
+            });
         }
     }
 

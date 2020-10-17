@@ -23,6 +23,10 @@
     {
       "name": "User Network",
       "description": "API related to user network"
+    },
+    {
+      "name": "Post",
+      "description": "API related to post"
     }
   ],
   "schemes": [
@@ -40,7 +44,7 @@
       "name": "token",
       "type": "string",
       "description": "Authorization token",
-      "default": "",
+      "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMzLCJuYW1lIjpudWxsLCJlbWFpbCI6bnVsbCwicGhvbmUiOiI4NjMwNjk0Nzc5IiwiZ2VuZGVyIjpudWxsLCJpbWFnZVVybCI6bnVsbCwiYmdJbWFnZVVybCI6bnVsbCwiYXVkaW9VcmwiOm51bGwsImFnZVJhbmdlSWQiOm51bGwsInByb2Zlc3Npb24iOm51bGwsImNvbXBhbnkiOm51bGwsImFwcExhbmd1YWdlIjpudWxsLCJjb250ZW50TGFuZ3VhZ2UiOm51bGwsInJvbGUiOiJ1c2VyIiwicmVmZXJyYWxDb2RlIjoiMkdXUUVRIiwicGFyZW50UmVmZXJyYWxDb2RlIjpudWxsLCJyb2xlSWQiOjMsImNvaW5zIjo2MCwicmVzcGVjdENvdW50Rm9yVXNlciI6MCwicmVzcGVjdENvdW50QnlVc2VyIjowLCJyZXNwZWN0ZWRCeU1lIjpmYWxzZSwiaG9iYmllcyI6W10sImxvY2F0aW9uIjp7ImxhdGl0dWRlIjpudWxsLCJsb25naXR1ZGUiOm51bGwsImFkZHJlc3MiOm51bGx9LCJpYXQiOjE2MDI5MzAyNzcsImV4cCI6MTYzNDQ3MDI3N30.ONLeenklk6xvOctfdkG8Z_EJkUir30yXTwTRN3hMflo",
       "required": true
     }
   },
@@ -209,6 +213,67 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/post/getAll": {
+      "post": {
+        "tags": [
+          "Post"
+        ],
+        "summary": "API to Get all posts",
+        "parameters": [
+          {
+            "in": "body",
+            "schema": {
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "example": 21.251385
+                },
+                "longitude": {
+                  "type": "number",
+                  "example": 81.629639
+                },
+                "postType": {
+                  "type": "string",
+                  "example": "normal"
+                },
+                "radiusInMeter": {
+                  "type": "number",
+                  "example": 10000
+                },
+                "lastPostId": {
+                  "type": "number",
+                  "example": 0
+                },
+                "postCount": {
+                  "type": "number",
+                  "example": 10
+                },
+                "postByUserId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "moodIds": {
+                  "type": "array",
+                  "example": [10, 11]
+                }
+              }
+            },
+            "name": "body"
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
           }
         }
       }

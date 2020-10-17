@@ -118,16 +118,16 @@ export class UserNetworkRoutes {
             try {
                 const activities = await this.userNetworkService.getCoinLogs(req.user.id);
                 const coinsFromMyActivities = activities.filter(a => {
-                    return [Activity.signup, Activity.login, Activity.addPost, Activity.addContestPost].indexOf(a.activity) > -1;
+                    return [Activity.signup, Activity.dailyVisit, Activity.addPost, Activity.addContestPost].indexOf(a.activity) > -1;
                 })
                     .map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 const coinsFromFrontLineActivities = activities.filter(a => {
-                    return [Activity.frontLineSignup, Activity.frontLineLogin, Activity.frontLineAddPost, Activity.frontLineAddContestPost].indexOf(a.activity) > -1;
+                    return [Activity.frontLineSignup, Activity.frontLineDailyVisit, Activity.frontLineAddPost, Activity.frontLineAddContestPost].indexOf(a.activity) > -1;
                 }).map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 const coinsFromDownLineActivities = activities.filter(a => {
-                    return [Activity.downLineSignup, Activity.downLineLogin, Activity.downLineAddPost, Activity.downLineAddContestPost].indexOf(a.activity) > -1;
+                    return [Activity.downLineSignup, Activity.downLineDailyVisit, Activity.downLineAddPost, Activity.downLineAddContestPost].indexOf(a.activity) > -1;
                 }).map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 return res.json({

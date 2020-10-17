@@ -29,3 +29,14 @@ create table coin_activity_log (
 );
 
 alter table user add column coins bigint default 0;
+
+-- -----------------------------------------------------
+-- Table `user_app_access`
+-- -----------------------------------------------------
+drop table if exists user_app_access;
+create table user_app_access (
+    id bigint(20) auto_increment primary key,
+    userId bigint(20),
+    activity varchar(30),
+    logDate datetime
+);

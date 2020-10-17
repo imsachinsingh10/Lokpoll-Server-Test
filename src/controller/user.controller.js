@@ -121,7 +121,6 @@ export class UserController {
             let user = await this.userService.loginUserByPhone(req.body);
             user = await this.getUserDetails(user.id);
             // await this.userService.updateLoginHistory(req, user);
-            this.userNetworkService.logSigninActivity(user.id);
             const token = jwt.sign(
                 user,
                 Config.auth.secretKey,
