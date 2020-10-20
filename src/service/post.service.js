@@ -56,7 +56,6 @@ export class PostService {
         let distanceQuery = ``;
         let havingCondition = ``;
 
-
         if (req.languageCode) {
             c4 = `and p.languageCode = '${req.languageCode}'`;
         }
@@ -346,6 +345,37 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getPostPolls(postIds) {
+        const query = `select p.*, pa.answerNumber, pa.userId
+                        from ${table.poll} p 
+                            join ${table.poll_answer} pa on p.id = pa.pollId
+                        where postId in ${Utils.getRange(postIds)};`;
+        const result = await SqlService.executeQuery(query);
+        if (_.isEmpty(result)) {
+            return [];
+        }
+        const grouped = _.groupBy(result, (p) => p.id);
+        let pollsGroupByPost = {};
+        for (const pollId in grouped) {
+            const polls = grouped[pollId] || [];
+            const p = polls[0];
+            const model = {
+                id: p.id,
+                option1: p.option1,
+                option2: p.option2,
+                option3: p.option3,
+                option4: p.option4,
+                option5: p.option5
+            }
+            model.answers = polls.map((a) => ({
+                userId: a.userId,
+                answerNumber: a.answerNumber
+            }))
+            pollsGroupByPost[p.postId] = model;
+        }
+        return pollsGroupByPost;
+    }
+
     async streamVideo(req, res) {
         //let res;
         const _path = path.resolve('assets/video', 'how_great_leaders_inspire_action.mp4');
@@ -461,6 +491,18 @@ export class PostService {
                         set isPublished = 1 
                         where publishDate is not null
                         ${c1};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async submitPollAnswer(req) {
+        let query;
+        const model = {
+            userId: req.body.userId || req.user.id,
+            pollId: req.body.pollId,
+            answerNumber: req.body.answerNumber
+        }
+        query = QueryBuilderService.getInsertQuery(table.poll_answer, model)
+            .replace(';', ` ON DUPLICATE KEY UPDATE answerNumber = ${model.answerNumber};`);
         return SqlService.executeQuery(query);
     }
 }

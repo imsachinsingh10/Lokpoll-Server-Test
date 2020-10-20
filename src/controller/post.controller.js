@@ -60,6 +60,7 @@ export class PostController {
 
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
+        await this.insertPoll(reqBody, result.insertId);
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }
@@ -143,6 +144,27 @@ export class PostController {
         await this.postService.createPostSubMoods(newSubMoods);
     }
 
+    async insertPoll(reqBody, postId) {
+        if (_.isEmpty(reqBody.poll)) {
+            return;
+        }
+        let poll;
+        try {
+            poll = JSON.parse(reqBody.poll);
+        } catch (e) {
+            throw new ErrorModel(AppCode.invalid_request, `poll is not valid`);
+        }
+        const model = {
+            postId,
+            question: poll.question
+        }
+        poll.options.forEach((option, index) => {
+            model['option' + (index + 1)] = option
+        });
+        const q = QueryBuilderService.getInsertQuery(table.poll, model);
+        return SqlService.executeQuery(q);
+    }
+
     async formatPosts(req, rawPosts) {
         if (_.isEmpty(rawPosts)) {
             return [];
@@ -152,7 +174,7 @@ export class PostController {
         if (postIds.length !== uniqPostIds.length) {
             log.e('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews] = await Promise.all([
+        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews, postPolls] = await Promise.all([
             this.postService.getComments(uniqPostIds),
             this.postService.getSubMoodByPostId(uniqPostIds),
             this.postService.getRespects(uniqPostIds),
@@ -160,19 +182,20 @@ export class PostController {
             this.postService.getPostTrust(uniqPostIds),
             this.postService.getPostMedia(uniqPostIds),
             this.postService.getPostViews(uniqPostIds),
+            this.postService.getPostPolls(uniqPostIds),
         ])
 
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {user: req.user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
+                {user: req.user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList, postPolls}
             );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost({user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+    getPost({user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList, postPolls}) {
         let referralCode;
         let userId = 0;
 
@@ -212,6 +235,7 @@ export class PostController {
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
         } = this.getReactionsWithCount(userId, post, reactions, trusts);
+
         return {
             ...basicDetails,
             viewCount,
@@ -227,7 +251,8 @@ export class PostController {
                 reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
             },
             comments: formattedComments,
-            commentCount: formattedComments.length
+            commentCount: formattedComments.length,
+            poll: postPolls[post.id] || {}
         }
     }
 

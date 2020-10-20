@@ -357,5 +357,21 @@ export class PostRoutes {
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/submitPollAnswer', async (req, res) => {
+            try {
+                await this.postService.submitPollAnswer(req);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === 'ER_NO_REFERENCED_ROW_2') {
+                    return res.status(HttpCode.bad_request).json("no poll or user found with this id");
+                }
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
     }
 }

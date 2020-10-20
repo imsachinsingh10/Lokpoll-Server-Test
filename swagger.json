@@ -151,6 +151,7 @@
         }
       }
     },
+
     "/user/getNetwork": {
       "get": {
         "summary": "Get my network",
@@ -217,6 +218,7 @@
         }
       }
     },
+
     "/post/getAll": {
       "post": {
         "tags": [
@@ -274,6 +276,143 @@
           },
           "400": {
             "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/create": {
+      "post": {
+        "consumes": ["multipart/form-data"],
+        "tags": [
+          "Post"
+        ],
+        "summary": "API to Create post",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "moodId",
+            "in": "formData",
+            "type": "number",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "video",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "profileType",
+            "in": "formData",
+            "default": "personal",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "default": "normal",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "languageCode",
+            "in": "formData",
+            "required": true,
+            "default": "en",
+            "type": "string",
+            "enum": ["en", "hi", "ta", "or"]
+          },
+          {
+            "name": "source",
+            "in": "formData",
+            "default": "Self",
+            "type": "string",
+            "enum": ["Self", "Forwarded", "Link"]
+          },
+          {
+            "name": "latitude",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "longitude",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "address",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "poll",
+            "in": "formData",
+            "type": "string",
+            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"]}"
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/submitPollAnswer": {
+      "post": {
+        "tags": [
+          "Post"
+        ],
+        "summary": "Submit poll answer",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "userId": {
+                  "type": "number",
+                  "example": "1",
+                  "description": "do not send this field from app"
+                },
+                "pollId": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "answerNumber": {
+                  "type": "number",
+                  "example": "1",
+                  "enum": [1, 2, 3, 4, 5]
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

@@ -12,7 +12,7 @@ create table coin_activity (
     description varchar(500),
     coins mediumint,
     updatedOn datetime
-)
+);
 
 -- -----------------------------------------------------
 -- Table `coin_activity_log`
