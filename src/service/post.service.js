@@ -346,9 +346,10 @@ export class PostService {
     }
 
     async getPostPolls(postIds) {
-        const query = `select p.*, pa.answerNumber, pa.userId
+        const query = `select p.*, pa.answerNumber, pa.userId, u.imageUrl, u.name
                         from ${table.poll} p 
-                            join ${table.poll_answer} pa on p.id = pa.pollId
+                            left join ${table.poll_answer} pa on p.id = pa.pollId
+                            left join ${table.user} u on u.id = pa.userId
                         where postId in ${Utils.getRange(postIds)};`;
         const result = await SqlService.executeQuery(query);
         if (_.isEmpty(result)) {
@@ -367,10 +368,16 @@ export class PostService {
                 option4: p.option4,
                 option5: p.option5
             }
-            model.answers = polls.map((a) => ({
-                userId: a.userId,
-                answerNumber: a.answerNumber
-            }))
+            model.answers = polls.map((a) => {
+                return a.userId ? {
+                    answerNumber: a.answerNumber,
+                    user: {
+                        id: a.userId,
+                        name: a.name,
+                        imageUrl: a.imageUrl
+                    }
+                } : undefined
+            }).filter(p => p);
             pollsGroupByPost[p.postId] = model;
         }
         return pollsGroupByPost;
