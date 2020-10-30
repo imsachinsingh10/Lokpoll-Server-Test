@@ -4,6 +4,7 @@ import {Config} from "../../config";
 import vash from 'vash';
 import fs from 'fs';
 import path from 'path';
+import moment from "moment";
 
 export default class Utils {
     static formData = {remember: ''};
@@ -131,4 +132,9 @@ export default class Utils {
             });
         })
     };
+
+    static getUTCDate(date) {
+        const momentUTC = moment(date).utc();
+        return momentUTC.format('YYYY-MM-DD HH:mm:ss');
+    }
 }

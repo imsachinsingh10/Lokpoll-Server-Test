@@ -156,7 +156,8 @@ export class PostController {
         }
         const model = {
             postId,
-            question: poll.question
+            question: poll.question,
+            expiryDate: poll.expiryDate
         }
         poll.options.forEach((option, index) => {
             model['option' + (index + 1)] = option

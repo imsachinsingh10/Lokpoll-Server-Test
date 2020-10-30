@@ -11,7 +11,7 @@ import {log} from "./src/service/common/logger.service";
 main();
 
 async function main() {
-    const postService = new PostService();
-    const polls = await postService.getPostPolls([1075]);
+    const d = '2020-10-12';
+    console.log('utc date', Utils.getUTCDate(d));
     process.exit(0)
 }

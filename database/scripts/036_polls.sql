@@ -15,7 +15,7 @@ create table poll (
       option5 text,
       foreign key (postId) references `post`(`id`) on DELETE cascade
 );
-
+alter table poll add column expiryDate datetime;
 -- -----------------------------------------------------
 -- Table `poll_answer`
 -- -----------------------------------------------------

@@ -361,7 +361,7 @@
             "name": "poll",
             "in": "formData",
             "type": "string",
-            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"]}"
+            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"], \"expiryDate\": \"2020-10-25 00:00:00\"}"
           },
           {
             "$ref": "#/parameters/tokenHeader"

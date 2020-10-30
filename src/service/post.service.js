@@ -362,11 +362,16 @@ export class PostService {
             const p = polls[0];
             const model = {
                 id: p.id,
-                option1: p.option1,
-                option2: p.option2,
-                option3: p.option3,
-                option4: p.option4,
-                option5: p.option5
+                expiryDate: p.expiryDate,
+                totalVote: 0,
+                result: null,
+                options: [
+                    this.getOption(1, p),
+                    this.getOption(2, p),
+                    this.getOption(3, p),
+                    this.getOption(4, p),
+                    this.getOption(5, p),
+                ]
             }
             model.answers = polls.map((a) => {
                 return a.userId ? {
@@ -381,6 +386,15 @@ export class PostService {
             pollsGroupByPost[p.postId] = model;
         }
         return pollsGroupByPost;
+    }
+
+    getOption = (id, poll) => {
+        return {
+            id,
+            option: poll[`option` + id] || null,
+            votePercent: 100,
+            voteCount: 100,
+        }
     }
 
     async streamVideo(req, res) {
