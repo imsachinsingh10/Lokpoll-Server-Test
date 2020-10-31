@@ -2,7 +2,7 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = Environment.dev;
+    static env = Environment.test;
 
     static version = {
         majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
@@ -44,7 +44,7 @@ export class Config {
 
     static serverUrl = {
         prod: 'https://localbol-prod.cloudjiffy.net',
-        test: 'https://lokpoll-server.cloudjiffy.net',
+        test: 'https://lokpoll-test.cloudjiffy.net',
         dev: 'http://localhost:9003',
         base: ''
     };

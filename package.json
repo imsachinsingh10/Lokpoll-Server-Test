@@ -10,7 +10,8 @@
     "serve": "node dist/src/main.js",
     "test": "babel-node test.js",
     "ps": "babel-node src/service/post-schedular.js",
-    "sql": "node database/generate-full-db.js"
+    "sql": "node database/generate-full-db.js",
+    "kill": "sudo kill -9 `sudo lsof -t -i:9003`"
   },
   "author": "Himanshu Sharma",
   "license": "ISC",
