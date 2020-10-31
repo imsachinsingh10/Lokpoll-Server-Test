@@ -5,7 +5,7 @@ export class Config {
     static env = process.env.NODE_ENV;
 
     static version = {
-        majorRevision: 4,  // (new UI, lots of new features, conceptual change, etc.)
+        majorRevision: 5,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
         bugFixes: 1,  // (Only bug fixes not new feature)
     };
