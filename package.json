@@ -5,9 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "nodemon --exec babel-node src/main.js",
-    "start": "node src/main.js",
+    "start": "node dist/src/main.js",
     "build": "babel-node build.js",
-    "serve": "node dist/src/main.js",
     "test": "babel-node test.js",
     "ps": "babel-node src/service/post-schedular.js",
     "sql": "node database/generate-full-db.js",
