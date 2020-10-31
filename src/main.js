@@ -4,6 +4,8 @@ import {InitRoutes} from './routes/$init.routes';
 import AppOverrides from "./service/common/app.overrides";
 import AppEventHandler from "./service/common/app.eventHandler";
 import path from "path";
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
