@@ -372,7 +372,7 @@ export class PostService {
                     this.getOption(3, p),
                     this.getOption(4, p),
                     this.getOption(5, p),
-                ]
+                ].filter(__ => __.option)
             }
             model.answers = polls.map((a) => {
                 return a.userId ? {
