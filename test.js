@@ -1,7 +1,17 @@
 import {SMSService} from "./src/service/common/sms.service";
 import path from 'path';
+import Utils from "./src/service/common/utils";
+import {UserService} from "./src/service/user.service";
+import {UserNetworkService} from "./src/service/user-network.service";
+import {UserController} from "./src/controller/user.controller";
+import moment from "moment";
+import {PostService} from "./src/service/post.service";
+import {log} from "./src/service/common/logger.service";
 
-// SMSService.sendTestSMS();
+main();
 
-
-console.log(path.resolve('assets'))
+async function main() {
+    const d = '2020-10-12';
+    console.log('utc date', Utils.getUTCDate(d));
+    process.exit(0)
+}

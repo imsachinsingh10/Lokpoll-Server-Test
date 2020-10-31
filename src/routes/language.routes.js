@@ -2,6 +2,7 @@ import express from 'express';
 import {HttpCode} from "../enum/http-code";
 import AppOverrides from "../service/common/app.overrides";
 import {LanguageService} from "../service/language.service";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -23,7 +24,7 @@ export class LanguageRoutes {
                 let languages = await this.languageService.getLanguages();
                 return await res.json(languages);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });

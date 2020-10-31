@@ -2,6 +2,7 @@ import {Config} from '../../config'
 import * as mysql from 'mysql';
 import {Environment} from "../../enum/common.enum";
 import _ from 'lodash';
+import {log} from "../common/logger.service";
 
 let db;
 if (Config.env === Environment.test) {
@@ -9,7 +10,7 @@ if (Config.env === Environment.test) {
 } else if (Config.env === Environment.prod) {
     db = Config.dbProd
 } else {
-    db = Config.dbDev;
+    db = Config.dbTest;
 }
 const pool = mysql.createPool(db);
 // console.log('mysql pool created');
@@ -22,7 +23,7 @@ export class SqlService {
     }
 
     static executeQuery(query) {
-        console.log('query', query);
+        log.sql(query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
@@ -56,7 +57,7 @@ export class SqlService {
     }
 
     static getSingle(query) {
-        console.log('query', query);
+        log.sql(query);
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {

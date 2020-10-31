@@ -4,14 +4,15 @@ import {QueryBuilderService} from "../service/sql/querybuilder.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {MinIOService} from "../service/common/minio.service";
-import {PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
+import {Environment, LanguageCode, PostReaction, PostVoteOption, ProfileType} from "../enum/common.enum";
 import {AppCode} from "../enum/app-code";
 import Validator from "../service/common/validator.service";
 import {ErrorModel} from "../model/common.model";
 import Utils from "../service/common/utils";
-import fs from 'fs';
 import {FirebaseController} from "./firebase.controller";
 import {Config} from "../config";
+import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
+import {log} from "../service/common/logger.service";
 
 export class PostController {
     constructor() {
@@ -35,19 +36,71 @@ export class PostController {
             address: reqBody.address,
             source: reqBody.source,
             languageCode: reqBody.languageCode,
+            challengeId: reqBody.challengeId || 0,
+            isPublished: 1,
+            isGeneric: 0,
         };
         if (files.image || files.video || files.audio) {
             post.isPostUpload = '0';
         } else {
             post.isPostUpload = '1';
         }
+        if (reqBody.publishDate && reqBody.publishDate !== 'null') {
+            post.isPublished = 0;
+            post.publishDate = reqBody.publishDate;
+        }
+        if (!post.latitude && !post.longitude) {
+            post.latitude = 0;
+            post.address = '';
+            post.longitude = 0;
+            post.isGeneric = 1
+        }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
-        Validator.validateRequiredFields(post);
+        Validator.validateRequiredFields(post, req);
 
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
+        await this.insertPoll(reqBody, result.insertId);
         delete post.createdAt;
         return {id: result.insertId, ...post};
+    }
+
+    async createContentPost(req) {
+        const reqBody = req.body;
+        const post = {
+            description: reqBody.description,
+            userId: reqBody.userId || req.user.id,
+            creatorId: req.user.id,
+            createdAt: 'utc_timestamp()',
+            type: reqBody.type,
+            profileType: reqBody.profileType,
+            latitude: reqBody.latitude,
+            longitude: reqBody.longitude,
+            address: reqBody.address,
+            source: reqBody.source,
+            languageCode: reqBody.languageCode,
+            challengeId: reqBody.challengeId || 0,
+            isPostUpload: 1,
+            isOriginalContest : reqBody.isOriginalContest || 0
+        };
+
+        post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
+        const result = await this.postService.createPost(post);
+        await this.insertPostMediaUrl(reqBody, result.insertId);
+        delete post.createdAt;
+        return {id: result.insertId, ...post};
+    }
+
+    async insertPostMediaUrl(reqBody, postId) {
+        const postMedia = {
+            postId: postId,
+            commentId: 0,
+            url: reqBody.posterUrl,
+            type: "image",
+            thumbnailUrl: reqBody.posterUrl || null
+        }
+        const query = QueryBuilderService.getInsertQuery(table.postMedia, postMedia);
+        return SqlService.executeQuery(query);
     }
 
     async insertSubMoods(reqBody, postId) {
@@ -57,7 +110,7 @@ export class PostController {
             subMoodNames = JSON.parse(reqBody.subMoodData);
             subMoodNamesOriginal = JSON.parse(reqBody.subMoodData);
         } catch (e) {
-            console.log('e', e);
+            log.e('', e);
         }
         if (_.isEmpty(subMoodNames)) {
             return;
@@ -91,6 +144,28 @@ export class PostController {
         await this.postService.createPostSubMoods(newSubMoods);
     }
 
+    async insertPoll(reqBody, postId) {
+        if (_.isEmpty(reqBody.poll)) {
+            return;
+        }
+        let poll;
+        try {
+            poll = JSON.parse(reqBody.poll);
+        } catch (e) {
+            throw new ErrorModel(AppCode.invalid_request, `poll is not valid`);
+        }
+        const model = {
+            postId,
+            question: poll.question,
+            expiryDate: poll.expiryDate
+        }
+        poll.options.forEach((option, index) => {
+            model['option' + (index + 1)] = option
+        });
+        const q = QueryBuilderService.getInsertQuery(table.poll, model);
+        return SqlService.executeQuery(q);
+    }
+
     async formatPosts(req, rawPosts) {
         if (_.isEmpty(rawPosts)) {
             return [];
@@ -98,9 +173,9 @@ export class PostController {
         const postIds = _.map(rawPosts, r => r.id);
         const uniqPostIds = _.uniq(postIds);
         if (postIds.length !== uniqPostIds.length) {
-            console.log('+++++++++ alert +++, if someone see this log tell himanshu immediately');
+            log.e('+++++++++ alert +++, if someone see this log tell himanshu immediately');
         }
-        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews] = await Promise.all([
+        const [comments, subMoods, respects, reactions, trusts, mediaList, postViews, postPolls] = await Promise.all([
             this.postService.getComments(uniqPostIds),
             this.postService.getSubMoodByPostId(uniqPostIds),
             this.postService.getRespects(uniqPostIds),
@@ -108,19 +183,28 @@ export class PostController {
             this.postService.getPostTrust(uniqPostIds),
             this.postService.getPostMedia(uniqPostIds),
             this.postService.getPostViews(uniqPostIds),
+            this.postService.getPostPolls(uniqPostIds),
         ])
 
         const posts = [];
         _.forEach(rawPosts, (post) => {
             const _post = this.getPost(
-                {userId: req.user ? req.user.id : 0, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}
+                {user: req.user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList, postPolls}
             );
             posts.push(_post);
         });
         return posts;
     }
 
-    getPost({userId, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList}) {
+    getPost({user, post, comments, postViews, subMoods, respects, reactions, trusts, mediaList, postPolls}) {
+        let referralCode;
+        let userId = 0;
+
+        if (user) {
+            referralCode = user.referralCode
+            userId = user.id;
+        }
+
         const postViewFiltered = postViews.filter(postView => postView.postId === post.id);
 
         let viewCount = 0;
@@ -138,7 +222,7 @@ export class PostController {
 
         const postComments = comments.filter(comment => comment.postId === post.id);
         const subMoodData = subMoods.filter(subMood => subMood.postId === post.id);
-        const basicDetails = this.getBasicPostDetails(userId, post, respects);
+        const basicDetails = this.getBasicPostDetails(userId, referralCode, post, respects);
         const media = mediaList
             .filter(m => m.postId === post.id && m.url !== null && m.commentId === 0)
             .map(p => ({
@@ -152,6 +236,7 @@ export class PostController {
             reaction, loveCount, angryCount, enjoyCount, lolCount, wowCount, sadCount,
             trust, voteUpCount, voteDownCount, noVoteCount,
         } = this.getReactionsWithCount(userId, post, reactions, trusts);
+
         return {
             ...basicDetails,
             viewCount,
@@ -167,7 +252,8 @@ export class PostController {
                 reactionByMe: _.isEmpty(reaction) ? null : reaction.type,
             },
             comments: formattedComments,
-            commentCount: formattedComments.length
+            commentCount: formattedComments.length,
+            poll: postPolls[post.id] || null
         }
     }
 
@@ -206,29 +292,26 @@ export class PostController {
         })
     }
 
-    getBasicPostDetails(userId, post, respects) {
+    getBasicPostDetails(userId, referralCode, post, respects) {
         const respectedByMe = _.find(respects, (r) => {
             return userId === r.respectBy && post.userId === r.respectFor;
         });
-        let linkToShare = `${Config.serverUrl.base}/post/${post.id}`;
-        if (!_.isEmpty(post.description)) {
-            if (post.description.length > 200) {
-                const shortDesc = post.description.substr(0, 200) + '...';
-                linkToShare = `${shortDesc}\n\n${linkToShare}`;
-            } else {
-                linkToShare = `${post.description}\n\n${linkToShare}`;
-            }
-        }
+        let linkToShare = this.getLinkToShare(post, referralCode);
         return {
             id: post.id,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,
+            isPublished: post.isPublished,
+            publishDate: post.publishDate,
+            isGeneric: post.isGeneric,
             type: post.postType,
             mood: post.mood,
             source: post.source,
             language: post.language,
             languageCode: post.languageCode,
+            isOriginalContest: post.isOriginalContest,
+            topic: post.contestTopic,
             linkToShare,
             user: {
                 id: post.userId,
@@ -245,6 +328,53 @@ export class PostController {
                 address: post.address
             }
         }
+    }
+
+    getLinkToShare(post, code) {
+        let playStoreLink = `https://localbol.page.link?amv=1&apn=com.aeon.lokpoll&link=https%3A%2F%2Fwww.localbol.com%2Fpost%3Fid%3D${post.id}`
+        let linkToShare = `http://www.localbol.com/post-test/#/${post.id}`;
+        if (Config.env === Environment.prod) {
+            linkToShare = `http://www.localbol.com/post/#/${post.id}`;
+        }
+        if (!_.isEmpty(post.description)) {
+            if (post.description.length > 200) {
+                const shortDesc = post.description.substr(0, 200) + '...';
+                linkToShare = `${shortDesc}\n\n ${linkToShare}`;
+            } else {
+                linkToShare = `${post.description}\n\n ${linkToShare}`;
+            }
+        }
+        switch (post.languageCode) {
+            case LanguageCode.English:
+                linkToShare += `\n\n Download India\'s own local app LocalBol now to get news, updates, hear directly from local talent, causes and business from your preferred locations in your local languages.`;
+                linkToShare += `\n\n ${playStoreLink}`
+                if (code) {
+                    linkToShare += `\n\n Please use my Referral code ${code} or my Mobile number while signing up for LocalBol`
+                }
+                break;
+            case LanguageCode.Hindi:
+                linkToShare += `\n\n अपनी स्थानीय भाषा में अपने पसंदीदा स्थान से स्थानीय समाचार, सामाजिक कार्य, व्यवसाय से सीधे अपडेट प्राप्त करने के लिए भारत का अपना स्थानीय ऐप LocalBol डाउनलोड करें.`;
+                linkToShare += `\n\n ${playStoreLink}`
+                if (code) {
+                    linkToShare += `\n\n जब आप LocalBol के लिए साइन अप करते हैं तो कृपया मेरे रेफरल कोड ${code} या मेरे मोबाइल नंबर का उपयोग करें`
+                }
+                break;
+            case LanguageCode.Odia:
+                linkToShare += `\n\n LocalBol app ଡାଉନଲୋଡ କରନ୍ତୁ ଜୋଉଥିରେ କି ନିଜ ଜାଗାର କିମ୍ବା ଆଖ ପାଖ ଅଂଚଳ ର ଖବର ହେଉ କି କାହାଣୀ ହେଉ ସବୁ ନିଜ ସ୍ଥାନ, ନିଜ ଲୋକଙ୍କର ସମ୍ବନ୍ଧରେ ଅଥବା ନିଜ ଭାଷା ରେ  ଦେଖି ପାରିବେ I ଖାଲି ତାହା ନୁହଁ, ଆପଣ ଚାହିଁଲେ ଅନ୍ୟ Location ରେ କଣ ଚାଲିଛି ତାହା ମଧ୍ୟ୍ୟ ଦେଖୀ ପାରିବେ.`;
+                linkToShare += `\n\n ${playStoreLink}`
+                if (code) {
+                    linkToShare += `\n\n ଯେତେବେଳେ ଆପଣ ଲୋକାଲ୍ ବୋଲ୍ ପାଇଁ ସାଇନ୍ ଅପ୍ କରନ୍ତି ଦୟାକରି ମୋର ରେଫରାଲ୍ କୋଡ୍ ${code} କିମ୍ବା ମୋ ମୋବାଇଲ୍ ନମ୍ବର ବ୍ୟବହାର କରନ୍ତୁ |`
+                }
+                break;
+            case LanguageCode.Sambalpuri:
+                linkToShare += `\n\n ପହେଲା ଥର, ଆମର ଭାଷା ରେ  APP କେ ଚଲାବାର ମଜା ଅଲଗା ଲାଗବା !! ନିଜର ଜାଗା, ନିଜର ଲୋକ ଆଉ ନିଜର ଭାଷା ଲାଗିର ବନା ହୋଇଛେ I Link ଦିଆହେଇଛେ ନିଜେ ଡାଉନଲୋଡ କରୁନ ଆଉ ସମକୁ forward କରୁନ.`;
+                linkToShare += `\n\n ${playStoreLink}`
+                if (code) {
+                    linkToShare += `\n\n LocalBol ରେ ସାଇନ୍ ଅପ୍ କଲା ବେଲେ ଦୟାକରି ମୋର ରେଫେର୍ରାଲ କୋଡ଼ ${code} ନାଇଁହେଲେ ମୋର ମୋବାଇଲ ନମ୍ବର add କରୁନ |`
+                }
+                break;
+        }
+        return linkToShare;
     }
 
     getReactionsWithCount(userId, post, reactions, trusts) {
@@ -360,7 +490,7 @@ export class PostController {
         const query = `select deviceToken from ${table.user} where id = ${userId};`;
         const result = await SqlService.getSingle(query);
         if (_.isEmpty(result) || _.isEmpty(result.deviceToken)) {
-            return console.log('+++++ no user found to notify +++++');
+            return log.i('no user found to notify');
         }
         return FirebaseService.sendMessage([result.deviceToken], FirebaseMessage.PostCreated)
     };

@@ -12,12 +12,6 @@ export default class AppOverrides {
         this.overrideJSONDeserializer();
         this.updateConfig();
 
-        global.log = {
-            i: (info) => {
-                // console.log(info)
-            }
-        }
-
         if (!fs.existsSync('./uploads')){
             fs.mkdirSync('./uploads');
         }

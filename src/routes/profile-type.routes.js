@@ -4,6 +4,7 @@ import {AppCode} from "../enum/app-code";
 import AppOverrides from "../service/common/app.overrides";
 import {validateAuthToken} from "../middleware/auth.middleware";
 import {ProfileTypeService} from "../service/profile-type.service";
+import {log} from "../service/common/logger.service";
 
 const router = express();
 
@@ -25,7 +26,7 @@ export class ProfileTypeRoutes {
                 let result = this.profileTypeService.getAllProfileTypes();
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }

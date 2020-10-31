@@ -16,14 +16,14 @@ export class Config {
         password: `ZDGhxq62647`,
         database: `lokpoll`,
         port: 3306,
-        multipleStatements: true
+        insecureAuth: false
     };
 
     static dbTest = {
-        host: `node23483-asa-server.cloudjiffy.net`,
+        host: `node39278-localbol-prod.cloudjiffy.net`,
         user: `root`,
-        password: `16hstpssZz`,
-        database: `lokpoll`,
+        password: `ZDGhxq62647`,
+        database: `lokpoll_test`,
         port: 3306,
         multipleStatements: true
     };
@@ -44,7 +44,7 @@ export class Config {
 
     static serverUrl = {
         prod: 'https://localbol-prod.cloudjiffy.net',
-        test: 'https://lokpoll-server.cloudjiffy.net',
+        test: 'https://lokpoll-test.cloudjiffy.net',
         dev: 'http://localhost:9003',
         base: ''
     };
@@ -104,5 +104,15 @@ export class Config {
 
     static firebase = {
         serverKey: 'AAAAOwz4hOo:APA91bEXIOPMCjB-1r8UumEuGG9z7xHUJLI7FnJfgOaimi8kLO-AGoikhyGjZswyg_P12sbj1AkpkUPjg0zMb3KW_zcWy6m0kt1EncAcFVvk5dt7lof1Ze7eY3dfEcOxhrTowgrxs4h5'
+    }
+
+    static get host() {
+        if (this.env === Environment.test) {
+            return 'localbol-test.cloudjiffy.net'
+        }
+        if (this.env === Environment.prod) {
+            return 'localbol-prod.cloudjiffy.net'
+        }
+        return 'localhost:9003'
     }
 }

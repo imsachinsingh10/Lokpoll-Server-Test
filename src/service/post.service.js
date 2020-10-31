@@ -2,19 +2,14 @@ import {QueryBuilderService} from "./sql/querybuilder.service";
 import {SqlService} from "./sql/sql.service";
 import {table} from "../enum/table";
 import Utils from "./common/utils";
-import geolib from 'geolib';
-// const geolib = require('geolib');
 import _ from 'lodash';
-import {AppCode} from "../enum/app-code";
 import fs from "fs";
 import path from 'path';
-import {LanguageCode} from "../enum/common.enum";
 import {FirebaseController} from "../controller/firebase.controller";
+import {log} from "./common/logger.service";
 
 export class PostService {
     constructor() {
-        this.queryBuilderService = new QueryBuilderService();
-        this.sqlService = new SqlService();
         this.firebaseController = new FirebaseController();
     }
 
@@ -23,11 +18,23 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
-    async getTotalPostCount(data) {
+    async getTotalPostCount(req) {
+        let c1 = '';
+        let c2 = '';
+        if (req.user.roleId === 2) {
+            c1 = `and p.userId = ${req.user.id}`;
+        }
+        if (req.user.roleId === 3) {
+            c2 = `and p.isPublished = 1`;
+        }
+        if (req.body.futurePost) {
+            c2 = `and p.isPublished = 0`;
+        }
         const query = `select count("id") count
 	    				from ${table.post} p
 	    				join user u on u.id = p.userId
 	    				where p.isDeleted = 0
+	    				    ${c1} ${c2}
                             and p.latitude is not null and p.longitude is not null
                             and p.isPostUpload = 1;`;
         return SqlService.getSingle(query);
@@ -39,41 +46,81 @@ export class PostService {
             latitude: req.latitude,
             longitude: req.longitude,
         };
-        let condition1 = ``;
-        let condition2 = ``;
-        let condition3 = ``;
-        let condition4 = '';
+        let c1 = ``;
+        let c2 = ``;
+        let c3 = ``;
+        let c4 = '';
+        let c5 = '';
+        let c6 = 'and p.isPublished = 1';
+        let c7 = '';
         let distanceQuery = ``;
         let havingCondition = ``;
 
         if (req.languageCode) {
-            condition4 = `and p.languageCode = '${req.languageCode}'`;
+            c4 = `and p.languageCode = '${req.languageCode}'`;
         }
         if (req.postByUserId > 0) {
-            condition2 = `and p.userId = ${req.postByUserId}`;
-            condition4 = '';
+            c2 = `and p.userId = ${req.postByUserId}`;
+            c4 = '';
         }
         try {
             const moodIds = JSON.parse(req.moodIds);
             if (!_.isEmpty(req.moodIds) && Array.isArray(moodIds)) {
-                condition3 = `and p.moodId in ${Utils.getRange(moodIds)}`
+                c3 = `and p.moodId in ${Utils.getRange(moodIds)}`
             }
         } catch (e) {
 
         }
 
+        if (req.roleId === 2) {
+            c5 = `and p.userId = ${req.userId}`;
+        }
+
+        if (req.roleId === 1) {
+            c6 = ``;
+        }
+
+        if (req.futurePost) {
+            c6 = `and p.isPublished = 0`;
+        }
+
+        if (req.categoryId) {
+            c7 = `and m.categoryId = ${req.categoryId}`;
+        }
+
         if (req.latitude && req.longitude && req.radiusInMeter) {
-            havingCondition = `having distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)}`;
+            havingCondition = `having (distance <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or isGeneric = 1)`;
             distanceQuery = `, SQRT(
                                 POW(69.1 * (p.latitude - ${reqCoordinate.latitude}), 2) +
                                 POW(69.1 * (${reqCoordinate.longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
                             ) AS distance`
         }
-        const query = `select p.id, p.createdAt, p.description, p.source, 
+
+        if (req.locations && req.radiusInMeter) {
+            try {
+                const locations = JSON.parse(req.locations);
+                if (!_.isEmpty(req.locations) && Array.isArray(locations)) {
+                    havingCondition = `having (`;
+                    for (let i = 0; i < locations.length; i++) {
+                        const {longitude, latitude} = locations[i];
+                        havingCondition += `distance${i + 1} <= ${Utils.getDistanceInMiles(req.radiusInMeter)} or `
+                        distanceQuery += `, SQRT(
+                                POW(69.1 * (p.latitude - ${latitude}), 2) +
+                                POW(69.1 * (${longitude} - p.longitude) * COS(p.latitude / 57.3), 2)
+                            ) AS distance${i + 1}`;
+                    }
+
+                    havingCondition += `isGeneric = 1)`;
+                }
+            } catch (e) {
+                log.e('failed parsing locations', req.locations, typeof req.locations);
+            }
+        }
+        const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
-                            p.type 'postType',
-                            pro.name 'displayName', pro.type 'profileType',
+                            p.type 'postType', p.isPublished, p.publishDate, p.isGeneric,
+                            pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
                             ${distanceQuery}
@@ -82,11 +129,11 @@ export class PostService {
                             left join mood m on m.id = p.moodId
                             left join profile pro on pro.type = p.profileType and pro.userId = u.id
                             left join language l on l.code = p.languageCode
+                            left join challenge c on c.id = p.challengeId
                         where 
                             p.isDeleted = 0
-                            and p.latitude is not null and p.longitude is not null
-                            and p.isPostUpload = 1 
-                            ${condition1} ${condition2} ${condition3} ${condition4}
+                            and p.isPostUpload = 1
+                            ${c1} ${c2} ${c3} ${c4} ${c5} ${c6} ${c7}
                             ${havingCondition}
                         order by p.id desc
                         limit ${req.postCount} offset ${req.offset}
@@ -121,6 +168,7 @@ export class PostService {
             languageCode: reqBody.languageCode,
             moodId: reqBody.moodId,
             description: reqBody.description,
+            publishDate: reqBody.publishDate,
         }
         const condition = `where id = ${post.id}`;
         const query = QueryBuilderService.getUpdateQuery(table.post, post, condition);
@@ -162,7 +210,6 @@ export class PostService {
     }
 
     async updatePostDescription(model) {
-        console.log(model);
         const query = `update ${table.post} 
                         set description = '${model.description}'
                         where id = ${model.postId};`;
@@ -298,6 +345,59 @@ export class PostService {
         return SqlService.executeQuery(query);
     }
 
+    async getPostPolls(postIds) {
+        const query = `select p.*, pa.answerNumber, pa.userId, u.imageUrl, u.name
+                        from ${table.poll} p 
+                            left join ${table.poll_answer} pa on p.id = pa.pollId
+                            left join ${table.user} u on u.id = pa.userId
+                        where postId in ${Utils.getRange(postIds)};`;
+        const result = await SqlService.executeQuery(query);
+        if (_.isEmpty(result)) {
+            return [];
+        }
+        const grouped = _.groupBy(result, (p) => p.id);
+        let pollsGroupByPost = {};
+        for (const pollId in grouped) {
+            const polls = grouped[pollId] || [];
+            const p = polls[0];
+            const model = {
+                id: p.id,
+                expiryDate: p.expiryDate,
+                totalVote: 0,
+                result: null,
+                question: p.question,
+                options: [
+                    this.getOption(1, p),
+                    this.getOption(2, p),
+                    this.getOption(3, p),
+                    this.getOption(4, p),
+                    this.getOption(5, p),
+                ].filter(__ => __.option)
+            }
+            model.answers = polls.map((a) => {
+                return a.userId ? {
+                    answerNumber: a.answerNumber,
+                    user: {
+                        id: a.userId,
+                        name: a.name,
+                        imageUrl: a.imageUrl
+                    }
+                } : undefined
+            }).filter(p => p);
+            pollsGroupByPost[p.postId] = model;
+        }
+        return pollsGroupByPost;
+    }
+
+    getOption = (id, poll) => {
+        return {
+            id,
+            option: poll[`option` + id] || null,
+            votePercent: 100,
+            voteCount: 100,
+        }
+    }
+
     async streamVideo(req, res) {
         //let res;
         const _path = path.resolve('assets/video', 'how_great_leaders_inspire_action.mp4');
@@ -337,9 +437,7 @@ export class PostService {
         console.log('end post service for video stream');
     }
 
-
     async getTrustOnPost(req) {
-        console.log(req.postId);
         const query = `select pr.id, pr.type as trustType, u.id as userId,u.name, u.imageUrl, u.bgImageUrl
                         from ${table.postTrust} pr
                             left join user u on u.id = pr.reactedBy
@@ -392,15 +490,41 @@ export class PostService {
         const query = `select * from ${table.subMood} where name = '${name}';`;
         return await SqlService.getSingle(query);
     }
+
     async getSubMoodByNames(names) {
         const query = `select * from ${table.subMood} 
                         where trim(lower(name)) in ${Utils.getRange(names)};`;
         return await SqlService.executeQuery(query);
     }
+
     async deletePostComment(model) {
         const query = `update ${table.postComment} 
                         set isDeleted = 1 
                         where id = ${model.commentId};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async publishPost(postId) {
+        let c1 = ``;
+        if (postId > 0) {
+            c1 = `and id = ${postId}`
+        }
+        const query = `update ${table.post} 
+                        set isPublished = 1 
+                        where publishDate is not null
+                        ${c1};`;
+        return SqlService.executeQuery(query);
+    }
+
+    async submitPollAnswer(req) {
+        let query;
+        const model = {
+            userId: req.body.userId || req.user.id,
+            pollId: req.body.pollId,
+            answerNumber: req.body.answerNumber
+        }
+        query = QueryBuilderService.getInsertQuery(table.poll_answer, model)
+            .replace(';', ` ON DUPLICATE KEY UPDATE answerNumber = ${model.answerNumber};`);
         return SqlService.executeQuery(query);
     }
 }

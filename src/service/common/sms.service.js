@@ -1,8 +1,7 @@
 import axios from 'axios';
-import {Config} from "../../config";
-import {Environment} from "../../enum/common.enum";
 import * as _ from "lodash";
 import {AppCode} from "../../enum/app-code";
+import {log} from "./logger.service";
 
 export class SMSService {
 
@@ -19,14 +18,14 @@ export class SMSService {
 		}
 		const msg = `${otp} is the OTP to verify your mobile number and it is valid for 15 Mins. LICN Info: FwXZu6s1yHK`;
 		const apiKey = '9hcbNtCJ79c-Ystk844Ss6ApaLSUJZ7cPqvEQOvVgE';
-		const sender = 'LOKPAT';
+		const sender = 'LOCLBL';
 		const url = `https://api.textlocal.in/send/?apiKey=${apiKey}&sender=${sender}&numbers=${phone}&message=${msg}`;
 		try {
 			const result = await axios.get(url);
-			console.log(' +++++++ sms result +++++++++ ', result.data);
+			log.i('sms result', result.data);
 			return true;
 		} catch (e) {
-			console.log('error while sending message', e);
+			log.e('error while sending message', e);
 			return false;
 		}
 	};

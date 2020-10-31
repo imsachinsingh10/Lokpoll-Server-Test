@@ -5,6 +5,7 @@ import {ErrorModel} from "../../model/common.model";
 import {AppCode} from "../../enum/app-code";
 import {promisify} from 'util';
 import {Environment} from "../../enum/common.enum";
+import {log} from "./logger.service";
 
 const Minio = require('minio');
 const fs = require('fs');
@@ -17,6 +18,7 @@ if (Config.env === Environment.prod) {
     minioConfig = Config.minio.configProd;
     minioBaseUrl = Config.minio.baseUrlProd;
 }
+
 const policy = JSON.stringify({
     "Version": "2012-10-17",
     "Statement": [
@@ -86,7 +88,6 @@ export class MinIOService {
     }
 
     async uploadFile(file) {
-        console.log('uploading file', file);
         return new Promise(async (resolve) => {
             if (!file) {
                 return resolve({
@@ -193,7 +194,7 @@ export class MinIOService {
         return new Promise((resolve, reject) => {
             this.minioClient.fPutObject(bucketName, bucketPath + fileName, filePath, function (error, etag) {
                 if (error) {
-                    console.log('+++++++ s3 error ++++++', error);
+                    log.i('s3 error', error);
                     return reject(new ErrorModel(AppCode.s3_error, error.S3Error));
                 }
                 const fileUrl = `${minioBaseUrl}/${bucketName}/${bucketPath + fileName}`;
@@ -206,7 +207,7 @@ export class MinIOService {
         return new Promise((resolve, reject) => {
             this.minioClient.bucketExists(bucketName, (error, exists) => {
                 if (error && error.code !== "UnknownError") {
-                    console.log('+++++++ check if bucket exists ++++++', error);
+                    log.e('check if bucket exists', error);
                     return reject(new ErrorModel(AppCode.s3_error, error.code));
                 }
                 if (exists) {
@@ -214,12 +215,12 @@ export class MinIOService {
                 }
                 this.minioClient.makeBucket(bucketName, 'in-west-1', (err) => {
                     if (err && err.code !== 'BucketAlreadyOwnedByYou') {
-                        console.log('+++++++ create bucket ++++++', err);
+                        log.e('create bucket', err);
                         return reject(new ErrorModel(AppCode.s3_error, err.S3Error));
                     }
                     this.minioClient.setBucketPolicy(bucketName, policy, (err1, result) => {
                         if (err1) {
-                            console.log('error while setting bucket policy', err1);
+                            log.e('error while setting bucket policy', err1);
                             return reject(new ErrorModel(AppCode.s3_error, err1.S3Error));
                         }
                         return resolve(new ErrorModel(AppCode.bucket_exists))

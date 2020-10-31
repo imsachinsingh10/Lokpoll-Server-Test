@@ -12,6 +12,11 @@ import {ProductRoutes} from "./product.routes";
 import {LocationRoutes} from "./location.routes";
 import {ChallengeRoutes} from "./challenge.routes";
 import {JudgeRoutes} from "./judge.routes";
+import {NoticeboardRoutes} from "./noticeboard.routes";
+import {MoodCategoryRoutes} from "./mood-category.routes";
+import {Config} from "../config";
+import {log} from "../service/common/logger.service";
+import {UserNetworkRoutes} from "./user-network.routes";
 
 export class InitRoutes {
 
@@ -26,7 +31,8 @@ export class InitRoutes {
         app.get('/', async (req, res) => {
             return res.json({
                 version: Utils.getVersion(),
-                system_time: new Date()
+                system_time: new Date(),
+                env: Config.env
             });
         });
 
@@ -37,7 +43,7 @@ export class InitRoutes {
                     message: 'database working'
                 });
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.status(HttpCode.internal_server_error).json(e);
             }
         });
@@ -49,6 +55,7 @@ export class InitRoutes {
         new UserRoutes(app);
         new LanguageRoutes(app);
         new MoodRoutes(app);
+        new MoodCategoryRoutes(app);
         new PostRoutes(app);
         new ProfileTypeRoutes(app);
         new ProductRoutes(app);
@@ -56,5 +63,7 @@ export class InitRoutes {
         new LocationRoutes(app);
         new ChallengeRoutes(app);
         new JudgeRoutes(app);
+        new NoticeboardRoutes(app);
+        new UserNetworkRoutes(app);
     }
 }

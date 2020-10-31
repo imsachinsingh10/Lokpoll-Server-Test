@@ -1,18 +1,22 @@
 import * as _ from 'lodash';
-
 import {Config} from '../config'
 import {AppCode} from "../enum/app-code";
 import {UserService} from "../service/user.service";
 import Validator from "../service/common/validator.service";
 import jwt from "jsonwebtoken";
 import {HttpCode} from "../enum/http-code";
+import {AgeRange} from "../enum/common.enum";
+import Utils from "../service/common/utils";
+import {log} from "../service/common/logger.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
-import {AgeRange} from "../enum/common.enum";
+import {UserNetworkService} from "../service/user-network.service";
+import {Activity} from "../model/activity.model";
 
 export class UserController {
     constructor() {
         this.userService = new UserService();
+        this.userNetworkService = new UserNetworkService();
     }
 
     async checkIfUserRegistered(user) {
@@ -89,7 +93,7 @@ export class UserController {
             ageRangeId: user.ageRangeId,
             appLanguage: user.appLanguage,
             contentLanguage: user.contentLanguage,
-            // phone: user.phone
+            password: user.password
         };
         if (user.subscribed === 'true' || user.subscribed === true) {
             _user.subscribed = true;
@@ -116,7 +120,7 @@ export class UserController {
             }
             let user = await this.userService.loginUserByPhone(req.body);
             user = await this.getUserDetails(user.id);
-            await this.userService.updateLoginHistory(req, user);
+            // await this.userService.updateLoginHistory(req, user);
             const token = jwt.sign(
                 user,
                 Config.auth.secretKey,
@@ -128,7 +132,7 @@ export class UserController {
                 isNewUser: false
             });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
+            log.e(`${req.method}: ${req.url}`, e);
             if (e.code === AppCode.invalid_phone || e.code === AppCode.invalid_otp || e.code === AppCode.otp_expired) {
                 return res.status(HttpCode.bad_request).send(e);
             } else if (e.code === AppCode.invalid_creds) {
@@ -140,46 +144,52 @@ export class UserController {
 
     async registerAndroidUser(req, res) {
         try {
-            try {
-                let user = req.body;
-                await this.userService.verifyOTP(user.otp, user.phone, true);
-                user = {
-                    phone: user.phone, roleId: 3, regDate: 'utc_timestamp()'
-                };
-                const result = await this.userService.createUser(user);
-                await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
-                user = await this.getUserDetails(result.insertId);
-                const token = jwt.sign(
-                    {id: result.insertId, roleId: 3},
-                    Config.auth.secretKey,
-                    {expiresIn: Config.auth.expiryInSeconds}
-                );
-                return await res.json({
-                    token,
-                    user,
-                    isNewUser: true
-                });
-            } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.otp_expired || e.code === AppCode.invalid_creds) {
-                    return res.status(HttpCode.unauthorized).json(e);
-                }
-                return res.sendStatus(HttpCode.internal_server_error);
-            }
+            let user = req.body;
+            user = {
+                phone: user.phone,
+                roleId: 3,
+                regDate: 'utc_timestamp()',
+                referralCode: Utils.getRandomStringV2(6, {capitalLetters: true, numbers: true})
+            };
+            await this.userService.verifyOTP(req.body.otp, user.phone, true);
+
+            const result = await this.userService.createUser(user);
+            // await this.userService.createAnonymousAndBusinessProfiles(result.insertId);
+            this.userNetworkService.logSignupActivity(result.insertId)
+            user = await this.getUserDetails(result.insertId);
+            const token = jwt.sign(
+                {id: result.insertId, roleId: 3},
+                Config.auth.secretKey,
+                {expiresIn: Config.auth.expiryInSeconds}
+            );
+            return await res.json({
+                token,
+                user,
+                isNewUser: true
+            });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
-            if (e.code === AppCode.invalid_creds) {
-                return res.status(HttpCode.unauthorized).send(e);
+            log.e(`${req.method}: ${req.url}`, e);
+            if (e.code === AppCode.invalid_request) {
+                return res.status(HttpCode.unauthorized).json(e);
             }
-            res.sendStatus(HttpCode.internal_server_error);
+            return res.sendStatus(HttpCode.internal_server_error);
         }
     }
 
     async loginWeb(req, res) {
         try {
             let user = req.body;
-            user = await this.userService.validateUserByEmail(user);
-            await this.userService.updateLoginHistory(req, user);
+            if (_.isEmpty(user) || _.isEmpty(user.username) || _.isEmpty(user.password)) {
+                throw {
+                    code: AppCode.invalid_creds,
+                    message: "Email/Phone or password is missing"
+                };
+            }
+            if (isNaN(user.username)) {
+                user = await this.userService.validateUserByEmail(user);
+            } else {
+                user = await this.userService.validateUserByPhone(user);
+            }
             const token = jwt.sign(
                 user,
                 Config.auth.secretKey,
@@ -190,7 +200,7 @@ export class UserController {
                 user
             });
         } catch (e) {
-            console.error(`${req.method}: ${req.url}`, e);
+            log.e(`${req.method}: ${req.url}`, e);
             if (e.code === AppCode.invalid_platform) {
                 return res.status(HttpCode.bad_request).send(e);
             }
@@ -260,4 +270,5 @@ export class UserController {
             }
         })
     };
+
 }

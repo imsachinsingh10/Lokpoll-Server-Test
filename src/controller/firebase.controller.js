@@ -3,6 +3,7 @@ import {table} from "../enum/table";
 import FirebaseService from "../service/firebase.service";
 import {SqlService} from "../service/sql/sql.service";
 import Utils from "../service/common/utils";
+import {log} from '../service/common/logger.service';
 
 export class FirebaseController {
     constructor() {
@@ -23,7 +24,7 @@ export class FirebaseController {
                 receiverIds
             }
         );
-        console.log('notification', notification);
+        log.i('notification', notification);
         return this.sendAndLogNotification(receiverIds, notification);
     }
 
@@ -46,7 +47,6 @@ export class FirebaseController {
             receiverIds = receiverIds.concat(postCreated.userId);
         }
 
-        console.log("comment Data",receiverIds);
         const notification = notificationModel(
             {
                 title: `Comment Added`,
@@ -56,9 +56,12 @@ export class FirebaseController {
                 receiverIds
             }
         );
-         console.log('notification', notification);
+         log.i('notification', notification);
         return this.sendNotifications(receiverIds, notification);
     }
+
+
+
 
     async sendNotificationForReaction(reaction, reactionCount) {
         const query = `select userId
@@ -92,7 +95,7 @@ export class FirebaseController {
                         where deviceToken is not null and id in ${Utils.getRange(receiverIds)};`;
         let tokens = await SqlService.executeQuery(query);
         if (_.isEmpty(tokens)) {
-            console.log('no tokens found');
+            log.i('no tokens found');
             return;
         }
         const _tokens = tokens.map(t => t.deviceToken);
@@ -115,8 +118,8 @@ export class FirebaseController {
                 ...payload
             }
         }
-        console.log('message obj', message);
-        console.log(`${_tokens.length} users notified, tokens`, _tokens);
+        log.i('message obj', message);
+        log.i(`${_tokens.length} users notified, tokens`, _tokens);
         return FirebaseService.sendMessage(message);
     }
 }

@@ -2,6 +2,7 @@ import path from 'path';
 const ffmpeg = require('hs-node-ffmpeg');
 import _ from 'lodash';
 import jimp from "jimp";
+import {log} from "../service/common/logger.service";
 
 export const extractThumbnailsMiddleware = async (files, res, next) => {
     if (!_.isEmpty(files) && !_.isEmpty(files.video)) {
@@ -42,7 +43,7 @@ export const extractThumbnailFromVideo = async (file) => {
             path: filePath
         };
     } catch (e) {
-        console.log('e', e);
+        log.e('', e);
     }
 };
 
@@ -60,6 +61,6 @@ export const extractThumbnailFromImage = async (file) => {
             path: destination
         };
     } catch (e) {
-        console.log('error', e);
+        log.e('thumbnail error', e);
     }
 };

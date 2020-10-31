@@ -12,6 +12,8 @@ import _ from 'lodash';
 import {MinIOService, uploadProfilePictures} from "../service/common/minio.service";
 import {ProfileType} from "../enum/common.enum";
 import {FirebaseController} from "../controller/firebase.controller";
+import {log} from "../service/common/logger.service";
+import {UserNetworkService} from "../service/user-network.service";
 
 const router = express();
 
@@ -23,8 +25,11 @@ export class UserRoutes {
 
         this.userService = new UserService();
         this.userController = new UserController();
+        this.userController = new UserController();
         this.minioService = new MinIOService();
         this.firebaseController = new FirebaseController();
+        this.userNetworkService = new UserNetworkService();
+
         this.initRoutes();
     }
 
@@ -36,7 +41,7 @@ export class UserRoutes {
                 const user = await this.userController.getUserDetails(req.user.id);
                 return await res.json(user);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -50,7 +55,7 @@ export class UserRoutes {
                 roles = roles.filter((r) => r.id !== 1);
                 return await res.json(roles);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -68,7 +73,7 @@ export class UserRoutes {
                 }
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -81,7 +86,7 @@ export class UserRoutes {
                 let users = await this.userService.getAllUsers(req);
                 return await res.json(users);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -94,7 +99,7 @@ export class UserRoutes {
                 let user = await this.userService.getFormattedUsers(req.query);
                 return await res.json(user);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e.message);
                 }
@@ -107,7 +112,7 @@ export class UserRoutes {
                 let ageRanges = this.userController.getAgeRanges();
                 return await res.json(ageRanges);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -119,7 +124,7 @@ export class UserRoutes {
             try {
                 return await res.json(ProfileType);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -140,7 +145,7 @@ export class UserRoutes {
                 user = await this.userController.getUserDetails(user.id);
                 return await res.json(user);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.duplicate_entity) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -153,7 +158,7 @@ export class UserRoutes {
                 await this.userService.deleteUser(req.params.userId);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -164,7 +169,7 @@ export class UserRoutes {
                 let users = await this.userService.getSearchUsers(searchData);
                 return await res.json(users);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -177,7 +182,7 @@ export class UserRoutes {
                 let result = await this.userService.getTotalUsers(req.body);
                 return await res.json(result.totalUsers);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -202,11 +207,11 @@ export class UserRoutes {
                     throw new ErrorModel(AppCode.invalid_request, 'Please select files, no files to upload');
                 }
                 const result = await Promise.all(promises);
-                const user = Object.assign({id: req.user.id}, result[0], result[1] ,result[2]);
+                const user = Object.assign({id: req.user.id}, result[0], result[1], result[2]);
                 await this.userService.updateUser(user);
                 return await res.json(_.omit(user, ['id']));
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -226,17 +231,17 @@ export class UserRoutes {
                 this.firebaseController.sendRespectUserMessage(model);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
 
         router.post('/getWhoRespectingMe', async (req, res) => {
             try {
-                let result =  await this.userController.getFormattedWhoRespectingMe(req);
+                let result = await this.userController.getFormattedWhoRespectingMe(req);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -246,7 +251,7 @@ export class UserRoutes {
                 let result = await this.userController.getFormattedWhoRespectedByMe(req);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 res.sendStatus(HttpCode.internal_server_error);
             }
         });
@@ -256,7 +261,7 @@ export class UserRoutes {
                 const user = await this.userController.getUserDetails(req.body.userId, req.user.id);
                 return await res.json(user);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -269,10 +274,33 @@ export class UserRoutes {
                 await this.userService.saveToken(req.body);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 return res.sendStatus(HttpCode.internal_server_error);
             }
         });
+
+        router.post('/addReferralCode', async (req, res) => {
+            try {
+                const user = {
+                    id: req.user.id,
+                }
+                if (req.body.referralKey) {
+                    const {id, level, parentId} = await this.userNetworkService.validateReferralCode(user, req.body.referralKey);
+                    user.parentId = id;
+                    user.gParentId = parentId;
+                    user.level = level + 1;
+                    await this.userService.updateUser(user);
+                }
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
     }
 }
 

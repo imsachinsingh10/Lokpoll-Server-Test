@@ -7,14 +7,12 @@ import {validateAuthToken} from "../middleware/auth.middleware";
 import {uploadPostMediaMiddleware,} from "../service/common/minio.service";
 import {PostController} from "../controller/post.controller";
 import {ProductService} from "../service/product.service";
-import {Environment, PostType} from "../enum/common.enum";
+import {PostType} from "../enum/common.enum";
 import path from "path";
 import childProcess from 'child_process';
-import {Config} from "../config";
-import Utils from "../service/common/utils";
-import * as _ from "lodash";
-import {sendTestMessage} from "../service/firebase.service";
-
+import {ChallengeController} from "../controller/challenge.controller";
+import {log} from "../service/common/logger.service";
+import {UserNetworkService} from "../service/user-network.service";
 
 const router = express();
 
@@ -26,6 +24,8 @@ export class PostRoutes {
         this.postService = new PostService();
         this.productService = new ProductService();
         this.postController = new PostController();
+        this.challengeController = new ChallengeController();
+        this.userNetworkService = new UserNetworkService();
 
         this.initRoutes();
     }
@@ -34,49 +34,63 @@ export class PostRoutes {
         router.use(validateAuthToken);
 
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
-                try {
-                    const {id, userId} = await this.postController.createPost(req);
-                    const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
-                    const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
-                    taskProcessor.on('disconnect', function (msg) {
-                        this.kill();
-                    });
+            try {
+                const {id, userId} = await this.postController.createPost(req);
+                await this.userNetworkService.logAddPostActivity({userId, postId: id});
+                const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
+                const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
+                taskProcessor.on('disconnect', function (msg) {
+                    this.kill();
+                });
 
-                    taskProcessor.send(JSON.stringify({
-                        files: req.files,
-                        postId: id,
-                        productTags: req.body.productTags,
-                        userId
-                    }));
-                    return res.status(HttpCode.ok).json({postId: id});
-                } catch (e) {
-                    console.error("test Data",`${req.method}: ${req.url}`, e);
-                    if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
-                        return res.status(HttpCode.bad_request).send(e);
-                    }
-                    return res.status(HttpCode.internal_server_error).send(e);
+                taskProcessor.send(JSON.stringify({
+                    files: req.files,
+                    postId: id,
+                    productTags: req.body.productTags,
+                    userId
+                }));
+                return res.status(HttpCode.ok).json({postId: id});
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-            });
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+        router.post('/createContentPost', uploadPostMediaMiddleware, async (req, res) => {
+            try {
+                const {id} = await this.postController.createContentPost(req);
+                return res.status(HttpCode.ok).json({postId: id});
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
 
         router.post('/update', uploadPostMediaMiddleware, async (req, res) => {
-                try {
-                    await this.postService.updatePost(req.body);
-                    return res.sendStatus(HttpCode.ok);
-                } catch (e) {
-                    console.error("test Data",`${req.method}: ${req.url}`, e);
-                    if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
-                        return res.status(HttpCode.bad_request).send(e);
-                    }
-                    return res.status(HttpCode.internal_server_error).send(e);
+            try {
+                await this.postService.updatePost(req.body);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
                 }
-            });
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
 
         router.post('/totalPosts', async (req, res) => {
             try {
-                let result = await this.postService.getTotalPostCount(req.body);
+                let result = await this.postService.getTotalPostCount(req);
                 return await res.json(result.count);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -86,30 +100,38 @@ export class PostRoutes {
 
         router.post('/getAll', async (req, res) => {
             const start = new Date();
+
             try {
                 const request = {
-                    "latitude": req.body.latitude,
-                    "longitude": req.body.longitude,
-                    "type": req.body.type || 'normal',
-                    "radiusInMeter": req.body.radiusInMeter,
-                    "lastPostId": req.body.lastPostId,
-                    "postCount": req.body.postCount || 20,
-                    "postByUserId": req.body.postByUserId,
-                    "moodIds": req.body.moodIds,
-                    "offset": req.body.offset || 0,
-                    "languageCode": req.body.languageCode,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
+                    type: req.body.type || 'normal',
+                    radiusInMeter: req.body.radiusInMeter,
+                    lastPostId: req.body.lastPostId,
+                    postCount: req.body.postCount || 20,
+                    postByUserId: req.body.postByUserId,
+                    moodIds: req.body.moodIds,
+                    offset: req.body.offset || 0,
+                    languageCode: req.body.languageCode,
+                    roleId: req.user.roleId,
+                    userId: req.user.id,
+                    futurePost: req.body.futurePost,
+                    locations: req.body.locations,
+                    categoryId: req.body.categoryId,
                 };
                 // let qualifiedPostIds = await this.postService.getQualifiedPostIdsByLocation(request);
                 let result = await this.postService.getAllPosts(request);
                 result = await this.postController.formatPosts(req, result);
+                this.userNetworkService.logDailyVisitActivity(request.userId);
+                // result = await this.challengeController.formatChallengeEntries(req, result);
                 // result = result.map(r => ({id: r.id, distanceInMeters: r.distanceInMeters}));
                 // result = result.map(r => r.id);
                 const end = new Date() - start;
-                console.log('get all post response', {processingTime: end / 1000 + ' Seconds'})
+                log.i('get all post response', {processingTime: end / 1000 + ' Seconds'})
                 // return await res.json({result, processingTime: end / 1000 + ' seconds'});
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -117,18 +139,16 @@ export class PostRoutes {
             }
         });
 
-
         router.post('/getpostByPostId', async (req, res) => {
             try {
                 const request = {
                     "postId": req.body.postId
                 };
                 let result = await this.postService.getPostData(request);
-                console.log('post data', result);
                 result = await this.postController.formatPosts(req, result);
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -137,12 +157,12 @@ export class PostRoutes {
         });
 
         router.get('/getAllTypes', async (req, res) => {
-            sendTestMessage();
+            // sendTestMessage();
             try {
                 return await res.json(PostType);
             } catch (e) {
 
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -155,7 +175,7 @@ export class PostRoutes {
                 let result = this.postController.getReactionTypes();
                 return await res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
@@ -204,7 +224,7 @@ export class PostRoutes {
                 }));
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -217,7 +237,7 @@ export class PostRoutes {
                 await this.postController.votePost(req);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -230,7 +250,7 @@ export class PostRoutes {
                 await this.postController.reactOnPost(req);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -243,7 +263,7 @@ export class PostRoutes {
                 const result = await this.postService.addPostView(req);
                 return res.json(result);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -253,12 +273,10 @@ export class PostRoutes {
 
         router.get('/videoStream', async (req, res) => {
             try {
-                console.log("In Video Stream");
                 await this.postService.streamVideo(req, res);
-                console.log("In Video HttpCode.ok");
                 //return res.sendStatus(HttpCode.ok);
             } catch (e) {
-                console.error(`${req.method}: ${req.url}`, e);
+                log.e(`${req.method}: ${req.url}`, e);
                 if (e.code === AppCode.s3_error) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
@@ -269,7 +287,7 @@ export class PostRoutes {
         router.post('/getTrustOnPost', async (req, res) => {
             try {
 
-                let result =  await this.postController.getFormattedTrustData(req.body);
+                let result = await this.postController.getFormattedTrustData(req.body);
 
                 return await res.json(result);
             } catch (e) {
@@ -282,7 +300,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostVoteUp', async (req, res) => {
             try {
-                let result =  await this.postController.getFormattedTrustDataVoteUp(req.body);
+                let result = await this.postController.getFormattedTrustDataVoteUp(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
@@ -294,7 +312,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostVoteDown', async (req, res) => {
             try {
-                let result =  await this.postController.getFormattedTrustDataVoteDown(req.body);
+                let result = await this.postController.getFormattedTrustDataVoteDown(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
@@ -306,7 +324,7 @@ export class PostRoutes {
 
         router.post('/getTrustOnPostNoVote', async (req, res) => {
             try {
-                let result =  await this.postController.getFormattedTrustDataNoVote(req.body);
+                let result = await this.postController.getFormattedTrustDataNoVote(req.body);
                 return await res.json(result);
             } catch (e) {
                 if (e.code === AppCode.invalid_creds) {
@@ -321,6 +339,34 @@ export class PostRoutes {
                 await this.postService.deletePostComment(req.body);
                 return res.sendStatus(HttpCode.ok);
             } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.get('/publishPost/:postId', async (req, res) => {
+            try {
+                await this.postService.publishPost(req.params.postId);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                if (e.code === AppCode.invalid_creds) {
+                    return res.status(HttpCode.unauthorized).send(e);
+                }
+                return res.sendStatus(HttpCode.internal_server_error);
+            }
+        });
+
+        router.post('/submitPollAnswer', async (req, res) => {
+            try {
+                await this.postService.submitPollAnswer(req);
+                return res.sendStatus(HttpCode.ok);
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === 'ER_NO_REFERENCED_ROW_2') {
+                    return res.status(HttpCode.bad_request).json("no poll or user found with this id");
+                }
                 if (e.code === AppCode.invalid_creds) {
                     return res.status(HttpCode.unauthorized).send(e);
                 }
