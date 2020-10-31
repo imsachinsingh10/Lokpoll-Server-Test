@@ -365,6 +365,7 @@ export class PostService {
                 expiryDate: p.expiryDate,
                 totalVote: 0,
                 result: null,
+                question: p.question,
                 options: [
                     this.getOption(1, p),
                     this.getOption(2, p),

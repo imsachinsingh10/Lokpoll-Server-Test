@@ -253,7 +253,7 @@ export class PostController {
             },
             comments: formattedComments,
             commentCount: formattedComments.length,
-            poll: postPolls[post.id] || {}
+            poll: postPolls[post.id] || null
         }
     }
 
