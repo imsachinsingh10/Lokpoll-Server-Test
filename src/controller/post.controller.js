@@ -68,9 +68,15 @@ export class PostController {
 
     async shareInternally(req) {
         const reqBody = req.body;
-        const postOriginal = await SqlService.getSingle(`select * from post where id = ${reqBody.post}`);
+        const postOriginal = await SqlService.getSingle(`select * from post where id = ${reqBody.postId}`);
         if (_.isEmpty(postOriginal)) {
             throw new ErrorModel(AppCode.invalid_request, `no post found with id ${reqBody.postId}`);
+        }
+        const polls = await SqlService.executeQuery(
+            `select 1 from ${table.poll} where postId = ${postOriginal.id};`
+        )
+        if (!_.isEmpty(polls)) {
+            throw new ErrorModel(AppCode.invalid_request, `post with polls cannot be shared`);
         }
         const post = {
             description: reqBody.description,
@@ -80,7 +86,7 @@ export class PostController {
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
             address: reqBody.address,
-            source: 'forwarded',
+            source: 'Forwarded',
             isGeneric: 0,
         };
         if (!post.latitude && !post.longitude) {
@@ -91,6 +97,14 @@ export class PostController {
         }
         delete post.id;
         const result = await this.postService.createPost(post);
+        let postMedia = await SqlService.executeQuery(
+            `select * from ${table.postMedia} where postId = ${postOriginal.id};`
+        );
+        if (!_.isEmpty(postMedia)) {
+            postMedia = postMedia.map((pm) => ({...pm, postId: result.insertId}));
+            const query = QueryBuilderService.getMultiInsertQuery(table.postMedia, postMedia);
+            await SqlService.executeMultipleQueries(query);
+        }
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }
@@ -366,7 +380,7 @@ export class PostController {
     getLinkToShare(post, code) {
         let playStoreLink = `https://localbol.page.link?amv=1&apn=com.aeon.lokpoll&link=https%3A%2F%2Fwww.localbol.com%2Fpost%3Fid%3D${post.id}`
         let linkToShare = `http://www.localbol.com/post-test/#/${post.id}`;
-        if (Config.env === Environment.prod) {
+        if (process.env.NODE_ENV === Environment.prod) {
             linkToShare = `http://www.localbol.com/post/#/${post.id}`;
         }
         if (!_.isEmpty(post.description)) {

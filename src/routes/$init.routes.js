@@ -32,7 +32,7 @@ export class InitRoutes {
             return res.json({
                 version: Utils.getVersion(),
                 system_time: new Date(),
-                env: Config.env
+                env: process.env.NODE_ENV
             });
         });
 

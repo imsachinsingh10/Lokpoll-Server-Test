@@ -5,9 +5,9 @@ import _ from 'lodash';
 import {log} from "../common/logger.service";
 
 let db;
-if (Config.env === Environment.test) {
+if (process.env.NODE_ENV === Environment.test) {
     db = Config.dbTest
-} else if (Config.env === Environment.prod) {
+} else if (process.env.NODE_ENV === Environment.prod) {
     db = Config.dbProd
 } else {
     db = Config.dbTest;

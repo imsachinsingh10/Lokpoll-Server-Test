@@ -14,7 +14,7 @@ const unlink = promisify(fs.unlink);
 const bucket = Config.minio.bucket;
 let minioConfig = Config.minio.configTest;
 let minioBaseUrl = Config.minio.baseUrlTest;
-if (Config.env === Environment.prod) {
+if (process.env.NODE_ENV === Environment.prod) {
     minioConfig = Config.minio.configProd;
     minioBaseUrl = Config.minio.baseUrlProd;
 }

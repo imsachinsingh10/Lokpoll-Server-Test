@@ -1,6 +1,8 @@
 import express from 'express';
 import BodyParser from 'body-parser';
 import {InitRoutes} from './routes/$init.routes';
+
+import * as dotenv from 'dotenv';
 import AppOverrides from "./service/common/app.overrides";
 import AppEventHandler from "./service/common/app.eventHandler";
 import path from "path";
@@ -8,10 +10,11 @@ import {PostScheduler} from "./service/post-schedular";
 import {Config} from "./config";
 import {Environment} from "./enum/common.enum";
 import {log} from "./service/common/logger.service";
+
+dotenv.config();
+
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('../swagger.json');
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const app = express();
 
@@ -20,7 +23,7 @@ app.use(BodyParser.json());
 app.use('/assets', express.static(path.resolve('assets')));
 
 swaggerDocument.host = Config.host;
-if (Config.env !== Environment.dev) {
+if (process.env.NODE_ENV !== Environment.dev) {
     swaggerDocument.schemes[0] = 'https';
 }
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -28,7 +31,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 new AppEventHandler();
 new AppOverrides(app);
 new InitRoutes(app);
-if (Config.env !== Environment.dev) {
+if (process.env.NODE_ENV !== Environment.dev) {
     new PostScheduler().start();
 }
 

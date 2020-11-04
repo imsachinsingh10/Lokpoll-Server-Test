@@ -2,8 +2,6 @@ import {Environment} from "./enum/common.enum";
 
 export class Config {
 
-    static env = process.env.NODE_ENV;
-
     static version = {
         majorRevision: 5,  // (new UI, lots of new features, conceptual change, etc.)
         minorRevision: 1,  // (maybe a change to a search box, 1 feature added, collection of bug fixes)
@@ -107,10 +105,10 @@ export class Config {
     }
 
     static get host() {
-        if (this.env === Environment.test) {
+        if (process.env.NODE_ENV === Environment.test) {
             return 'localbol-test.cloudjiffy.net'
         }
-        if (this.env === Environment.prod) {
+        if (process.env.NODE_ENV === Environment.prod) {
             return 'localbol-prod.cloudjiffy.net'
         }
         return 'localhost:9003'

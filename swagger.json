@@ -51,6 +51,9 @@
   "responses": {
     "200": {
       "description": "OK"
+    },
+    "400": {
+      "description": "Bad Request"
     }
   },
   "paths": {
@@ -361,7 +364,7 @@
             "name": "poll",
             "in": "formData",
             "type": "string",
-            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"], \"expiryDate\": \"2020-10-25 00:00:00\"}"
+            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"], \"expiryInDays\": 7}"
           },
           {
             "$ref": "#/parameters/tokenHeader"
@@ -386,79 +389,32 @@
         "summary": "API to Share post internally",
         "parameters": [
           {
-            "name": "description",
-            "in": "formData",
-            "type": "string"
-          },
-          {
-            "name": "moodId",
-            "in": "formData",
-            "type": "number",
-            "required": true
-          },
-          {
-            "name": "userId",
-            "in": "formData",
-            "type": "number"
-          },
-          {
-            "name": "image",
-            "in": "formData",
-            "type": "file"
-          },
-          {
-            "name": "video",
-            "in": "formData",
-            "type": "file"
-          },
-          {
-            "name": "profileType",
-            "in": "formData",
-            "default": "personal",
-            "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "formData",
-            "default": "normal",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "languageCode",
-            "in": "formData",
-            "required": true,
-            "default": "en",
-            "type": "string",
-            "enum": ["en", "hi", "ta", "or"]
-          },
-          {
-            "name": "source",
-            "in": "formData",
-            "default": "Self",
-            "type": "string",
-            "enum": ["Self", "Forwarded", "Link"]
-          },
-          {
-            "name": "latitude",
-            "in": "formData",
-            "type": "number"
-          },
-          {
-            "name": "longitude",
-            "in": "formData",
-            "type": "number"
-          },
-          {
-            "name": "address",
-            "in": "formData",
-            "type": "string"
-          },
-          {
-            "name": "poll",
-            "in": "formData",
-            "type": "string",
-            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"], \"expiryDate\": \"2020-10-25 00:00:00\"}"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "properties": {
+                "postId": {
+                  "type": "number",
+                  "example": 1102
+                },
+                "description": {
+                  "type": "string",
+                  "example": ""
+                },
+                "latitude": {
+                  "type": "number",
+                  "example": 0
+                },
+                "longitude": {
+                  "type": "number",
+                  "example": 0
+                },
+                "address": {
+                  "type": "string",
+                  "example": ""
+                }
+              }
+            }
           },
           {
             "$ref": "#/parameters/tokenHeader"

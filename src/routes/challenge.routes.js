@@ -179,7 +179,7 @@ export class ChallengeRoutes {
             try {
                 const {id, userId} = await this.challengeController.createChallengeEntries(req);
                 this.userNetworkService.logAddContestPostActivity({userId: userId, contestPostId: id});
-                const processorPath = path.resolve(Config.env === Environment.dev ? 'src' : '', 'service', 'media-queue-processor-challenge-entries.js');
+                const processorPath = path.resolve(process.env.NODE_ENV === Environment.dev ? 'src' : '', 'service', 'media-queue-processor-challenge-entries.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
                     this.kill();

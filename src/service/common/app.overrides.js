@@ -41,9 +41,9 @@ export default class AppOverrides {
     }
 
     updateConfig() {
-        if (Config.env === Environment.prod) {
+        if (process.env.NODE_ENV === Environment.prod) {
             Config.serverUrl.base = Config.serverUrl.prod
-        } else if (Config.env === Environment.test) {
+        } else if (process.env.NODE_ENV === Environment.test) {
             Config.serverUrl.base = Config.serverUrl.test
         } else {
             Config.serverUrl.base = Config.serverUrl.dev
