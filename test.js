@@ -12,6 +12,9 @@ main();
 
 async function main() {
     const d = '2020-10-12';
-    console.log('utc date', Utils.getUTCDate(d));
+    console.log('utc date', moment.utc(),
+        moment.utc()
+            .add('days', 7)
+            .format('YYYY-MM-DD HH:mm:ss'));
     process.exit(0)
 }

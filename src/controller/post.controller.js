@@ -13,6 +13,7 @@ import {FirebaseController} from "./firebase.controller";
 import {Config} from "../config";
 import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 import {log} from "../service/common/logger.service";
+import moment from "moment";
 
 export class PostController {
     constructor() {
@@ -61,6 +62,35 @@ export class PostController {
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
         await this.insertPoll(reqBody, result.insertId);
+        delete post.createdAt;
+        return {id: result.insertId, ...post};
+    }
+
+    async shareInternally(req) {
+        const reqBody = req.body;
+        const postOriginal = await SqlService.getSingle(`select * from post where id = ${reqBody.post}`);
+        if (_.isEmpty(postOriginal)) {
+            throw new ErrorModel(AppCode.invalid_request, `no post found with id ${reqBody.postId}`);
+        }
+        const post = {
+            description: reqBody.description,
+            descriptionOld: postOriginal.description,
+            userId: reqBody.userId || req.user.id,
+            createdAt: 'utc_timestamp()',
+            latitude: reqBody.latitude,
+            longitude: reqBody.longitude,
+            address: reqBody.address,
+            source: 'forwarded',
+            isGeneric: 0,
+        };
+        if (!post.latitude && !post.longitude) {
+            post.latitude = 0;
+            post.address = '';
+            post.longitude = 0;
+            post.isGeneric = 1
+        }
+        delete post.id;
+        const result = await this.postService.createPost(post);
         delete post.createdAt;
         return {id: result.insertId, ...post};
     }
@@ -154,10 +184,13 @@ export class PostController {
         } catch (e) {
             throw new ErrorModel(AppCode.invalid_request, `poll is not valid`);
         }
+        const expiryDate = moment.utc()
+            .add('days', poll.expiryInDays)
+            .format('YYYY-MM-DD HH:mm:ss');
         const model = {
             postId,
             question: poll.question,
-            expiryDate: poll.expiryDate
+            expiryDate
         }
         poll.options.forEach((option, index) => {
             model['option' + (index + 1)] = option

@@ -30,3 +30,6 @@ create table poll_answer (
      foreign key (userId) references user(id) on delete cascade,
      UNIQUE KEY(userId, pollId)
 );
+
+alter table post add column descriptionOld longtext default null;
+alter table post add column postIdParent bigint(20);

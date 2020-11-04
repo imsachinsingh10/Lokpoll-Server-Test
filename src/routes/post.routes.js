@@ -59,6 +59,19 @@ export class PostRoutes {
             }
         });
 
+        router.post('/share', async (req, res) => {
+            try {
+                const {id} = await this.postController.shareInternally(req);
+                return res.status(HttpCode.ok).json({postId: id, message: 'Post shared internally'});
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
         router.post('/createContentPost', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 const {id} = await this.postController.createContentPost(req);
