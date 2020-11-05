@@ -36,6 +36,7 @@ export class PostController {
             longitude: reqBody.longitude,
             address: reqBody.address,
             source: reqBody.source,
+            link: reqBody.link,
             languageCode: reqBody.languageCode,
             challengeId: reqBody.challengeId || 0,
             isPublished: 1,
@@ -57,7 +58,9 @@ export class PostController {
             post.isGeneric = 1
         }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
-        Validator.validateRequiredFields(post, req);
+        if (_.isEmpty(reqBody.description) && _.isEmpty(reqBody.link) && _.isEmpty(req.files) && _.isEmpty(req.poll)) {
+            throw new ErrorModel(AppCode.invalid_request, `invalid request`);
+        }
 
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
@@ -79,6 +82,7 @@ export class PostController {
             throw new ErrorModel(AppCode.invalid_request, `post with polls cannot be shared`);
         }
         const post = {
+            ...postOriginal,
             description: reqBody.description,
             descriptionOld: postOriginal.description,
             userId: reqBody.userId || req.user.id,
@@ -88,6 +92,7 @@ export class PostController {
             address: reqBody.address,
             source: 'Forwarded',
             isGeneric: 0,
+            postIdParent: postOriginal.id
         };
         if (!post.latitude && !post.longitude) {
             post.latitude = 0;
@@ -346,6 +351,8 @@ export class PostController {
         let linkToShare = this.getLinkToShare(post, referralCode);
         return {
             id: post.id,
+            link: post.link,
+            descriptionOld: post.descriptionOld,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,

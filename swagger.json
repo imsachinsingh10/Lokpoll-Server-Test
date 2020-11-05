@@ -331,6 +331,12 @@
             "required": true
           },
           {
+            "name": "link",
+            "in": "formData",
+            "default": "",
+            "type": "string"
+          },
+          {
             "name": "languageCode",
             "in": "formData",
             "required": true,

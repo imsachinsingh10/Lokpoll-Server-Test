@@ -46,7 +46,7 @@ export default class Validator {
     static validateRequiredFields(reqBody, req) {
         for (let key in reqBody) {
             const value = reqBody[key];
-            if (req && req.user.roleId !== 2)  {
+            if (req && req.user.roleId !== 2)  { // 2 === 'content creator'
                 if (key === 'latitude' || key === 'longitude' || key === 'address') {
                     continue;
                 }

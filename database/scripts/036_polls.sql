@@ -33,3 +33,4 @@ create table poll_answer (
 
 alter table post add column descriptionOld longtext default null;
 alter table post add column postIdParent bigint(20);
+alter table post add column link mediumtext default null;
