@@ -35,6 +35,7 @@ export class PostRoutes {
 
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
             try {
+                log.i('create new post body', req.body);
                 const {id, userId} = await this.postController.createPost(req);
                 await this.userNetworkService.logAddPostActivity({userId, postId: id});
                 const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
