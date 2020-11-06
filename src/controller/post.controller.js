@@ -58,7 +58,7 @@ export class PostController {
             post.isGeneric = 1
         }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
-        if (_.isEmpty(reqBody.description) && _.isEmpty(reqBody.link) && _.isEmpty(req.files) && _.isEmpty(req.poll)) {
+        if (_.isEmpty(reqBody.description) && _.isEmpty(reqBody.link) && _.isEmpty(req.files) && _.isEmpty(reqBody.poll)) {
             throw new ErrorModel(AppCode.invalid_request, `invalid request`);
         }
 
