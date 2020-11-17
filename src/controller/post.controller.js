@@ -90,7 +90,7 @@ export class PostController {
             latitude: reqBody.latitude,
             longitude: reqBody.longitude,
             address: reqBody.address,
-            source: 'Forwarded',
+            source: 'Reposted',
             isGeneric: 0,
             postIdParent: postOriginal.id
         };
