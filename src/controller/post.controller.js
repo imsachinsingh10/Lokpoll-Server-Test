@@ -353,6 +353,7 @@ export class PostController {
             id: post.id,
             link: post.link,
             descriptionOld: post.descriptionOld,
+            postIdParent: post.postIdParent,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),
             description: post.description,

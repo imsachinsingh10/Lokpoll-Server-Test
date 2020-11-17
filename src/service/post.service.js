@@ -119,7 +119,8 @@ export class PostService {
         const query = `select p.id, p.createdAt, p.description, p.source, p.isOriginalContest,
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
-                            p.type 'postType', p.isPublished, p.publishDate, p.isGeneric, p.link, p.descriptionOld,
+                            p.type 'postType', p.isPublished, p.publishDate, p.isGeneric, p.link, 
+                            p.descriptionOld, p.postIdParent,
                             pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'
