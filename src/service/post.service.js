@@ -145,7 +145,8 @@ export class PostService {
     async getPostData(req) {
         const query = `select p.id, p.createdAt, p.description, p.source, p.latitude, p.longitude, p.address, p.language,
                             0 'respects', 0 'comments',
-                            p.type 'postType',
+                            p.type 'postType', p.isPublished, p.publishDate, p.isGeneric, p.link, 
+                            p.descriptionOld, p.postIdParent,
                             pro.name 'displayName', pro.type 'profileType',
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl
                         from post p 

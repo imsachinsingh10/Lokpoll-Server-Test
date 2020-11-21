@@ -14,19 +14,27 @@ import {Config} from "../config";
 import FirebaseService, {FirebaseMessage} from "../service/firebase.service";
 import {log} from "../service/common/logger.service";
 import moment from "moment";
+import {UserNetworkService} from '../service/user-network.service';
+import {PostContentType} from '../enum/post-content-type';
+import {CoinActivity} from '../enum/coin-activity';
 
 export class PostController {
     constructor() {
         this.postService = new PostService();
         this.minioService = new MinIOService();
         this.firebaseController = new FirebaseController();
+        this.userNetworkService = new UserNetworkService();
     }
 
     async createPost(req) {
         const reqBody = req.body;
         const files = req.files;
         const post = {
+            contentType: reqBody.contentType,
             description: reqBody.description,
+            text: reqBody.text,
+            textColor: reqBody.textColor,
+            textBgColor: reqBody.textBgColor,
             userId: reqBody.userId || req.user.id,
             creatorId: req.user.id,
             createdAt: 'utc_timestamp()',
@@ -42,7 +50,7 @@ export class PostController {
             isPublished: 1,
             isGeneric: 0,
         };
-        if (files.image || files.video || files.audio) {
+        if (files.image || files.video || files.audio || files.textBgImage) {
             post.isPostUpload = '0';
         } else {
             post.isPostUpload = '1';
@@ -67,6 +75,60 @@ export class PostController {
         await this.insertPoll(reqBody, result.insertId);
         delete post.createdAt;
         return {id: result.insertId, ...post};
+    }
+
+    async creditCoinsByAddPost(postId, userId) {
+        const reqBody = req.body;
+        const files = req.files;
+        if (_.isEmpty(req.body.contentType)) {
+            return
+        }
+        let activity, frontLineActivity, downLineActivity;
+
+        switch (req.body.contentType) {
+            case PostContentType.postDescription:
+                activity = CoinActivity.addPost;
+                frontLineActivity = CoinActivity.frontLineAddPost;
+                downLineActivity = CoinActivity.downLineAddPost;
+                break;
+            case PostContentType.postCustomText:
+                activity = CoinActivity.addPostWithCustomText;
+                frontLineActivity = CoinActivity.frontLineAddPostWithCustomText;
+                downLineActivity = CoinActivity.downLineAddPostWithCustomText;
+                break;
+            case PostContentType.postAudio:
+                activity = CoinActivity.addPostWithAudio;
+                frontLineActivity = CoinActivity.frontLineAddPostWithAudio;
+                downLineActivity = CoinActivity.downLineAddPostWithAudio;
+                break;
+            case PostContentType.postVideo:
+                activity = CoinActivity.addPostWithVideo;
+                frontLineActivity = CoinActivity.frontLineAddPostWithVideo;
+                downLineActivity = CoinActivity.downLineAddPostWithVideo;
+                break;
+            case PostContentType.postLink:
+                activity = CoinActivity.addPostWithLink;
+                frontLineActivity = CoinActivity.frontLineAddPostWithLink;
+                downLineActivity = CoinActivity.downLineAddPostWithLink;
+                break;
+            case PostContentType.postPhoto:
+                activity = CoinActivity.addPostWithPhoto;
+                frontLineActivity = CoinActivity.frontLineAddPostWithPhoto;
+                downLineActivity = CoinActivity.downLineAddPostWithPhoto;
+                break;
+            case PostContentType.postPoll:
+                activity = CoinActivity.addPostWithPoll;
+                frontLineActivity = CoinActivity.frontLineAddPostWithPoll;
+                downLineActivity = CoinActivity.downLineAddPostWithPoll;
+                break;
+        }
+        await this.userNetworkService.logAddPostActivity({
+            userId,
+            postId,
+            activity,
+            frontLineActivity,
+            downLineActivity,
+        });
     }
 
     async shareInternally(req) {
@@ -130,7 +192,7 @@ export class PostController {
             languageCode: reqBody.languageCode,
             challengeId: reqBody.challengeId || 0,
             isPostUpload: 1,
-            isOriginalContest : reqBody.isOriginalContest || 0
+            isOriginalContest: reqBody.isOriginalContest || 0
         };
 
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
@@ -478,6 +540,12 @@ export class PostController {
         if (files.image && files.image.length > 0) {
             _.forEach(files.image, file => {
                 const filePromise = this.minioService.uploadPostMedia(file, 'image');
+                promises.push(filePromise);
+            });
+        }
+        if (files.textBgImage && files.textBgImage.length > 0) {
+            _.forEach(files.textBgImage, file => {
+                const filePromise = this.minioService.uploadPostMedia(file, 'textBgImage');
                 promises.push(filePromise);
             });
         }

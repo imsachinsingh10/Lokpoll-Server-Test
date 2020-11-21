@@ -11,7 +11,6 @@ import {log} from "../service/common/logger.service";
 import {table} from "../enum/table";
 import {SqlService} from "../service/sql/sql.service";
 import {UserNetworkService} from "../service/user-network.service";
-import {Activity} from "../model/activity.model";
 
 export class UserController {
     constructor() {

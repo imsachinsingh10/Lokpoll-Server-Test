@@ -52,6 +52,7 @@ const uploadFiles = multer({storage: storage}).array('file', 50);
 export const uploadPostMediaMiddleware = multer({storage: storage})
     .fields([
         {name: 'image', maxCount: 50},
+        {name: 'textBgImage', maxCount: 1},
         {name: 'video', maxCount: 50},
         {name: 'audio', maxCount: 50},
     ]);

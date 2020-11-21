@@ -8,7 +8,6 @@ import {FirebaseController} from "../controller/firebase.controller";
 import {UserNetworkService} from "../service/user-network.service";
 import {log} from "../service/common/logger.service";
 import {UserNetworkController} from "../controller/user-network.controller";
-import {Activity} from "../model/activity.model";
 
 const router = express();
 
@@ -118,16 +117,15 @@ export class UserNetworkRoutes {
             try {
                 const activities = await this.userNetworkService.getCoinLogs(req.user.id);
                 const coinsFromMyActivities = activities.filter(a => {
-                    return [Activity.signup, Activity.dailyVisit, Activity.addPost, Activity.addContestPost].indexOf(a.activity) > -1;
-                })
-                    .map(a => a.coins).reduce((a, b) => a + b, 0);
+                    return !(a.activity.includes('frontLine') || a.activity.includes('downLine'))
+                }).map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 const coinsFromFrontLineActivities = activities.filter(a => {
-                    return [Activity.frontLineSignup, Activity.frontLineDailyVisit, Activity.frontLineAddPost, Activity.frontLineAddContestPost].indexOf(a.activity) > -1;
+                    return a.activity.includes('frontLine')
                 }).map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 const coinsFromDownLineActivities = activities.filter(a => {
-                    return [Activity.downLineSignup, Activity.downLineDailyVisit, Activity.downLineAddPost, Activity.downLineAddContestPost].indexOf(a.activity) > -1;
+                    return a.activity.includes('downLine')
                 }).map(a => a.coins).reduce((a, b) => a + b, 0);
 
                 return res.json({

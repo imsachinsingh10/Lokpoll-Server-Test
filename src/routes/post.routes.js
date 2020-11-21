@@ -37,7 +37,7 @@ export class PostRoutes {
             try {
                 log.i('create new post body', req.body);
                 const {id, userId} = await this.postController.createPost(req);
-                await this.userNetworkService.logAddPostActivity({userId, postId: id});
+
                 const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');
                 const taskProcessor = childProcess.fork(processorPath, null, {serialization: "json"});
                 taskProcessor.on('disconnect', function (msg) {
@@ -50,6 +50,7 @@ export class PostRoutes {
                     productTags: req.body.productTags,
                     userId
                 }));
+                this.postController.creditCoinsByAddPost(id, userId);
                 return res.status(HttpCode.ok).json({postId: id});
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);

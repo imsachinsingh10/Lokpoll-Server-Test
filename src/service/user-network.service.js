@@ -8,10 +8,10 @@ import {ErrorModel} from "../model/common.model";
 import {Message, ProfileType} from "../enum/common.enum";
 import Validator from "./common/validator.service";
 import {FirebaseController} from "../controller/firebase.controller";
-import {Activity} from "../model/activity.model";
 import {UserService} from "./user.service";
 import moment from "moment";
 import {log} from "./common/logger.service";
+import {CoinActivity} from '../enum/coin-activity';
 
 export class UserNetworkService {
     constructor() {
@@ -29,8 +29,8 @@ export class UserNetworkService {
     }
 
     async logSignupActivity(userId) {
-        let coins = await this.getCoinsByActivityName(Activity.signup);
-        await this.logActivity({userId, activity: Activity.signup, coins});
+        let coins = await this.getCoinsByActivityName(CoinActivity.signup);
+        await this.logActivity({userId, activity: CoinActivity.signup, coins});
 
         const ancestors = await this.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -39,14 +39,14 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            coins = await this.getCoinsByActivityName(Activity.frontLineSignup);
-            await this.logActivity({userId: parent.id, activity: Activity.frontLineSignup, coins});
+            coins = await this.getCoinsByActivityName(CoinActivity.frontLineSignup);
+            await this.logActivity({userId: parent.id, activity: CoinActivity.frontLineSignup, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            coins = await this.getCoinsByActivityName(Activity.downLineSignup);
-            await this.logActivity({userId: gParent.id, activity: Activity.downLineSignup, coins});
+            coins = await this.getCoinsByActivityName(CoinActivity.downLineSignup);
+            await this.logActivity({userId: gParent.id, activity: CoinActivity.downLineSignup, coins});
         }
     }
 
@@ -54,7 +54,7 @@ export class UserNetworkService {
         const accessLog = await this.getAppAccessLog({userId});
         let q = '';
         if (_.isEmpty(accessLog)) {
-            const model = {userId, logDate: 'utc_timestamp()', activity: Activity.dailyVisit,}
+            const model = {userId, logDate: 'utc_timestamp()', activity: CoinActivity.dailyVisit,}
             q = QueryBuilderService.getInsertQuery(table.user_app_access, model);
             await SqlService.executeQuery(q);
         } else {
@@ -72,7 +72,7 @@ export class UserNetworkService {
 
         const q = `select * from ${table.user_app_access} 
                     where userId = ${userId} 
-                        and activity = '${Activity.dailyVisit}' 
+                        and activity = '${CoinActivity.dailyVisit}' 
                         ${c1}
                     limit 1;`
         return SqlService.getSingle(q);
@@ -91,8 +91,8 @@ export class UserNetworkService {
         }
 
         this.addAppAccessLog(userId).then(null);
-        let coins = await this.getCoinsByActivityName(Activity.dailyVisit);
-        await this.logActivity({userId, activity: Activity.dailyVisit, coins});
+        let coins = await this.getCoinsByActivityName(CoinActivity.dailyVisit);
+        await this.logActivity({userId, activity: CoinActivity.dailyVisit, coins});
 
         const ancestors = await this.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -101,20 +101,22 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            coins = await this.getCoinsByActivityName(Activity.frontLineDailyVisit);
-            await this.logActivity({userId: parent.id, activity: Activity.frontLineDailyVisit, coins});
+            coins = await this.getCoinsByActivityName(CoinActivity.frontLineDailyVisit);
+            await this.logActivity({userId: parent.id, activity: CoinActivity.frontLineDailyVisit, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            coins = await this.getCoinsByActivityName(Activity.downLineDailyVisit);
-            await this.logActivity({userId: gParent.id, activity: Activity.downLineDailyVisit, coins});
+            coins = await this.getCoinsByActivityName(CoinActivity.downLineDailyVisit);
+            await this.logActivity({userId: gParent.id, activity: CoinActivity.downLineDailyVisit, coins});
         }
     }
 
-    async logAddPostActivity({userId, postId}) {
-        let coins = await this.getCoinsByActivityName(Activity.addPost);
-        await this.logActivity({userId, postId, activity: Activity.addPost, coins});
+    async logAddPostActivity({userId, postId, activity, frontLineActivity, downLineActivity}) {
+        if (activity) {
+            const coins = await this.getCoinsByActivityName(activity);
+            await this.logActivity({userId, postId, activity: activity, coins});
+        }
 
         const ancestors = await this.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -122,21 +124,21 @@ export class UserNetworkService {
         }
 
         const parent = ancestors.filter(a => a.level === -1)[0];
-        if (parent) {
-            coins = await this.getCoinsByActivityName(Activity.frontLineAddPost);
-            await this.logActivity({userId: parent.id, postId, activity: Activity.frontLineAddPost, coins});
+        if (parent && downLineActivity) {
+            const coins = await this.getCoinsByActivityName(CoinActivity.frontLineAddPost);
+            await this.logActivity({userId: parent.id, postId, activity: frontLineActivity, coins});
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
-        if (gParent) {
-            coins = await this.getCoinsByActivityName(Activity.downLineAddPost);
-            await this.logActivity({userId: gParent.id, postId, activity: Activity.downLineAddPost, coins});
+        if (gParent && frontLineActivity) {
+            const coins = await this.getCoinsByActivityName(CoinActivity.downLineAddPost);
+            await this.logActivity({userId: gParent.id, postId, activity: downLineActivity, coins});
         }
     }
 
     async logAddContestPostActivity({userId, contestPostId}) {
-        let coins = await this.getCoinsByActivityName(Activity.addContestPost);
-        await this.logActivity({userId, contestPostId, activity: Activity.addContestPost, coins});
+        let coins = await this.getCoinsByActivityName(CoinActivity.addContestPost);
+        await this.logActivity({userId, contestPostId, activity: CoinActivity.addContestPost, coins});
 
         const ancestors = await this.getAncestors(userId);
         if (_.isEmpty(ancestors)) {
@@ -145,22 +147,22 @@ export class UserNetworkService {
 
         const parent = ancestors.filter(a => a.level === -1)[0];
         if (parent) {
-            coins = await this.getCoinsByActivityName(Activity.frontLineAddContestPost);
+            coins = await this.getCoinsByActivityName(CoinActivity.frontLineAddContestPost);
             await this.logActivity({
                 userId: parent.id,
                 contestPostId,
-                activity: Activity.frontLineAddContestPost,
+                activity: CoinActivity.frontLineAddContestPost,
                 coins
             });
         }
 
         const gParent = ancestors.filter(a => a.level === -2)[0];
         if (gParent) {
-            coins = await this.getCoinsByActivityName(Activity.downLineAddContestPost);
+            coins = await this.getCoinsByActivityName(CoinActivity.downLineAddContestPost);
             await this.logActivity({
                 userId: gParent.id,
                 contestPostId,
-                activity: Activity.downLineAddContestPost,
+                activity: CoinActivity.downLineAddContestPost,
                 coins
             });
         }
@@ -195,7 +197,7 @@ export class UserNetworkService {
     }
 
     async getAllCoinActivities() {
-        const q = `select * from ${table.coin_activity};`
+        const q = `select * from ${table.coin_activity} order by position;`
         return SqlService.executeQuery(q);
     }
 
@@ -203,7 +205,7 @@ export class UserNetworkService {
         const q = `update ${table.coin_activity} 
                     set coins = ${activity.coins}, 
                         updatedOn = utc_timestamp()
-                    where id = ${activity.id};`;
+                    where activity = '${activity.activity}';`;
         return SqlService.executeQuery(q);
     }
 

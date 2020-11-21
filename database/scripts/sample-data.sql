@@ -77,13 +77,45 @@ INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`i
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`imageUrl`,`hi`,`en`,`or`,`ta`,`isActive`,`position`) VALUES (67,NULL,'2020-05-09 12:16:53',101,NULL,'#e6e6c2','https://common-storage.cloudjiffy.net/lokpoll/mood_icons7NLlqEq4-1589037568079-15 Learning Bol.png','Talks','Talks','Talks','Talks',1,26);
 INSERT INTO `mood` (`id`,`name`,`createdAt`,`createdBy`,`description`,`color`,`imageUrl`,`hi`,`en`,`or`,`ta`,`isActive`,`position`) VALUES (68,NULL,'2020-05-09 12:17:32',101,NULL,'#f3ebc3','https://common-storage.cloudjiffy.net/lokpoll/mood_iconsTzqkkyYz-1589037578052-15 Learning Bol.png','Books','Books','Books','Books',1,27);
 
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (1, 'signup', 'coins to me, when i signs up', 100, '2020-10-09 13:11:19');
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (2, 'frontLineSignup', 'coins to me, when someone signs up in front line', 100, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (3, 'downLineSignup', 'coins to me, when someone signs up in down line', 10, '2020-10-10 11:20:58');
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (4, 'dailyVisit', 'coins to me, when i visit app first time in a day', 20, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (5, 'frontLineDailyVisit', 'coins to me, when someone in front line visits app first time in a day', 2, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (6, 'downLineDailyVisit', 'coins to me, when someone in down line visits app first time in a day', 1, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (7, 'addPost', 'coins to me, when i add new post', 60, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (8, 'frontLineAddPost', 'coins to me, when someone adds new post in front line', 6, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (9, 'downLineAddPost', 'coins to me, when someone adds new post in down line', 1, null);
-INSERT INTO coin_activity (id, activity, description, coins, updatedOn) VALUES (10, 'addContestPost', 'coins to me, when i participate in contest', 40, null);
+delete from coin_activity where activity is not null;
+INSERT INTO coin_activity (activity, description, coins, updatedOn, position)
+VALUES ('signup', 'Coins to me, when i signs up', 100, '2020-10-09 13:11:19', 1),
+       ('frontLineSignup', 'Coins to me, when someone signs up in front line', 100, null, 2),
+       ('downLineSignup', 'Coins to me, when someone signs up in down line', 10, '2020-10-10 11:20:58', 3),
+
+       ('dailyVisit', 'Coins to me, when i visit app first time in a day', 20, null, 4),
+       ('frontLineDailyVisit', 'Coins to me, when someone in front line visits app first time in a day', 2, null, 5),
+       ('downLineDailyVisit', 'Coins to me, when someone in down line visits app first time in a day', 1, null, 6),
+
+       ('addPost', 'Coins to me, when i add new post with description only', 51, '2020-11-21 10:24:52', 7),
+       ('frontLineAddPost', 'Coins to me, when i add new post in front line with description only', 6, '2020-11-21 10:24:52', 8),
+       ('downLineAddPost', 'Coins to me, when i add new post in down line with description only', 1, '2020-11-21 10:24:52', 9),
+
+       ('addPostWithCustomText', 'Coins to me, when i add new post with custom text', 60, null, 10),
+       ('frontLineAddPostWithCustomText', 'Coins to me, when i add new post in front line with custom text', 60, null, 11),
+       ('downLineAddPostWithCustomText', 'Coins to me, when i add new post in down line with custom text', 60, null, 12),
+
+       ('addPostWithPhoto', 'Coins to me, when i add new post with photo', 50, null, 13),
+       ('frontLineAddPostWithPhoto', 'Coins to me, when i add new post in front line with photo', 50, null, 14),
+       ('downLineAddPostWithPhoto', 'Coins to me, when i add new post in down line with photo', 50, null, 15),
+
+       ('addPostWithVideo', 'Coins to me, when i add new post with video', 70, null, 16),
+       ('frontLineAddPostWithVideo', 'Coins to me, when i add new post in front line with video', 70, null, 17),
+       ('downLineAddPostWithVideo', 'Coins to me, when i add new post in down line with video', 70, null, 18),
+
+       ('addPostWithAudio', 'Coins to me, when i add new post with audio', 60, null, 19),
+       ('frontLineAddPostWithAudio', 'Coins to me, when i add new post in front line with audio', 60, null, 20),
+       ('downLineAddPostWithAudio', 'Coins to me, when i add new post in down line with audio', 60, null, 21),
+
+       ('addPostWithLink', 'Coins to me, when i add new post with link', 40, null, 22),
+       ('frontLineAddPostWithLink', 'Coins to me, when i add new post in front line with link', 40, null, 23),
+       ('downLineAddPostWithLink', 'Coins to me, when i add new post in down line with link', 40, null, 24),
+
+       ('addPostWithPoll', 'Coins to me, when i add new post with poll', 60, null, 25),
+       ('frontLineAddPostWithPoll', 'Coins to me, when i add new post in front line with poll', 60, null, 26),
+       ('downLineAddPostWithPoll', 'Coins to me, when i add new post in down line with poll', 60, null, 27),
+
+       ('addContestPost', 'Coins to me, when i participate in contest', 40, null, 28),
+       ('frontLineAddContestPost', 'Coins to me, when someone in front line participate in contest', 40, null, 29),
+       ('downLineAddContestPost', 'Coins to me, when someone in down line participate in contest', 40, null, 30)
+;
