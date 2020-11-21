@@ -688,7 +688,7 @@ export class PostController {
             _.isEmpty(req.files) &&
             _.isEmpty(reqBody.poll) &&
             reqBody.contentType !== PostContentType.postCustomText) {
-            message = 'at least one of these should be there [description|link|files|poll]'
+            message = 'At least one of these is required [description|link|files|poll]'
         }
         if (!_.isEmpty(message)) {
             throw new ErrorModel(AppCode.invalid_request, message);
