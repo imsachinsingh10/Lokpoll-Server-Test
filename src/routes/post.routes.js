@@ -36,6 +36,7 @@ export class PostRoutes {
         router.post('/create', uploadPostMediaMiddleware, async (req, res) => {
             try {
                 log.i('create new post body', req.body);
+                this.postController.validateAddPostRequest(req);
                 const {id, userId} = await this.postController.createPost(req);
 
                 const processorPath = path.resolve(__dirname, '../service', 'media-queue-processor.js');

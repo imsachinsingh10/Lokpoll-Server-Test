@@ -66,9 +66,6 @@ export class PostController {
             post.isGeneric = 1
         }
         post.moodId = reqBody.moodId > 0 ? reqBody.moodId : undefined;
-        if (_.isEmpty(reqBody.description) && _.isEmpty(reqBody.link) && _.isEmpty(req.files) && _.isEmpty(reqBody.poll)) {
-            throw new ErrorModel(AppCode.invalid_request, `invalid request`);
-        }
 
         const result = await this.postService.createPost(post);
         await this.insertSubMoods(reqBody, result.insertId);
@@ -679,4 +676,22 @@ export class PostController {
         })
     };
 
+    validateAddPostRequest(req) {
+        const reqBody = req.body;
+        let message = ''
+        if (_.isEmpty(reqBody.contentType)) {
+            message = 'contentType is missing'
+        } else if (reqBody.contentType === PostContentType.postCustomText && _.isEmpty(reqBody.text)) {
+            message = 'text is missing'
+        } else if (_.isEmpty(reqBody.description) &&
+            _.isEmpty(reqBody.link) &&
+            _.isEmpty(req.files) &&
+            _.isEmpty(reqBody.poll) &&
+            reqBody.contentType !== PostContentType.postCustomText) {
+            message = 'at least one of these should be there [description|link|files|poll]'
+        }
+        if (!_.isEmpty(message)) {
+            throw new ErrorModel(AppCode.invalid_request, message);
+        }
+    }
 }
