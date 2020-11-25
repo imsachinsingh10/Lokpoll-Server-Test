@@ -179,7 +179,8 @@ export class UserNetworkService {
     }
 
     async getCoinLogs(userId) {
-        const q = `select * from ${table.coin_activity_log} c where userId = ${userId} order by id desc;`
+        const q = `select * from ${table.coin_activity_log} c 
+                    where userId = ${userId} order by id desc;`
         return SqlService.executeQuery(q);
     }
 
