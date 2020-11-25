@@ -59,7 +59,7 @@ export class UserNetworkRoutes {
 
         router.get('/getAllCoinActivities', async (req, res) => {
             try {
-                const activities = await this.userNetworkService.getAllCoinActivities();
+                const activities = await this.userNetworkController.getGroupedCoinActivities();
                 res.json(activities);
             } catch (e) {
                 console.error(`${req.method}: ${req.url}`, e);

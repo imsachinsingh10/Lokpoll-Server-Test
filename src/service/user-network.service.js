@@ -202,10 +202,12 @@ export class UserNetworkService {
     }
 
     async updateCoinActivity(activity) {
-        const q = `update ${table.coin_activity} 
-                    set coins = ${activity.coins}, 
-                        updatedOn = utc_timestamp()
-                    where activity = '${activity.activity}';`;
+        const model = {
+            coins: activity.coins,
+            name: activity.name
+        }
+        const condition = `where activity = '${activity.activity}'`;
+        const q = QueryBuilderService.getUpdateQuery(table.coin_activity, model, condition);
         return SqlService.executeQuery(q);
     }
 

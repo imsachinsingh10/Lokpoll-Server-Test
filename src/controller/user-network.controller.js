@@ -88,4 +88,10 @@ export class UserNetworkController {
         return result;
     }
 
+    async getGroupedCoinActivities() {
+        const allActivities = await this.userNetworkService.getAllCoinActivities();
+        // const grouped = _.groupBy(allActivities, (a) => a.group);
+        return allActivities;
+    }
+
 }

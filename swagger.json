@@ -221,6 +221,24 @@
         }
       }
     },
+    "/user/getAllCoinActivities": {
+      "get": {
+        "summary": "Get all coin activities",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
 
     "/post/getAll": {
       "post": {
@@ -292,9 +310,36 @@
         "summary": "API to Create post",
         "parameters": [
           {
+            "name": "contentType",
+            "in": "formData",
+            "type": "string",
+            "required": true,
+            "enum": []
+          },
+          {
             "name": "description",
             "in": "formData",
             "type": "string"
+          },
+          {
+            "name": "text",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textColor",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textBgColor",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textBgImage",
+            "in": "formData",
+            "type": "file"
           },
           {
             "name": "moodId",

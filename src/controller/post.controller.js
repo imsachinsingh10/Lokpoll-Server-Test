@@ -679,6 +679,7 @@ export class PostController {
     validateAddPostRequest(req) {
         const reqBody = req.body;
         let message = ''
+        const requiredFields = ['contentType', 'moodId']
         if (_.isEmpty(reqBody.contentType)) {
             message = 'contentType is missing'
         } else if (reqBody.contentType === PostContentType.postCustomText && _.isEmpty(reqBody.text)) {

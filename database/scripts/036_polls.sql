@@ -78,4 +78,5 @@ alter table post add column textColor varchar(16) default null;
 alter table post add column textBgColor varchar(16) default null;
 
 alter table coin_activity add column position int default 0;
-alter table coin_activity add column type varchar default null;
+alter table coin_activity add column name varchar default null;
+alter table coin_activity add column group varchar default null;
