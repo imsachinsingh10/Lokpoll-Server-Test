@@ -144,11 +144,6 @@ export class PostController {
     }
 
     async creditCoinsOnSharePostExternally({postId, userId, platform}) {
-        const reqBody = req.body;
-        const files = req.files;
-        if (_.isEmpty(req.body.contentType)) {
-            return
-        }
         await this.userNetworkService.logAddPostActivity({
             userId,
             postId,
