@@ -57,3 +57,8 @@ export const LanguageCode = {
     Sambalpuri: 'ta',
     Odia: 'or',
 }
+
+export const SMPlatform = {
+    Facebook: 'facebook',
+    Whatsapp: 'whatsapp',
+}

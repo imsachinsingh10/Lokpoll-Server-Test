@@ -431,7 +431,7 @@
         }
       }
     },
-    "/post/share": {
+    "/post/repost": {
       "post": {
         "consumes": ["application/json"],
         "tags": [
@@ -463,6 +463,45 @@
                 "address": {
                   "type": "string",
                   "example": ""
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/creditCoinsOnSharePostExternally": {
+      "post": {
+        "consumes": ["application/json"],
+        "tags": [
+          "Post"
+        ],
+        "summary": "credit coins when user shares post externally",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "properties": {
+                "postId": {
+                  "type": "number",
+                  "example": 1102
+                },
+                "platform": {
+                  "type": "number",
+                  "example": "whatsapp",
+                  "enum": ["facebook", "whatsapp"]
                 }
               }
             }

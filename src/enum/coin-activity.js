@@ -39,4 +39,12 @@ export const CoinActivity = {
     addContestPost: 'addContestPost',
     frontLineAddContestPost: 'frontLineAddContestPost',
     downLineAddContestPost: 'downLineAddContestPost',
+
+    repost: 'repost',
+    frontLineRepost: 'frontLineRepost',
+    downLineRepost: 'downLineRepost',
+
+    sharePost: 'sharePost',
+    frontLineSharePost: 'frontLineSharePost',
+    downLineSharePost: 'downLineSharePost',
 }

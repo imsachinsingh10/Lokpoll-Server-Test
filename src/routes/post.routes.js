@@ -13,6 +13,7 @@ import childProcess from 'child_process';
 import {ChallengeController} from "../controller/challenge.controller";
 import {log} from "../service/common/logger.service";
 import {UserNetworkService} from "../service/user-network.service";
+import {RequestValidator} from '../service/request-validator';
 
 const router = express();
 
@@ -62,13 +63,28 @@ export class PostRoutes {
             }
         });
 
-        router.post('/share', async (req, res) => {
+        router.post('/repost', async (req, res) => {
             try {
-                const {id} = await this.postController.shareInternally(req);
+                const {id, userId} = await this.postController.shareInternally(req);
+                this.postController.creditCoinsOnRePost(id, userId);
                 return res.status(HttpCode.ok).json({postId: id, message: 'Post shared internally'});
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);
-                if (e.code === AppCode.s3_error || e.code === AppCode.invalid_request) {
+                if (e.code === AppCode.invalid_request) {
+                    return res.status(HttpCode.bad_request).send(e);
+                }
+                return res.status(HttpCode.internal_server_error).send(e);
+            }
+        });
+
+        router.post('/creditCoinsOnSharePostExternally', async (req, res) => {
+            try {
+                RequestValidator.externalShare(req);
+                await this.postController.creditCoinsOnSharePostExternally({...req.body, userId: req.user.id});
+                return res.status(HttpCode.ok).json({message: 'Coins credited for sharing post externally'});
+            } catch (e) {
+                log.e(`${req.method}: ${req.url}`, e);
+                if (e.code === AppCode.invalid_request) {
                     return res.status(HttpCode.bad_request).send(e);
                 }
                 return res.status(HttpCode.internal_server_error).send(e);

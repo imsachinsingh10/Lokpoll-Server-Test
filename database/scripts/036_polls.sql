@@ -80,3 +80,6 @@ alter table post add column textBgColor varchar(16) default null;
 alter table coin_activity add column position int default 0;
 alter table coin_activity add column name varchar default null;
 alter table coin_activity add column group varchar default null;
+
+alter table coin_activity_log add foreign key (activity) references coin_activity(activity);
+alter table coin_activity_log add column `platform` varchar(50) default null;

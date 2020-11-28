@@ -128,6 +128,37 @@ export class PostController {
         });
     }
 
+    async creditCoinsOnRePost(postId, userId) {
+        const reqBody = req.body;
+        const files = req.files;
+        if (_.isEmpty(req.body.contentType)) {
+            return
+        }
+        await this.userNetworkService.logAddPostActivity({
+            userId,
+            postId,
+            activity: CoinActivity.repost,
+            frontLineActivity: CoinActivity.frontLineRepost,
+            downLineActivity: CoinActivity.downLineRepost,
+        });
+    }
+
+    async creditCoinsOnSharePostExternally({postId, userId, platform}) {
+        const reqBody = req.body;
+        const files = req.files;
+        if (_.isEmpty(req.body.contentType)) {
+            return
+        }
+        await this.userNetworkService.logAddPostActivity({
+            userId,
+            postId,
+            platform,
+            activity: CoinActivity.sharePost,
+            frontLineActivity: CoinActivity.frontLineSharePost,
+            downLineActivity: CoinActivity.downLineSharePost,
+        });
+    }
+
     async shareInternally(req) {
         const reqBody = req.body;
         const postOriginal = await SqlService.getSingle(`select * from post where id = ${reqBody.postId}`);
