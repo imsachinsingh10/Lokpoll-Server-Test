@@ -1,9 +1,9 @@
 export const PostContentType = {
-    postDescription: 'postDescription',
-    postCustomText: 'postCustomText',
-    postAudio: 'postAudio',
-    postVideo: 'postVideo',
-    postLink: 'postLink',
-    postPhoto: 'postPhoto',
-    postPoll: 'postPoll',
+    Description: 'description',
+    CustomText: 'customText',
+    Audio: 'audio',
+    Video: 'video',
+    Link: 'link',
+    Photo: 'photo',
+    Poll: 'poll',
 }

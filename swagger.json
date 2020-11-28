@@ -314,7 +314,7 @@
             "in": "formData",
             "type": "string",
             "required": true,
-            "enum": []
+            "enum": ["description", "customText", "audio", "video", "link", "photo", "poll"]
           },
           {
             "name": "description",

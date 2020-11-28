@@ -75,45 +75,40 @@ export class PostController {
     }
 
     async creditCoinsByAddPost(postId, userId) {
-        const reqBody = req.body;
-        const files = req.files;
-        if (_.isEmpty(req.body.contentType)) {
-            return
-        }
         let activity, frontLineActivity, downLineActivity;
 
         switch (req.body.contentType) {
-            case PostContentType.postDescription:
+            case PostContentType.Description:
                 activity = CoinActivity.addPost;
                 frontLineActivity = CoinActivity.frontLineAddPost;
                 downLineActivity = CoinActivity.downLineAddPost;
                 break;
-            case PostContentType.postCustomText:
+            case PostContentType.CustomText:
                 activity = CoinActivity.addPostWithCustomText;
                 frontLineActivity = CoinActivity.frontLineAddPostWithCustomText;
                 downLineActivity = CoinActivity.downLineAddPostWithCustomText;
                 break;
-            case PostContentType.postAudio:
+            case PostContentType.Audio:
                 activity = CoinActivity.addPostWithAudio;
                 frontLineActivity = CoinActivity.frontLineAddPostWithAudio;
                 downLineActivity = CoinActivity.downLineAddPostWithAudio;
                 break;
-            case PostContentType.postVideo:
+            case PostContentType.Video:
                 activity = CoinActivity.addPostWithVideo;
                 frontLineActivity = CoinActivity.frontLineAddPostWithVideo;
                 downLineActivity = CoinActivity.downLineAddPostWithVideo;
                 break;
-            case PostContentType.postLink:
+            case PostContentType.Link:
                 activity = CoinActivity.addPostWithLink;
                 frontLineActivity = CoinActivity.frontLineAddPostWithLink;
                 downLineActivity = CoinActivity.downLineAddPostWithLink;
                 break;
-            case PostContentType.postPhoto:
+            case PostContentType.Photo:
                 activity = CoinActivity.addPostWithPhoto;
                 frontLineActivity = CoinActivity.frontLineAddPostWithPhoto;
                 downLineActivity = CoinActivity.downLineAddPostWithPhoto;
                 break;
-            case PostContentType.postPoll:
+            case PostContentType.Poll:
                 activity = CoinActivity.addPostWithPoll;
                 frontLineActivity = CoinActivity.frontLineAddPostWithPoll;
                 downLineActivity = CoinActivity.downLineAddPostWithPoll;
@@ -708,13 +703,13 @@ export class PostController {
         const requiredFields = ['contentType', 'moodId']
         if (_.isEmpty(reqBody.contentType)) {
             message = 'contentType is missing'
-        } else if (reqBody.contentType === PostContentType.postCustomText && _.isEmpty(reqBody.text)) {
+        } else if (reqBody.contentType === PostContentType.CustomText && _.isEmpty(reqBody.text)) {
             message = 'text is missing'
         } else if (_.isEmpty(reqBody.description) &&
             _.isEmpty(reqBody.link) &&
             _.isEmpty(req.files) &&
             _.isEmpty(reqBody.poll) &&
-            reqBody.contentType !== PostContentType.postCustomText) {
+            reqBody.contentType !== PostContentType.CustomText) {
             message = 'At least one of these is required [description|link|files|poll]'
         }
         if (!_.isEmpty(message)) {
