@@ -11,7 +11,7 @@ export class RequestValidator {
             }
         }
         const {postId, platform} = req.body;
-        if (_.isEmpty(postId) || _.isEmpty(platform)) {
+        if (!(postId > 0) || _.isEmpty(platform)) {
             throw {
                 message: `postId or platform is missing`,
                 code: AppCode.invalid_request
