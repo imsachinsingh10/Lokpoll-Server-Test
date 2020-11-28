@@ -83,3 +83,4 @@ alter table coin_activity add column group varchar default null;
 
 alter table coin_activity_log add foreign key (activity) references coin_activity(activity);
 alter table coin_activity_log add column `platform` varchar(50) default null;
+alter table post add column contentType varchar(40) default null;
