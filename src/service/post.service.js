@@ -120,7 +120,7 @@ export class PostService {
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType', p.isPublished, p.publishDate, p.isGeneric, p.link, 
-                            p.descriptionOld, p.postIdParent, p.contentType,
+                            p.descriptionOld, p.postIdParent, p.contentType, p.text, p.textColor, p.textBgColor,
                             pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'

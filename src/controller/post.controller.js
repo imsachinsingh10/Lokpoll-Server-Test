@@ -700,24 +700,4 @@ export class PostController {
             }
         })
     };
-
-    validateAddPostRequest(req) {
-        const reqBody = req.body;
-        let message = ''
-        const requiredFields = ['contentType', 'moodId']
-        if (_.isEmpty(reqBody.contentType)) {
-            message = 'contentType is missing'
-        } else if (reqBody.contentType === PostContentType.CustomText && _.isEmpty(reqBody.text)) {
-            message = 'text is missing'
-        } else if (_.isEmpty(reqBody.description) &&
-            _.isEmpty(reqBody.link) &&
-            _.isEmpty(req.files) &&
-            _.isEmpty(reqBody.poll) &&
-            reqBody.contentType !== PostContentType.CustomText) {
-            message = 'At least one of these is required [description|link|files|poll]'
-        }
-        if (!_.isEmpty(message)) {
-            throw new ErrorModel(AppCode.invalid_request, message);
-        }
-    }
 }
