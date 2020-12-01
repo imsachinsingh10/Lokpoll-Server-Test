@@ -76,6 +76,11 @@ alter table post add column contentType varchar(50) default null;
 alter table post add column text longtext default null;
 alter table post add column textColor varchar(16) default null;
 alter table post add column textBgColor varchar(16) default null;
+alter table post add column textHAlign varchar(50) default null;
+alter table post add column textVAlign varchar(50) default null;
+alter table post add column textSize varchar(20) default null;
+alter table post add column textWeight varchar(32) default null;
+alter table post add column fontFamily varchar(64) default null;
 
 alter table coin_activity add column position int default 0;
 alter table coin_activity add column name varchar default null;

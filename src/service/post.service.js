@@ -120,7 +120,9 @@ export class PostService {
                             p.latitude, p.longitude, p.address, l.name language, p.languageCode,
                             0 'respects', 0 'comments',
                             p.type 'postType', p.isPublished, p.publishDate, p.isGeneric, p.link, 
-                            p.descriptionOld, p.postIdParent, p.contentType, p.text, p.textColor, p.textBgColor,
+                            p.descriptionOld, p.postIdParent, p.contentType, 
+                            p.text, p.textColor, p.textBgColor, p.textHAlign, p.textVAlign, 
+                            p.textSize, p.textWeight, p.fontFamily,
                             pro.name 'displayName', pro.type 'profileType', c.topic contestTopic,
                             u.id userId, u.name userName, u.imageUrl, u.bgImageUrl, u.audioUrl,
                             m.${req.languageCode || 'en'} 'mood'

@@ -32,9 +32,6 @@ export class PostController {
         const post = {
             contentType: reqBody.contentType,
             description: reqBody.description,
-            text: reqBody.text,
-            textColor: reqBody.textColor,
-            textBgColor: reqBody.textBgColor,
             userId: reqBody.userId || req.user.id,
             creatorId: req.user.id,
             createdAt: 'utc_timestamp()',
@@ -50,6 +47,21 @@ export class PostController {
             isPublished: 1,
             isGeneric: 0,
         };
+        if (!_.isEmpty(reqBody.customText)) {
+            try {
+                const ct = JSON.parse(reqBody.customText);
+                reqBody.text = ct.text;
+                reqBody.textColor = ct.textColor;
+                reqBody.textBgColor = ct.textBgColor;
+                reqBody.textHAlign = ct.textHAlign;
+                reqBody.textVAlign = ct.textVAlign;
+                reqBody.textSize = ct.textSize;
+                reqBody.textWeight = ct.textWeight;
+                reqBody.fontFamily = ct.fontFamily;
+            } catch (e) {
+                throw new ErrorModel(AppCode.invalid_request, `customText is not valid`);
+            }
+        }
         if (files.image || files.video || files.audio || files.textBgImage) {
             post.isPostUpload = '0';
         } else {
@@ -362,6 +374,10 @@ export class PostController {
                 url: p.url,
                 thumbnailUrl: p.thumbnailUrl
             }));
+        const customTextBgImage = media.find(m => m.type === 'textBgImage');
+        if (!_.isEmpty(customTextBgImage)) {
+            basicDetails.customText.textBgImageUrl = customTextBgImage.url
+        }
         const formattedComments = this.getFormattedComments(postComments);
 
         const {
@@ -434,9 +450,16 @@ export class PostController {
             link: post.link,
             descriptionOld: post.descriptionOld,
             contentType: post.contentType,
-            text: post.text,
-            textColor: post.textColor,
-            textBgColor: post.textBgColor,
+            customText: {
+                text: post.text,
+                textColor: post.textColor,
+                textBgColor: post.textBgColor,
+                textHAlign: post.textHAlign,
+                textVAlign: post.textVAlign,
+                textSize: post.textSize,
+                textWeight: post.textWeight,
+                fontFamily: post.fontFamily,
+            },
             postIdParent: post.postIdParent,
             distanceInMeters: Utils.getDistanceInMeters(post.distance),
             createdAt: Utils.getNumericDate(post.createdAt),

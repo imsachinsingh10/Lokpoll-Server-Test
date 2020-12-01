@@ -33,7 +33,7 @@ export class RequestValidator {
         const requiredFields = ['contentType', 'moodId']
         if (_.isEmpty(reqBody.contentType)) {
             message = 'contentType is missing'
-        } else if (reqBody.contentType === PostContentType.CustomText && _.isEmpty(reqBody.text)) {
+        } else if (reqBody.contentType === PostContentType.CustomText && _.isEmpty(reqBody.customText)) {
             message = 'text is missing'
         } else if (_.isEmpty(reqBody.description) &&
             _.isEmpty(reqBody.link) &&
@@ -42,14 +42,20 @@ export class RequestValidator {
             reqBody.contentType !== PostContentType.CustomText) {
             message = 'At least one of these is required [description|link|files|poll]'
         }
+        let parsedCustomText;
+        try {
+            parsedCustomText = JSON.parse(reqBody.customText);
+        } catch (e) {
+            message = 'customText is not valid'
+        }
         const colorRegEx = /^#[a-fA-F0-9]{6}$/;
-        if (reqBody.textColor) {
-            if (!colorRegEx.test(reqBody.textColor)) {
+        if (parsedCustomText.textColor) {
+            if (!colorRegEx.test(parsedCustomText.textColor)) {
                 message = 'textColor is invalid'
             }
         }
-        if (reqBody.textBgColor) {
-            if (!colorRegEx.test(reqBody.textBgColor)) {
+        if (parsedCustomText.textBgColor) {
+            if (!colorRegEx.test(parsedCustomText.textBgColor)) {
                 message = 'textBgColor is invalid'
             }
         }

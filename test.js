@@ -11,10 +11,16 @@ import {log} from "./src/service/common/logger.service";
 main();
 
 async function main() {
-    const d = '2020-10-12';
-    console.log('utc date', moment.utc(),
-        moment.utc()
-            .add('days', 7)
-            .format('YYYY-MM-DD HH:mm:ss'));
+    const obj =  {
+        "text" : "Hello World!!!",
+        "textHAlign" : "center",
+        "textVAlign" : "center",
+        "textWeight" : "normal",
+        "fontFamily" : "Roboto",
+        "textSize" : "20",
+        "textColor" : "#ffffff",
+        "textBgColor" : "#ffffff"
+    }
+    console.log('sf', JSON.stringify(obj))
     process.exit(0)
 }
