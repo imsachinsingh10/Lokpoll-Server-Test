@@ -43,10 +43,13 @@ export class RequestValidator {
             message = 'At least one of these is required [description|link|files|poll]'
         }
         let parsedCustomText = {};
-        try {
-            parsedCustomText = JSON.parse(reqBody.customText);
-        } catch (e) {
-            message = 'customText is not valid'
+
+        if (!_.isEmpty(reqBody.customText)) {
+            try {
+                parsedCustomText = JSON.parse(reqBody.customText);
+            } catch (e) {
+                message = 'customText is not valid'
+            }
         }
         const colorRegEx = /^#[a-fA-F0-9]{6}$/;
         if (parsedCustomText.textColor) {
