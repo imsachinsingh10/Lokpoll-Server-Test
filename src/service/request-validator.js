@@ -42,7 +42,7 @@ export class RequestValidator {
             reqBody.contentType !== PostContentType.CustomText) {
             message = 'At least one of these is required [description|link|files|poll]'
         }
-        let parsedCustomText;
+        let parsedCustomText = {};
         try {
             parsedCustomText = JSON.parse(reqBody.customText);
         } catch (e) {
