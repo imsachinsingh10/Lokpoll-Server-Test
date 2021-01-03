@@ -58,6 +58,17 @@ export class PostController {
                 reqBody.textSize = ct.textSize;
                 reqBody.textWeight = ct.textWeight;
                 reqBody.fontFamily = ct.fontFamily;
+                
+                
+                post.text = ct.text;
+                post.textColor = ct.textColor;
+                post.textBgColor = ct.textBgColor;
+                post.textHAlign = ct.textHAlign;
+                post.textVAlign = ct.textVAlign;
+                post.textSize = ct.textSize;
+                post.textWeight = ct.textWeight;
+                post.fontFamily = ct.fontFamily;
+                
             } catch (e) {
                 throw new ErrorModel(AppCode.invalid_request, `customText is not valid`);
             }
