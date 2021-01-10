@@ -52,7 +52,7 @@ export class PostRoutes {
                     productTags: req.body.productTags,
                     userId
                 }));
-                this.postController.creditCoinsByAddPost(id, userId);
+                this.postController.creditCoinsByAddPost(req, id, userId);
                 return res.status(HttpCode.ok).json({postId: id});
             } catch (e) {
                 log.e(`${req.method}: ${req.url}`, e);

@@ -50,16 +50,6 @@ export class PostController {
         if (!_.isEmpty(reqBody.customText)) {
             try {
                 const ct = JSON.parse(reqBody.customText);
-                reqBody.text = ct.text;
-                reqBody.textColor = ct.textColor;
-                reqBody.textBgColor = ct.textBgColor;
-                reqBody.textHAlign = ct.textHAlign;
-                reqBody.textVAlign = ct.textVAlign;
-                reqBody.textSize = ct.textSize;
-                reqBody.textWeight = ct.textWeight;
-                reqBody.fontFamily = ct.fontFamily;
-                
-                
                 post.text = ct.text;
                 post.textColor = ct.textColor;
                 post.textBgColor = ct.textBgColor;
@@ -68,7 +58,6 @@ export class PostController {
                 post.textSize = ct.textSize;
                 post.textWeight = ct.textWeight;
                 post.fontFamily = ct.fontFamily;
-                
             } catch (e) {
                 throw new ErrorModel(AppCode.invalid_request, `customText is not valid`);
             }
@@ -97,7 +86,7 @@ export class PostController {
         return {id: result.insertId, ...post};
     }
 
-    async creditCoinsByAddPost(postId, userId) {
+    async creditCoinsByAddPost(req, postId, userId) {
         let activity, frontLineActivity, downLineActivity;
 
         switch (req.body.contentType) {
