@@ -21,6 +21,6 @@ async function main() {
         "textColor" : "#ffffff",
         "textBgColor" : "#ffffff"
     }
-    console.log('sf', JSON.stringify(obj))
+    console.log('sf', JSON.stringify(obj))  
     process.exit(0)
 }
