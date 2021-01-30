@@ -33,9 +33,6 @@ export class GalleryRoutes {
                     status: req.body.status,
                 
                 }; 
-
-                console.log(req.body);
-                return false;
                 // if (req.file) {
                 //     const file = await this.minioService.uploadFile(req.file);
                 //     galleryData.fileName = file.url;
@@ -58,7 +55,6 @@ export class GalleryRoutes {
 
                     let images = await this.GalleryService.getGalleryData(req.body);
                     return res.json({'status':HttpCode.ok,'data':images});
-                    //return res.sendStatus(HttpCode.ok);
                 } catch (e) {
                     log.e(`${req.method}: ${req.url}`, e);
                     if (e.code === AppCode.s3_error) {
