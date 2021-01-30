@@ -8,21 +8,28 @@ export class Config {
         bugFixes: 1,  // (Only bug fixes not new feature)
     };
 
-    static dbProd = {
-        host: `node39278-localbol-prod.cloudjiffy.net`,
-        user: `root`,
-        password: `ZDGhxq62647`,
-        database: `lokpoll`,
-        port: 3306,
-        insecureAuth: false
-    };
+    // static dbProd = {
+    //     host: `node39278-localbol-prod.cloudjiffy.net`,
+    //     user: `root`,
+    //     password: `ZDGhxq62647`,
+    //     database: `lokpoll`,
+    //     port: 3306,
+    //     insecureAuth: false
+    // };
 
-    static dbTest = {
-        host: `node39278-localbol-prod.cloudjiffy.net`,
+    // static dbTest = {
+    //     host: `node39278-localbol-prod.cloudjiffy.net`,
+    //     user: `root`,
+    //     password: `ZDGhxq62647`,
+    //     database: `lokpoll_test`,
+    //     port: 3306,
+    //     multipleStatements: true
+    // };
+    static dbProd = {
+        host: `127.0.0.1`,
         user: `root`,
-        password: `ZDGhxq62647`,
+        password: ``,
         database: `lokpoll_test`,
-        port: 3306,
         multipleStatements: true
     };
 
@@ -30,7 +37,15 @@ export class Config {
         host: `127.0.0.1`,
         user: `root`,
         password: ``,
-        database: `lokpoll`,
+        database: `lokpoll_test`,
+        multipleStatements: true
+    };
+
+    static dbTest = {
+        host: `127.0.0.1`,
+        user: `root`,
+        password: ``,
+        database: `lokpoll_test`,
         multipleStatements: true
     };
 

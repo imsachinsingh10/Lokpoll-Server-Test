@@ -45,6 +45,8 @@ export const table = {
     user_app_access: 'user_app_access',
     poll: 'poll',
     poll_answer: 'poll_answer',
+    employee: 'employee_table',
+    gallery: 'gallery',
 };
 
 export const dbview = {

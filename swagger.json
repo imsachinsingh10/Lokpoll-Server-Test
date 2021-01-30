@@ -240,6 +240,25 @@
       }
     },
 
+    "/user/bhargavapi": {
+      "get": {
+        "summary": "Get bhargav's network",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
     "/post/getAll": {
       "post": {
         "tags": [
@@ -301,6 +320,8 @@
         }
       }
     },
+
+   
     "/post/create": {
       "post": {
         "consumes": ["multipart/form-data"],
