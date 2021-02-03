@@ -49,12 +49,13 @@ export class GalleryRoutes {
         });
 
 
-        router.get('/images', async (req, res) => {
+        router.post('/images', async (req, res) => {
                 try {
                     
 
                     let images = await this.GalleryService.getGalleryData(req.body);
-                    return res.json({'status':HttpCode.ok,'data':images});
+                    // return res.json({'status':HttpCode.ok,'data':images});
+                    return await res.json(images);
                 } catch (e) {
                     log.e(`${req.method}: ${req.url}`, e);
                     if (e.code === AppCode.s3_error) {
@@ -70,9 +71,12 @@ export class GalleryRoutes {
                 {
                     id : req.body.id,
                     name : req.body.name,
-                    fileName : req.file.filename,
+                    // fileName : req.file.filename,
                     status : req.body.status
                 };
+                if (req.file) {
+                    galleryData.fileName =  req.file.filename;
+                }
                 // if (req.file) {
                 //     const file = await this.minioService.uploadFile(req.file);
                 //     mood.imageUrl = file.url;

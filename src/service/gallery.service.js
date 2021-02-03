@@ -13,7 +13,7 @@ export class GalleryService {
 
     async getGalleryData(body) {
         let columns = 'g.*';
-        let c1 = `and g.status="Active"`;
+        let c1 = `and (g.status='active') or (g.status='inactive')`;
         if (body.status) {
             c1 = `and g.status = '${body.status}'`;
         }

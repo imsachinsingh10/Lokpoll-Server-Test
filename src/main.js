@@ -10,6 +10,7 @@ import {PostScheduler} from "./service/post-schedular";
 import {Config} from "./config";
 import {Environment} from "./enum/common.enum";
 import {log} from "./service/common/logger.service";
+import cors from "cors";
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('../swagger.json');
 
 const app = express();
-
+app.use(cors());
 app.use(BodyParser.urlencoded({extended: false}));
 app.use(BodyParser.json());
 app.use('/assets', express.static(path.resolve('assets')));
@@ -27,6 +28,14 @@ if (process.env.NODE_ENV !== Environment.dev) {
     swaggerDocument.schemes[0] = 'https';
 }
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Allow to access API from outside.
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin','*');
+//     res.header('Access-Control-Allow-Methods','GET,POST,PUT,DELETE,UPDATE');
+//     res.header('Access-Control-Allow-Headers','Content-Type, token');
+//     next();
+// });
 
 new AppEventHandler();
 new AppOverrides(app);
