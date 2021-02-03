@@ -17,8 +17,6 @@ import {MoodCategoryRoutes} from "./mood-category.routes";
 import {Config} from "../config";
 import {log} from "../service/common/logger.service";
 import {UserNetworkRoutes} from "./user-network.routes";
-import { bhargavRoutes } from './bhargav.routes';
-import { EmployeeRoutes } from './employee.routes';
 import { GalleryRoutes } from './gallery.routes';
 
 
@@ -69,8 +67,6 @@ export class InitRoutes {
         new JudgeRoutes(app);
         new NoticeboardRoutes(app);
         new UserNetworkRoutes(app);
-        new bhargavRoutes(app);
-        new EmployeeRoutes(app);
         new GalleryRoutes(app);
     }
 }

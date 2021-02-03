@@ -27,6 +27,11 @@
     {
       "name": "Post",
       "description": "API related to post"
+    },
+
+    {
+      "name": "Gallery",
+      "description": "API related to gallery and images" 
     }
   ],
   "schemes": [
@@ -458,6 +463,7 @@
         }
       }
     },
+    
     "/post/repost": {
       "post": {
         "consumes": ["application/json"],
@@ -576,6 +582,143 @@
               }
             }
           },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "/gallery/add": {
+      "post": {
+        "consumes": ["multipart/form-data"],
+        "tags": [
+          "Gallery"
+        ],
+        "summary": "API to add images",
+        "parameters": [
+         
+          {
+            "name": "name",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "status",
+            "in": "formData",
+            "default": "active",
+            "type": "string"
+          },
+          
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+
+    "/gallery/update": {
+      "post": {
+        "consumes": ["multipart/form-data"],
+        "tags": [
+          "Gallery"
+        ],
+        "summary": "API to update images",
+        "parameters": [
+         
+          {
+            "name": "id",
+            "in": "formData",
+            "type": "number"
+          },
+
+          {
+            "name": "name",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "status",
+            "in": "formData",
+            "default": "active",
+            "type": "string"
+          },
+          
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+
+    "/gallery/delete/{galleryId}": {
+      "get": {
+        
+        "tags": [
+          "Gallery"
+        ],
+        "summary": "API to delete images",
+        "parameters": [
+         
+          {
+            "name": "galleryId",
+            "in": "path",
+            "type": "integer"
+          },
+          
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+
+    "/gallery/images": {
+      "post": {
+        "summary": "API to display list of all images",
+        "tags": [
+          "Gallery"
+        ],
+        "parameters": [
           {
             "$ref": "#/parameters/tokenHeader"
           }
