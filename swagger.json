@@ -1,0 +1,570 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "localbol-server",
+    "description": "Localbol APIs Documentation",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:9003",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Test",
+      "description": "Test APIs"
+    },
+    {
+      "name": "User",
+      "description": "API for users in the system"
+    },
+    {
+      "name": "User Network",
+      "description": "API related to user network"
+    },
+    {
+      "name": "Post",
+      "description": "API related to post"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "parameters": {
+    "tokenHeader": {
+      "in": "header",
+      "name": "token",
+      "type": "string",
+      "description": "Authorization token",
+      "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMzLCJuYW1lIjpudWxsLCJlbWFpbCI6bnVsbCwicGhvbmUiOiI4NjMwNjk0Nzc5IiwiZ2VuZGVyIjpudWxsLCJpbWFnZVVybCI6bnVsbCwiYmdJbWFnZVVybCI6bnVsbCwiYXVkaW9VcmwiOm51bGwsImFnZVJhbmdlSWQiOm51bGwsInByb2Zlc3Npb24iOm51bGwsImNvbXBhbnkiOm51bGwsImFwcExhbmd1YWdlIjpudWxsLCJjb250ZW50TGFuZ3VhZ2UiOm51bGwsInJvbGUiOiJ1c2VyIiwicmVmZXJyYWxDb2RlIjoiMkdXUUVRIiwicGFyZW50UmVmZXJyYWxDb2RlIjpudWxsLCJyb2xlSWQiOjMsImNvaW5zIjo2MCwicmVzcGVjdENvdW50Rm9yVXNlciI6MCwicmVzcGVjdENvdW50QnlVc2VyIjowLCJyZXNwZWN0ZWRCeU1lIjpmYWxzZSwiaG9iYmllcyI6W10sImxvY2F0aW9uIjp7ImxhdGl0dWRlIjpudWxsLCJsb25naXR1ZGUiOm51bGwsImFkZHJlc3MiOm51bGx9LCJpYXQiOjE2MDI5MzAyNzcsImV4cCI6MTYzNDQ3MDI3N30.ONLeenklk6xvOctfdkG8Z_EJkUir30yXTwTRN3hMflo",
+      "required": true
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "OK"
+    },
+    "400": {
+      "description": "Bad Request"
+    }
+  },
+  "paths": {
+    "/user/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "User login API",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                },
+                "otp": {
+                  "type": "string",
+                  "example": ""
+                },
+                "platform": {
+                  "type": "string",
+                  "example": "android"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/sendOTP": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Send OTP to user",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/verifyOTP": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Verify OTP",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "description": "phone number",
+                  "example": ""
+                },
+                "otp": {
+                  "type": "string",
+                  "description": "OTP",
+                  "example": ""
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "/user/getNetwork": {
+      "get": {
+        "summary": "Get my network",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/networkCoinSummaryByUser": {
+      "get": {
+        "summary": "Get my coin summary",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": [{
+              "frontLineCount": 0,
+              "downLineCount": 0,
+              "currentBalance": {
+                "sum": 20
+              },
+              "lifetimeEarning": {
+                "sum": 20
+              },
+              "lifetimeBurns": 0,
+              "lifetimeWinnings": 0
+            }]
+          }
+        }
+      }
+    },
+    "/user/getCoinActivities": {
+      "get": {
+        "summary": "Get my coin activities",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/getAllCoinActivities": {
+      "get": {
+        "summary": "Get all coin activities",
+        "tags": [
+          "User Network"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "/post/getAll": {
+      "post": {
+        "tags": [
+          "Post"
+        ],
+        "summary": "API to Get all posts",
+        "parameters": [
+          {
+            "in": "body",
+            "schema": {
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "example": 21.251385
+                },
+                "longitude": {
+                  "type": "number",
+                  "example": 81.629639
+                },
+                "postType": {
+                  "type": "string",
+                  "example": "normal"
+                },
+                "radiusInMeter": {
+                  "type": "number",
+                  "example": 10000
+                },
+                "lastPostId": {
+                  "type": "number",
+                  "example": 0
+                },
+                "postCount": {
+                  "type": "number",
+                  "example": 10
+                },
+                "postByUserId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "moodIds": {
+                  "type": "array",
+                  "example": [10, 11]
+                }
+              }
+            },
+            "name": "body"
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/create": {
+      "post": {
+        "consumes": ["multipart/form-data"],
+        "tags": [
+          "Post"
+        ],
+        "summary": "API to Create post",
+        "parameters": [
+          {
+            "name": "contentType",
+            "in": "formData",
+            "type": "string",
+            "required": true,
+            "enum": ["description", "customText", "audio", "video", "link", "photo", "poll"]
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "text",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textColor",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textBgColor",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "textBgImage",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "moodId",
+            "in": "formData",
+            "type": "number",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "video",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "profileType",
+            "in": "formData",
+            "default": "personal",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "default": "normal",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "link",
+            "in": "formData",
+            "default": "",
+            "type": "string"
+          },
+          {
+            "name": "languageCode",
+            "in": "formData",
+            "required": true,
+            "default": "en",
+            "type": "string",
+            "enum": ["en", "hi", "ta", "or"]
+          },
+          {
+            "name": "source",
+            "in": "formData",
+            "default": "Self",
+            "type": "string",
+            "enum": ["Self", "Forwarded", "Link"]
+          },
+          {
+            "name": "latitude",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "longitude",
+            "in": "formData",
+            "type": "number"
+          },
+          {
+            "name": "address",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "poll",
+            "in": "formData",
+            "type": "string",
+            "default": "{\"question\":\"best indian smartphone company?\",\"options\":[\"iball\",\"micromax\",\"lava\"], \"expiryInDays\": 7}"
+          },
+          {
+            "name": "customText",
+            "in": "formData",
+            "type": "string",
+            "default": "{\"text\":\"Hello World!!!\",\"textHAlign\":\"center\",\"textVAlign\":\"center\",\"textWeight\":\"normal\",\"fontFamily\":\"Roboto\",\"textSize\":\"20\",\"textColor\":\"#ffffff\",\"textBgColor\":\"#ffffff\"}"
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/repost": {
+      "post": {
+        "consumes": ["application/json"],
+        "tags": [
+          "Post"
+        ],
+        "summary": "API to Share post internally",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "properties": {
+                "postId": {
+                  "type": "number",
+                  "example": 1102
+                },
+                "description": {
+                  "type": "string",
+                  "example": ""
+                },
+                "latitude": {
+                  "type": "number",
+                  "example": 0
+                },
+                "longitude": {
+                  "type": "number",
+                  "example": 0
+                },
+                "address": {
+                  "type": "string",
+                  "example": ""
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/creditCoinsOnSharePostExternally": {
+      "post": {
+        "consumes": ["application/json"],
+        "tags": [
+          "Post"
+        ],
+        "summary": "credit coins when user shares post externally",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "properties": {
+                "postId": {
+                  "type": "number",
+                  "example": 1102
+                },
+                "platform": {
+                  "type": "number",
+                  "example": "whatsapp",
+                  "enum": ["facebook", "whatsapp"]
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/200"
+          },
+          "400": {
+            "$ref": "#/responses/400"
+          }
+        }
+      }
+    },
+    "/post/submitPollAnswer": {
+      "post": {
+        "tags": [
+          "Post"
+        ],
+        "summary": "Submit poll answer",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "properties": {
+                "userId": {
+                  "type": "number",
+                  "example": "1",
+                  "description": "do not send this field from app"
+                },
+                "pollId": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "answerNumber": {
+                  "type": "number",
+                  "example": "1",
+                  "enum": [1, 2, 3, 4, 5]
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/tokenHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
